@@ -1,4 +1,13 @@
-var language = {
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'air-datepicker/dist/css/datepicker.min.css';
+
+import 'air-datepicker';
+
+/* prepare datepicker */
+
+var today: Date = new Date();
+
+var language: AirDatepickerLanguageInstance = {
     days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     daysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     daysMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
@@ -11,9 +20,6 @@ var language = {
     firstDay: 1
 };
 
-// minimum date is yesterday
-var today = new Date();
-
 var datePicker = $('#inputDatePicker').datepicker({
     language: language,
     toggleSelected: false,
@@ -22,3 +28,12 @@ var datePicker = $('#inputDatePicker').datepicker({
 }).data('datepicker');
 
 datePicker.selectDate(today);
+
+/* app logic */
+
+let teaserText: JQuery<HTMLElement> = $("#resultTeaserText")!;
+let teaserBlock: JQuery<HTMLElement> = $("#resultTeaserBlock");
+let message: string = "I found free rooms :)";
+
+teaserText.html(message);
+teaserBlock.addClass('bg-success').removeClass('bg-danger');

@@ -1,0 +1,64 @@
+const path = require('path');
+const webpack = require('webpack');
+
+// extract a separate main.css file to avoid FOUC
+const CssPlugin = require("mini-css-extract-plugin");
+
+// help copying static assets
+const CopyPlugin = require('copy-webpack-plugin');
+
+module.exports = {
+    mode: 'production',
+    devtool: 'source-map',
+    entry: './src/index.ts',
+    module: {
+        rules: [
+            {
+                // load css stylesheets, extract source maps and extract them separately
+                test: /\.css$/,
+                use: [
+                    { loader: CssPlugin.loader },
+                    'css-loader?sourceMap'
+                ]
+            },
+            {
+                // load and compile type script sources
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/
+            }
+        ]
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js']
+    },
+    plugins: [
+        // add jquery, if we observe that its being used
+        new webpack.ProvidePlugin(
+            {
+                $: "jquery",
+                jQuery: "jquery"
+            }),
+        // extract css files to a separate file
+        new CssPlugin(
+            {
+                filename: "[name].css",
+                chunkFilename: "[id].css"
+            }),
+        // copy static assets
+        new CopyPlugin([
+            { from: './src/public/' },
+            { from: './src/index.html' },
+        ])
+    ],
+    output: {
+        filename: 'main.js',
+        path: path.resolve(__dirname, 'dist')
+    },
+    performance: {
+        // only warn if assets are larger than 512 KB
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000,
+        hints: 'warning'
+    }
+};
