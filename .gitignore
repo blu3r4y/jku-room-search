@@ -1,0 +1,40 @@
+# (c) https://github.com/Microsoft/TypeScript-Node-Starter/blob/master/.gitignore
+
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+*.swp
+
+pids
+logs
+results
+tmp
+
+# build
+public/css/main.css
+
+# coverage reports
+coverage
+
+# API keys and secrets
+.env
+
+# dependency directory
+node_modules
+bower_components
+
+# editors
+.idea
+*.iml
+
+# os metadata
+.DS_Store
+Thumbs.db
+
+# ignore built ts files
+dist/**/*
