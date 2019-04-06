@@ -36,6 +36,12 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
+            },
+            {
+                // lint typescript files
+                test: /\.ts$/,
+                enforce: 'pre',
+                use: 'tslint-loader',
             }
         ]
     },
