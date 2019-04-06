@@ -7,10 +7,20 @@ const CssPlugin = require("mini-css-extract-plugin");
 // help copying static assets
 const CopyPlugin = require('copy-webpack-plugin');
 
+// inject some variables into the index.html
+const HtmlPlugin = require('html-webpack-plugin');
+
 module.exports = {
     mode: 'production',
     devtool: 'source-map',
     entry: './src/index.ts',
+    output: {
+        filename: './js/[name].js',
+        path: path.resolve(__dirname, 'dist')
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js']
+    },
     module: {
         rules: [
             {
@@ -29,9 +39,6 @@ module.exports = {
             }
         ]
     },
-    resolve: {
-        extensions: ['.tsx', '.ts', '.js']
-    },
     plugins: [
         // add jquery, if we observe that its being used
         new webpack.ProvidePlugin(
@@ -46,14 +53,14 @@ module.exports = {
             }),
         // copy static assets
         new CopyPlugin([
-            { from: './src/public/' },
-            { from: './src/index.html' },
-        ])
+            { from: './src/public/' }
+        ]),
+        // inject variables into html files
+        new HtmlPlugin({
+            template: './src/index.ejs',
+            hash: true
+        })
     ],
-    output: {
-        filename: './js/[name].js',
-        path: path.resolve(__dirname, 'dist')
-    },
     performance: {
         // only warn if assets are larger than 512 KB
         maxEntrypointSize: 512000,
