@@ -16,3 +16,27 @@
     min-width: 250px;
     min-height: 250px;
 }
+
+.datepicker--cell.-current- {
+    color: #007bff;
+}
+
+.datepicker--cell.-selected- {
+    background: #007bff;
+}
+
+.datepicker--cell.-selected-.-current- {
+    background: #007bff;
+}
+
+.datepicker--cell.-selected-.-focus- {
+    background: #0069d9;
+}
+
+.datepicker--day-name {
+    color: #007bff;
+}
+
+.datepicker--button {
+    color: #007bff;
+}
