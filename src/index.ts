@@ -6,6 +6,7 @@ import "./index.css";
 
 /* packages */
 
+import { IResult, RoomSearch } from "./api";
 import { ColorStatus, RoomSearchFrontend } from "./frontend";
 import { Jku } from "./jku";
 
@@ -40,14 +41,29 @@ frontend.render();
 function submitHandler(event: Event) {
     frontend.renderSpinner(true);
 
+    // user request
     const query = frontend.getQuery();
     console.log(query);
 
-    // TODO
-    frontend.render("😟 Not implemented", null, ColorStatus.Info);
+    if (query) {
 
-    // disable the spinner in 200ms
-    setTimeout(() => frontend.renderSpinner(false), 200);
+        // process request
+        const result: IResult = RoomSearch.searchFreeRooms(query);
+        console.log(result);
+
+        if (result.length > 0) {
+            frontend.render("😊 We found some free rooms", result, ColorStatus.Success);
+        } else {
+            frontend.render("😟 Sorry, no free rooms found", null, ColorStatus.NoResult);
+        }
+
+    } else {
+        // something broke
+        frontend.render("😟 Sorry, something broke", null, ColorStatus.Error);
+    }
+
+    // disable the spinner shortly
+    setTimeout(() => frontend.renderSpinner(false), 250);
     event.preventDefault();
 }
 

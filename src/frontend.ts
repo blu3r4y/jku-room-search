@@ -1,6 +1,6 @@
 import "air-datepicker";
 
-import { IQuery, IResults } from "./api";
+import { IFreeRoom, IQuery, IResult } from "./api";
 import { Utils } from "./utils";
 
 const language: AirDatepickerLanguageInstance = {
@@ -18,8 +18,8 @@ const language: AirDatepickerLanguageInstance = {
 };
 
 export enum ColorStatus {
-    Okay = "bg-success",
-    Info = "bg-info",
+    Success = "bg-info",
+    NoResult = "bg-secondary",
     Error = "bg-danger",
 }
 
@@ -92,12 +92,13 @@ export class RoomSearchFrontend {
      * Render query results and the info label
      *
      * @param text Text to be displayed in the teaser or `null` for nothing
-     * @param results Result object or `null` for nothing
+     * @param result Result object or `null` for nothing
      * @param color Color of the teaser text block
      */
-    public render(text: string | null = null, results: IResults | null = null, color: ColorStatus = ColorStatus.Info) {
+    public render(text: string | null = null, result: IResult | null = null,
+        color: ColorStatus = ColorStatus.NoResult) {
         this.renderTeaser(text, color);
-        this.renderTable(results);
+        this.renderTable(result);
     }
 
     /**
@@ -121,6 +122,7 @@ export class RoomSearchFrontend {
         if (!text) {
             this.jqTeaserBlock.hide();
         } else {
+
             this.jqTeaserText.html(text);
 
             // switch the color class
@@ -133,10 +135,51 @@ export class RoomSearchFrontend {
         }
     }
 
-    private renderTable(results: IResults | null) {
-        if (!results) {
+    private renderTable(result: IResult | null) {
+        if (!result || (result as IResult).length === 0) {
             this.jqResults.hide();
         } else {
+
+            const d = document;
+            const fragment = d.createDocumentFragment();
+
+            for (const room of (result as IResult)) {
+                for (const [index, [from, to]] of room.available.entries()) {
+                    const tr = d.createElement("tr");
+
+                    // add room name only on first row
+                    if (index === 0) {
+                        const th = d.createElement("th");
+                        th.scope = "row";
+                        th.innerHTML = room.room;
+
+                        // set the row span property
+                        if (room.available.length > 1) {
+                            th.rowSpan = room.available.length;
+                        }
+
+                        tr.appendChild(th);
+                    }
+
+                    // from time
+                    const tdFrom = d.createElement("td");
+                    tdFrom.innerHTML = Utils.fromMinutes(from);
+                    tr.appendChild(tdFrom);
+
+                    // to time
+                    const tdTo = d.createElement("td");
+                    tdTo.innerHTML = Utils.fromMinutes(to);
+                    tr.appendChild(tdTo);
+
+                    fragment.appendChild(tr);
+                }
+            }
+
+            // update the table body
+            const body = this.jqResults.children("tbody");
+            body.empty();
+            body.append(fragment);
+
             this.jqResults.show();
         }
     }
