@@ -39,11 +39,15 @@ export class RoomSearchFrontend {
     private jqResults: JQuery<HTMLElement>;
     private jqTeaserText: JQuery<HTMLElement>;
     private jqTeaserBlock: JQuery<HTMLElement>;
+    private jqButton: HTMLInputElement;
+    private jqSpinner: JQuery<HTMLElement>;
+    private jqButtonText: JQuery<HTMLElement>;
 
     private currentColorStatus: ColorStatus;
 
     constructor(datepicker: JQuery<HTMLElement>, fromTime: JQuery<HTMLElement>, toTime: JQuery<HTMLElement>,
-        results: JQuery<HTMLElement>, teaserText: JQuery<HTMLElement>, teaserBlock: JQuery<HTMLElement>) {
+        results: JQuery<HTMLElement>, teaserText: JQuery<HTMLElement>, teaserBlock: JQuery<HTMLElement>,
+        button: JQuery<HTMLElement>, spinner: JQuery<HTMLElement>, buttonText: JQuery<HTMLElement>) {
 
         this.jqDatepicker = datepicker;
         this.jqFromTime = fromTime;
@@ -51,6 +55,9 @@ export class RoomSearchFrontend {
         this.jqResults = results;
         this.jqTeaserText = teaserText;
         this.jqTeaserBlock = teaserBlock;
+        this.jqButton = button[0] as HTMLInputElement;
+        this.jqSpinner = spinner;
+        this.jqButtonText = buttonText;
 
         this.currentColorStatus = ColorStatus.Error;
     }
@@ -91,6 +98,23 @@ export class RoomSearchFrontend {
     public render(text: string | null = null, results: IResults | null = null, color: ColorStatus = ColorStatus.Info) {
         this.renderTeaser(text, color);
         this.renderTable(results);
+    }
+
+    /**
+     * Render the spinner to indicate a loading process
+     *
+     * @param active Show or hide the spinner
+     */
+    public renderSpinner(active: boolean) {
+        if (active) {
+            this.jqButton.disabled = true;
+            this.jqButtonText.hide();
+            this.jqSpinner.show();
+        } else {
+            this.jqSpinner.hide();
+            this.jqButtonText.show();
+            this.jqButton.disabled = false;
+        }
     }
 
     private renderTeaser(text: string | null, color: ColorStatus) {
