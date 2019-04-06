@@ -44,6 +44,8 @@ export class RoomSearchFrontend {
     private jqButtonText: JQuery<HTMLElement>;
 
     private currentColorStatus: ColorStatus;
+    private startTimes?: number[] = undefined;
+    private endTimes?: number[] = undefined;
 
     constructor(datepicker: JQuery<HTMLElement>, fromTime: JQuery<HTMLElement>, toTime: JQuery<HTMLElement>,
         results: JQuery<HTMLElement>, teaserText: JQuery<HTMLElement>, teaserBlock: JQuery<HTMLElement>,
@@ -69,8 +71,11 @@ export class RoomSearchFrontend {
      * @param endTimes A set of raster end times
      */
     public init(startTimes: number[], endTimes: number[]) {
+        this.startTimes = startTimes;
+        this.endTimes = endTimes;
+
         this.initDatePicker();
-        this.initTimePickers(startTimes, endTimes);
+        this.initTimePickers();
     }
 
     /**
@@ -82,10 +87,15 @@ export class RoomSearchFrontend {
         }
 
         const day: Date = this.datepicker.selectedDates[0];
-        const fromMinutes = parseInt(this.jqFromTime.children("option:selected").val() as string, 10);
-        const toMinutes = parseInt(this.jqToTime.children("option:selected").val() as string, 10);
+        const fromMinutes = this.getFromMinutes();
+        const toMinutes = this.getToMinutes();
 
-        return { day, from: fromMinutes, to: toMinutes };
+        // sanity checks
+        if (!day || (toMinutes !== -1 && fromMinutes >= toMinutes)) {
+            return null;
+        } else {
+            return { day, from: fromMinutes, to: toMinutes };
+        }
     }
 
     /**
@@ -116,6 +126,14 @@ export class RoomSearchFrontend {
             this.jqButtonText.show();
             this.jqButton.disabled = false;
         }
+    }
+
+    private getFromMinutes(): number {
+        return parseInt(this.jqFromTime.children("option:selected").val() as string, 10);
+    }
+
+    private getToMinutes(): number {
+        return parseInt(this.jqToTime.children("option:selected").val() as string, 10);
     }
 
     private renderTeaser(text: string | null, color: ColorStatus) {
@@ -198,20 +216,65 @@ export class RoomSearchFrontend {
         this.datepicker = instance;
     }
 
-    private initTimePickers(startTimes: number[], endTimes: number[]) {
+    private initTimePickers() {
+
+        if (!this.startTimes || !this.endTimes) {
+            return;
+        }
+
+        // event for rolling the to time forwards if the from time gets changed
+        function fromTimeChanged(obj: RoomSearchFrontend) {
+            const from = obj.getFromMinutes();
+            const to = obj.getToMinutes();
+
+            if (to !== -1 && from >= to && obj.endTimes) {
+                // find the closest to time that is greater than the new from time
+                const rollover = obj.endTimes.find((e) => e > from);
+                if (rollover) {
+                    obj.jqToTime.val(rollover.toString());
+                }
+            }
+        }
+
+        // event for rolling the from time backwards if the to time gets changed
+        function toTimeChanged(obj: RoomSearchFrontend) {
+            const from = obj.getFromMinutes();
+            const to = obj.getToMinutes();
+
+            if (to !== -1 && to <= from && obj.startTimes) {
+                // find the closest from time that is smaller than the new to time
+                const rollunder = obj.startTimes.slice().reverse().find((e) => e < to);
+                if (rollunder) {
+                    obj.jqFromTime.val(rollunder.toString());
+                }
+            }
+        }
+
         // add <option> fields to start time <select>
-        startTimes.forEach((item) => {
+        this.startTimes.forEach((item) => {
             this.jqFromTime.append(
                 $("<option></option>").val(item).html(Utils.fromMinutes(item)),
             );
         });
 
         // add <option> fields to end time <select>
-        endTimes.forEach((item) => {
+        this.endTimes.forEach((item) => {
             this.jqToTime.append(
                 $("<option></option>").val(item).html(Utils.fromMinutes(item)),
             );
         });
+
+        // pre-select the closest start time in the past (or one up to 15 minutes in the future)
+        const today = new Date();
+        const currentMinutes = today.getHours() * 60 + today.getMinutes();
+        const setpoint = this.startTimes.slice().reverse().find((e) => currentMinutes >= e - 15);
+        if (setpoint) {
+            this.jqFromTime.val(setpoint.toString());
+        }
+
+        // bind change listeners
+        this.jqFromTime.change(() => fromTimeChanged(this));
+        this.jqToTime.change(() => toTimeChanged(this));
     }
 
 }
