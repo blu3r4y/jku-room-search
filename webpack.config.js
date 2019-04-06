@@ -1,14 +1,14 @@
-const path = require('path');
-const webpack = require('webpack');
+const path = require('path')
+const webpack = require('webpack')
 
 // extract a separate main.css file to avoid FOUC
-const CssPlugin = require("mini-css-extract-plugin");
+const CssPlugin = require("mini-css-extract-plugin")
 
 // help copying static assets
-const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin')
 
 // inject some variables into the index.html
-const HtmlPlugin = require('html-webpack-plugin');
+const HtmlPlugin = require('html-webpack-plugin')
 
 module.exports = {
     mode: 'production',
@@ -67,4 +67,4 @@ module.exports = {
         maxAssetSize: 512000,
         hints: 'warning'
     }
-};
+}

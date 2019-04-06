@@ -1,11 +1,14 @@
 {
     "compilerOptions": {
-        "sourceMap": true,
         "target": "es5",
         "module": "commonjs",
         "outDir": "./dist",
+        "sourceMap": true,
         "strict": true,
-        "esModuleInterop": true
+        "allowJs": false,
+        "esModuleInterop": true,
+        "downlevelIteration": true,
+        "lib": ["dom", "es6"]
     },
     "include": [
         "src/**/*"

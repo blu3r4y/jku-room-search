@@ -1,44 +1,44 @@
 /* stylesheets */
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'air-datepicker/dist/css/datepicker.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'air-datepicker/dist/css/datepicker.min.css'
 import './index.css'
 
 /* packages */
 
-import 'air-datepicker';
+import { RoomSearchFrontend, ColorStatus } from './frontend'
+import { Jku } from './jku'
 
-/* prepare datepicker */
+/* gui elements */
 
-var today: Date = new Date();
+const datepicker = $("#datepicker")
+const fromTime = $("#fromTime")
+const toTime = $("#toTime")
 
-var language: AirDatepickerLanguageInstance = {
-    days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-    daysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    daysMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-    monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    today: 'Today',
-    clear: 'Clear',
-    dateFormat: 'mm/dd/yyyy',
-    timeFormat: 'hh:ii aa',
-    firstDay: 1
-};
+const form = $("#form")
 
-var datePicker = $('#inputDatePicker').datepicker({
-    language: language,
-    toggleSelected: false,
-    todayButton: today,
-    minDate: today
-}).data('datepicker');
-
-datePicker.selectDate(today);
+const results = $("#results")
+const teaserText = $("#teaserText")
+const teaserBlock = $("#teaserBlock")
 
 /* app logic */
 
-let teaserText: JQuery<HTMLElement> = $("#resultTeaserText")!;
-let teaserBlock: JQuery<HTMLElement> = $("#resultTeaserBlock");
-let message: string = "I found free rooms :)";
+const startTimes: number[] = Jku.getRasterTimes("08:30", "21:30")
+const endTimes: number[] = Jku.getRasterTimes("09:15", "22:15")
 
-teaserText.html(message);
-teaserBlock.addClass('bg-success').removeClass('bg-danger');
+const frontend = new RoomSearchFrontend(datepicker, fromTime, toTime, results, teaserText, teaserBlock)
+
+frontend.init(startTimes, endTimes)
+frontend.render()
+
+function submitHandler(event: Event) {
+    let query = frontend.getQuery()
+    console.log(query)
+
+    // TODO
+    frontend.render("Not implemented :(", null, ColorStatus.Info)
+
+    event.preventDefault()
+}
+
+form.on('submit', submitHandler)

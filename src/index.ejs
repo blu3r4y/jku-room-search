@@ -29,24 +29,23 @@
   </div>
 
   <div class="container py-3">
-    <form>
+    <form id="form" action="#">
       <div class="row d-flex justify-content-center">
 
         <div class="col-auto-shrink m-3">
-          <div id="inputDatePicker" class="datepicker-prerender"></div>
+          <div id="datepicker" class="datepicker-prerender"></div>
         </div>
 
         <div class="col-md-3 m-3">
           <div class="form-row form-group">
-            <label for="roomStartTimePicker">I need a room from</label>
-            <select class="form-control" id="inputStartTimePicker">
-              <option></option>
+            <label for="fromTime">I need a room from</label>
+            <select class="form-control" id="fromTime">
             </select>
           </div>
           <div class="form-row form-group">
-            <label for="roomEndTimePicker">and at least until <span class="small pl-2">(optional)</span></label>
-            <select class="form-control" id="inputEndTimePicker">
-              <option>doesn't matter</option>
+            <label for="toTime">and at least until <span class="small pl-2">(optional)</span></label>
+            <select class="form-control" id="toTime">
+              <option value="-1">doesn't matter</option>
             </select>
           </div>
           <div class="form-row pt-4">
@@ -62,16 +61,16 @@
     <div class="row">
       <div class="col-md-6 mx-auto table-responsive">
 
-        <div id="resultTeaserBlock" class="text-center mb-5 pt-2 pb-1 bg-danger text-white">
-          <h5 id="resultTeaserText" class="font-weight-light">This website requires JavaScript :(</h5>
+        <div id="teaserBlock" class="text-center mb-5 pt-2 pb-1 bg-danger text-white">
+          <h5 id="teaserText" class="font-weight-light">This website requires JavaScript :(</h5>
         </div>
 
-        <table id="resultTable" class="table table-striped table-sm">
+        <table id="results" class="table table-striped table-sm">
           <thead>
             <tr>
               <th scope="col"></th>
               <th scope="col">from</th>
-              <th scope="col">until</th>
+              <th scope="col">to</th>
             </tr>
           </thead>
           <tbody>
