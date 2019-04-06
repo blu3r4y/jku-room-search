@@ -1,5 +1,10 @@
+/* stylesheets */
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'air-datepicker/dist/css/datepicker.min.css';
+import './index.css'
+
+/* packages */
 
 import 'air-datepicker';
 

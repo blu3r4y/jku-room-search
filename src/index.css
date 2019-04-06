@@ -1,0 +1,18 @@
+.subtitle-logo {
+    padding-right: 0.15rem;
+    padding-bottom: 0.15rem;
+    width: 18px;
+    height: 18px;
+}
+
+.github-corner {
+    position: absolute;
+    top: 0;
+    border: 0;
+    right: 0;
+}
+
+.datepicker-prerender {
+    min-width: 250px;
+    min-height: 250px;
+}
