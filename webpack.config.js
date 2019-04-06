@@ -42,8 +42,7 @@ module.exports = {
         // extract css files to a separate file
         new CssPlugin(
             {
-                filename: "[name].css",
-                chunkFilename: "[id].css"
+                filename: "./css/[name].css"
             }),
         // copy static assets
         new CopyPlugin([
@@ -52,7 +51,7 @@ module.exports = {
         ])
     ],
     output: {
-        filename: 'main.js',
+        filename: './js/[name].js',
         path: path.resolve(__dirname, 'dist')
     },
     performance: {
