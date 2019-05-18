@@ -18,25 +18,26 @@
   "homepage": "https://github.com/blu3r4y/jku-room-search#readme",
   "devDependencies": {
     "@types/air-datepicker": "git+https://git@github.com/blu3r4y/air-datepicker.d.ts.git",
-    "copy-webpack-plugin": "^5.0.2",
+    "copy-webpack-plugin": "^5.0.3",
     "css-loader": "^2.1.1",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.5.0",
     "popper.js": "^1.15.0",
     "style-loader": "^0.23.1",
-    "ts-loader": "^5.3.3",
-    "tslint": "^5.15.0",
+    "ts-loader": "^5.4.5",
+    "tslint": "^5.16.0",
     "tslint-loader": "^3.5.4",
-    "typescript": "^3.4.2",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0"
+    "typescript": "^3.4.5",
+    "webpack": "^4.31.0",
+    "webpack-cli": "^3.3.2"
   },
   "dependencies": {
     "@types/jquery": "^3.3.29",
     "@types/numeral": "0.0.25",
     "air-datepicker": "^2.2.3",
     "bootstrap": "^4.3.1",
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.1",
+    "js-joda": "^1.10.1",
     "numeral": "^2.0.6"
   }
 }
