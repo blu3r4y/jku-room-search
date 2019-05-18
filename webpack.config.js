@@ -46,6 +46,8 @@ module.exports = {
         ]
     },
     plugins: [
+        // expose the build hash as an environment variable
+        new webpack.ExtendedAPIPlugin(),
         // add jquery, if we observe that its being used
         new webpack.ProvidePlugin(
             {
@@ -59,13 +61,15 @@ module.exports = {
             }),
         // copy static assets
         new CopyPlugin([
-            { from: './src/public/' }
-        ]),
+            {
+                from: './src/public/'
+            }]),
         // inject variables into html files
-        new HtmlPlugin({
-            template: './src/index.ejs',
-            hash: true
-        })
+        new HtmlPlugin(
+            {
+                template: './src/index.ejs',
+                hash: true
+            })
     ],
     performance: {
         // only warn if assets are larger than 512 KB
