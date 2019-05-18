@@ -42,6 +42,7 @@ export class RoomSearchFrontend {
     private jqButton: HTMLInputElement;
     private jqSpinner: JQuery<HTMLElement>;
     private jqButtonText: JQuery<HTMLElement>;
+    private jqVersionText: JQuery<HTMLElement>;
 
     private currentColorStatus: ColorStatus;
     private startTimes?: number[] = undefined;
@@ -49,7 +50,8 @@ export class RoomSearchFrontend {
 
     constructor(datepicker: JQuery<HTMLElement>, fromTime: JQuery<HTMLElement>, toTime: JQuery<HTMLElement>,
         results: JQuery<HTMLElement>, teaserText: JQuery<HTMLElement>, teaserBlock: JQuery<HTMLElement>,
-        button: JQuery<HTMLElement>, spinner: JQuery<HTMLElement>, buttonText: JQuery<HTMLElement>) {
+        button: JQuery<HTMLElement>, spinner: JQuery<HTMLElement>, buttonText: JQuery<HTMLElement>,
+        versionText: JQuery<HTMLElement>) {
 
         this.jqDatepicker = datepicker;
         this.jqFromTime = fromTime;
@@ -60,6 +62,7 @@ export class RoomSearchFrontend {
         this.jqButton = button[0] as HTMLInputElement;
         this.jqSpinner = spinner;
         this.jqButtonText = buttonText;
+        this.jqVersionText = versionText;
 
         this.currentColorStatus = ColorStatus.Error;
     }
@@ -112,19 +115,37 @@ export class RoomSearchFrontend {
     }
 
     /**
-     * Render the spinner to indicate a loading process
+     * Render the version string
      *
-     * @param active Show or hide the spinner
+     * @param version Version string
      */
-    public renderSpinner(active: boolean) {
-        if (active) {
-            this.jqButton.disabled = true;
-            this.jqButtonText.hide();
-            this.jqSpinner.show();
-        } else {
-            this.jqSpinner.hide();
-            this.jqButtonText.show();
+    public renderVersion(version: string) {
+        this.jqVersionText.html(`Last refreshed: ${version}`);
+    }
+
+    /**
+     * Render the button enabled or disabled with an additional loading spinner
+     *
+     * @param enabled Disable or enable the button
+     * @param spinning Show a spinning animation
+     */
+    public renderButton(enabled: boolean, spinning: boolean | null = null) {
+        if (spinning == null) {
+            spinning = !enabled;
+        }
+
+        if (enabled) {
+            if (!spinning) {
+                this.jqSpinner.hide();
+                this.jqButtonText.show();
+            }
             this.jqButton.disabled = false;
+        } else {
+            this.jqButton.disabled = true;
+            if (spinning) {
+                this.jqButtonText.hide();
+                this.jqSpinner.show();
+            }
         }
     }
 
