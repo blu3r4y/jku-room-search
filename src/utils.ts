@@ -1,32 +1,43 @@
-import numeral from "numeral";
+import { ChronoUnit, DateTimeFormatter, LocalTime } from "js-joda";
 
-export class Utils {
+export class DateUtils {
 
     /**
-     * Converts the string-based minute representation to a number-based representation,
-     * e.g., converts `510` to `"08:30"` since `8 x 60 + 30 = 510`
+     * Converts a time string to a `LocalTime` object
      *
-     * @param timeString A time string, formatted like `"08:30"`
+     * @param str A time string, formatted like `"08:30"`
      */
-    public static fromTimeString(timeString: string): number {
-        const s: string[] = timeString.split(":");
-        const hours = parseInt(s[0], 10);
-        const mins = parseInt(s[1], 10);
-
-        return hours * 60 + mins;
+    public static fromString(text: string): LocalTime {
+        return LocalTime.parse(text).truncatedTo(ChronoUnit.MINUTES);
     }
 
     /**
-     * Converts the number-based minute representation to a string-based representation,
-     * e.g., converts `510` to `"08:30"` since `8 x 60 + 30 = 510`
+     * Formats the `LocalTime` object to a human-readable string, e.g. `"08:30"`
      *
-     * @param minutes The amount of minutes from the start of the day.
+     * @param time A `LocalTime` object
      */
-    public static fromMinutes(minutes: number): string {
-        const quo = Math.floor(minutes / 60);
-        const rem = minutes % 60;
+    public static toString(time: LocalTime): string {
+        return time.format(DateTimeFormatter.ofPattern("HH:mm"));
+    }
 
-        return numeral(quo).format("00") + ":" + numeral(rem).format("00");
+    /**
+     * Converts the minute-based representation to a `LocalTime` object,
+     * e.g. converts `510` to `LocalTime.parse("08:30")` since `8 x 60 + 30 = 510`
+     *
+     * @param minutes The amount of minutes from the start of the day
+     */
+    public static fromMinutes(minutes: number): LocalTime {
+        return LocalTime.ofSecondOfDay(minutes * 60);
+    }
+
+    /**
+     * Converts the `LocalTime` object to a minute-based representation,
+     * e.g. converts `LocalTime.parse("08:30")` to `510` since `8 x 60 + 30 = 510`
+     *
+     * @param time A `LocalTime` object
+     */
+    public static toMinutes(time: LocalTime): number {
+        return time.toSecondOfDay() / 60;
     }
 
 }

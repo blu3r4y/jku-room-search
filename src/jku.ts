@@ -1,16 +1,19 @@
-import { Utils } from "./utils";
+import { LocalTime } from "js-joda";
+
+import { DateUtils } from "./utils";
 
 export class Jku {
 
     /**
      * Returns the well-known raster times of the JKU
      *
-     * @param start A start time string, e.g. `"08:30"`
-     * @param stop A stop time string, e.g. `"21:30"`
+     * @param start A start time `LocalTime` object
+     * @param stop A stop time `LocalTime` object
      */
-    public static getRasterTimes(start: string, stop: string): number[] {
-        const minutes = Array.from(this.iterateRasterTimes(Utils.fromTimeString(start), Utils.fromTimeString(stop)));
-        return minutes;
+    public static getRasterTimes(start: LocalTime, stop: LocalTime): LocalTime[] {
+        const minutes = Array.from(this.iterateRasterTimes(DateUtils.toMinutes(start), DateUtils.toMinutes(stop)));
+        const times = minutes.map(DateUtils.fromMinutes);
+        return times;
     }
 
     /**

@@ -33,11 +33,9 @@
   },
   "dependencies": {
     "@types/jquery": "^3.3.29",
-    "@types/numeral": "0.0.25",
     "air-datepicker": "^2.2.3",
     "bootstrap": "^4.3.1",
     "jquery": "^3.4.1",
-    "js-joda": "^1.10.1",
-    "numeral": "^2.0.6"
+    "js-joda": "^1.10.1"
   }
 }

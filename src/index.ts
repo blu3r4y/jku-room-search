@@ -6,9 +6,12 @@ import "./index.css";
 
 /* packages */
 
+import { LocalDateTime, LocalTime } from "js-joda";
+
 import { IResult, RoomSearch } from "./api";
 import { ColorStatus, RoomSearchFrontend } from "./frontend";
 import { Jku } from "./jku";
+import { DateUtils } from "./utils";
 
 /* globals */
 
@@ -45,8 +48,8 @@ const versionText = $("#versionText");
 
 /* app logic */
 
-const startTimes: number[] = Jku.getRasterTimes("08:30", "21:30");
-const endTimes: number[] = Jku.getRasterTimes("09:15", "22:15");
+const startTimes: LocalTime[] = Jku.getRasterTimes(DateUtils.fromString("08:30"), DateUtils.fromString("21:30"));
+const endTimes: LocalTime[] = Jku.getRasterTimes(DateUtils.fromString("09:15"), DateUtils.fromString("22:15"));
 
 const frontend = new RoomSearchFrontend(datepicker, fromTime, toTime,
     results, teaserText, teaserBlock,
@@ -63,27 +66,34 @@ function submitHandler(event: Event) {
     const query = frontend.getQuery();
     console.log("query", query);
 
-    if (query) {
+    if (query != null) {
 
         if (ROOMS_DATA != null) {
 
-            // process request
-            const result: IResult = RoomSearch.searchFreeRooms(query);
+            // process user request
+            const result: IResult | null = RoomSearch.searchFreeRooms(query);
             console.log("result", result);
 
-            if (result.length > 0) {
-                frontend.render("😊 We found some free rooms", result, ColorStatus.Success);
+            if (result != null) {
+
+                if (result.length > 0) {
+                    frontend.render("😊 We found some free rooms", result, ColorStatus.Success);
+                } else {
+                    frontend.render("😟 Sorry, no free rooms found", null, ColorStatus.NoResult);
+                }
+
             } else {
-                frontend.render("😟 Sorry, no free rooms found", null, ColorStatus.NoResult);
+                console.error("The search algorithm could not process the query.");
+                frontend.render("😟 Sorry, something broke <tt>[ERR_SEARCH_ROOMS]</tt>", null, ColorStatus.Error);
             }
 
         } else {
-            console.error("Room data could not be loaded.");
+            console.error("Room data wasn't loaded properly.");
             frontend.render("😟 Sorry, something broke <tt>[ERR_NO_DATA]</tt>", null, ColorStatus.Error);
         }
 
     } else {
-        console.error("The frontend input could not be parsed into a valid query.");
+        console.error("The frontend input could not be parsed into a valid user query.");
         frontend.render("😟 Sorry, something broke <tt>[ERR_PARSE_INPUT]</tt>", null, ColorStatus.Error);
     }
 
@@ -99,7 +109,7 @@ form.on("submit", submitHandler);
 function dataLoadSuccessHandler(data: IRoomSearchData) {
     console.log("data", data);
     ROOMS_DATA = data;
-    frontend.renderVersion(data.version);
+    frontend.renderVersion(LocalDateTime.parse(data.version));
     frontend.renderButton(true);
 }
 

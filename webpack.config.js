@@ -72,9 +72,9 @@ module.exports = {
             })
     ],
     performance: {
-        // only warn if assets are larger than 512 KB
-        maxEntrypointSize: 512000,
-        maxAssetSize: 512000,
+        // only warn if assets are larger than 1 MiB
+        maxEntrypointSize: 1024000,
+        maxAssetSize: 1024000,
         hints: 'warning'
     }
 }

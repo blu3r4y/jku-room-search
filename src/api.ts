@@ -1,12 +1,14 @@
-import { Utils } from "./utils";
+import { LocalDate, LocalTime } from "js-joda";
+
+import { DateUtils } from "./utils";
 
 /**
  * API query for requesting free rooms
  */
 export declare interface IQuery {
-    day: Date;
-    from: number;
-    to: number | null;
+    day: LocalDate;
+    from: LocalTime;
+    to: LocalTime | null;
 }
 
 /**
@@ -19,7 +21,7 @@ export type IResult = IFreeRoom[];
  */
 export declare interface IFreeRoom {
     room: string;
-    available: Array<[number, number]>;
+    available: Array<[LocalTime, LocalTime]>;
 }
 
 /**
@@ -27,30 +29,36 @@ export declare interface IFreeRoom {
  */
 export class RoomSearch {
 
-    public static searchFreeRooms(query: IQuery): IResult {
+    public static searchFreeRooms(query: IQuery): IResult | null {
+        try {
 
-        // TODO: mocked output
+            // TODO: mocked output
 
-        if (query.to === -1) {
-            return [];
-        } else {
-            const todo: IResult = [
-                {
-                    available: [
-                        [Utils.fromTimeString("08:30"), Utils.fromTimeString("10:00")],
-                        [Utils.fromTimeString("15:30"), Utils.fromTimeString("17:00")],
-                    ],
-                    room: "S3 218",
-                },
-                {
-                    available: [
-                        [Utils.fromTimeString("08:30"), Utils.fromTimeString("12:00")],
-                    ],
-                    room: "BA 9901",
-                },
-            ];
+            if (query.to == null) {
+                return [];
+            } else {
+                const todo: IResult = [
+                    {
+                        available: [
+                            [DateUtils.fromString("08:30"), DateUtils.fromString("10:00")],
+                            [DateUtils.fromString("15:30"), DateUtils.fromString("17:00")],
+                        ],
+                        room: "S3 218",
+                    },
+                    {
+                        available: [
+                            [DateUtils.fromString("08:30"), DateUtils.fromString("12:00")],
+                        ],
+                        room: "BA 9901",
+                    },
+                ];
 
-            return todo;
+                return todo;
+            }
+
+        } catch (e) {
+            console.error(e);
+            return null;
         }
     }
 

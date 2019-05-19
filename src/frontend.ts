@@ -1,7 +1,8 @@
 import "air-datepicker";
+import { Duration, LocalDate, LocalDateTime, LocalTime } from "js-joda";
 
 import { IFreeRoom, IQuery, IResult } from "./api";
-import { Utils } from "./utils";
+import { DateUtils } from "./utils";
 
 const language: AirDatepickerLanguageInstance = {
     clear: "Clear",
@@ -45,8 +46,8 @@ export class RoomSearchFrontend {
     private jqVersionText: JQuery<HTMLElement>;
 
     private currentColorStatus: ColorStatus;
-    private startTimes?: number[] = undefined;
-    private endTimes?: number[] = undefined;
+    private startTimes?: LocalTime[] = undefined;
+    private endTimes?: LocalTime[] = undefined;
 
     constructor(datepicker: JQuery<HTMLElement>, fromTime: JQuery<HTMLElement>, toTime: JQuery<HTMLElement>,
         results: JQuery<HTMLElement>, teaserText: JQuery<HTMLElement>, teaserBlock: JQuery<HTMLElement>,
@@ -73,7 +74,7 @@ export class RoomSearchFrontend {
      * @param startTimes A set of raster start times
      * @param endTimes A set of raster end times
      */
-    public init(startTimes: number[], endTimes: number[]) {
+    public init(startTimes: LocalTime[], endTimes: LocalTime[]) {
         this.startTimes = startTimes;
         this.endTimes = endTimes;
 
@@ -85,19 +86,20 @@ export class RoomSearchFrontend {
      * Retrieve the current form inputs
      */
     public getQuery(): IQuery | null {
-        if (!this.datepicker || this.datepicker.selectedDates.length === 0) {
-            return null;
-        }
+        try {
+            const day = this.getDate();
+            const from = this.getFromTime();
+            const to = this.getToTime();
 
-        const day: Date = this.datepicker.selectedDates[0];
-        const fromMinutes = this.getFromMinutes();
-        const toMinutes = this.getToMinutes();
-
-        // sanity checks
-        if (!day || (toMinutes !== -1 && fromMinutes >= toMinutes)) {
+            // sanity checks (toMinutes is allowed to be NULL)
+            if (!day || !from || (to && from.isAfter(to))) {
+                return null;
+            } else {
+                return { day, from, to };
+            }
+        } catch (e) {
+            console.error(e);
             return null;
-        } else {
-            return { day, from: fromMinutes, to: toMinutes };
         }
     }
 
@@ -115,12 +117,24 @@ export class RoomSearchFrontend {
     }
 
     /**
-     * Render the version string
+     * Render the version tag
      *
-     * @param version Version string
+     * @param version Version, represented by a `LocalDateTime`
      */
-    public renderVersion(version: string) {
-        this.jqVersionText.html(`Last refreshed: ${version}`);
+    public renderVersion(version: LocalDateTime) {
+        const duration = Duration.between(version, LocalDateTime.now());
+        let readableDuration: string = "just now";
+        if (duration.toDays() >= 7) {
+            readableDuration = `${Math.floor(duration.toDays() / 7)} weeks ago`;
+        } else if (duration.toDays() > 0) {
+            readableDuration = `${duration.toDays()} days ago`;
+        } else if (duration.toHours() > 0) {
+            readableDuration = `${duration.toHours()} hours ago`;
+        } else if (duration.toMinutes() > 0) {
+            readableDuration = `${duration.toMinutes()} minutes ago`;
+        }
+
+        this.jqVersionText.html(`Last updated ${readableDuration}`);
     }
 
     /**
@@ -149,12 +163,23 @@ export class RoomSearchFrontend {
         }
     }
 
-    private getFromMinutes(): number {
-        return parseInt(this.jqFromTime.children("option:selected").val() as string, 10);
+    private getDate(): LocalDate | null {
+        if (!this.datepicker || this.datepicker.selectedDates.length === 0) {
+            return null;
+        }
+
+        const nativeDate: Date = this.datepicker.selectedDates[0];
+        return LocalDate.of(nativeDate.getFullYear(), nativeDate.getMonth() + 1, nativeDate.getDate());
     }
 
-    private getToMinutes(): number {
-        return parseInt(this.jqToTime.children("option:selected").val() as string, 10);
+    private getFromTime(): LocalTime | null {
+        const minutes = parseInt(this.jqFromTime.children("option:selected").val() as string, 10);
+        return minutes >= 0 ? DateUtils.fromMinutes(minutes) : null;
+    }
+
+    private getToTime(): LocalTime | null {
+        const minutes = parseInt(this.jqToTime.children("option:selected").val() as string, 10);
+        return minutes >= 0 ? DateUtils.fromMinutes(minutes) : null;
     }
 
     private renderTeaser(text: string | null, color: ColorStatus) {
@@ -202,12 +227,12 @@ export class RoomSearchFrontend {
 
                     // from time
                     const tdFrom = d.createElement("td");
-                    tdFrom.innerHTML = Utils.fromMinutes(from);
+                    tdFrom.innerHTML = DateUtils.toString(from);
                     tr.appendChild(tdFrom);
 
                     // to time
                     const tdTo = d.createElement("td");
-                    tdTo.innerHTML = Utils.fromMinutes(to);
+                    tdTo.innerHTML = DateUtils.toString(to);
                     tr.appendChild(tdTo);
 
                     fragment.appendChild(tr);
@@ -245,28 +270,36 @@ export class RoomSearchFrontend {
 
         // event for rolling the to time forwards if the from time gets changed
         function fromTimeChanged(obj: RoomSearchFrontend) {
-            const from = obj.getFromMinutes();
-            const to = obj.getToMinutes();
+            const from = obj.getFromTime();
+            const to = obj.getToTime();
 
-            if (to !== -1 && from >= to && obj.endTimes) {
+            if (from == null || to == null || obj.endTimes == null) {
+                return;
+            }
+
+            if (!from.isBefore(to)) {
                 // find the closest to time that is greater than the new from time
-                const rollover = obj.endTimes.find((e) => e > from);
+                const rollover = obj.endTimes.find((e) => e.isAfter(from));
                 if (rollover) {
-                    obj.jqToTime.val(rollover.toString());
+                    obj.jqToTime.val(DateUtils.toMinutes(rollover));
                 }
             }
         }
 
         // event for rolling the from time backwards if the to time gets changed
         function toTimeChanged(obj: RoomSearchFrontend) {
-            const from = obj.getFromMinutes();
-            const to = obj.getToMinutes();
+            const from = obj.getFromTime();
+            const to = obj.getToTime();
 
-            if (to !== -1 && to <= from && obj.startTimes) {
+            if (from == null || to == null || obj.startTimes == null) {
+                return;
+            }
+
+            if (!from.isBefore(to)) {
                 // find the closest from time that is smaller than the new to time
-                const rollunder = obj.startTimes.slice().reverse().find((e) => e < to);
+                const rollunder = obj.startTimes.slice().reverse().find((e) => e.isBefore(to));
                 if (rollunder) {
-                    obj.jqFromTime.val(rollunder.toString());
+                    obj.jqFromTime.val(DateUtils.toMinutes(rollunder));
                 }
             }
         }
@@ -274,23 +307,22 @@ export class RoomSearchFrontend {
         // add <option> fields to start time <select>
         this.startTimes.forEach((item) => {
             this.jqFromTime.append(
-                $("<option></option>").val(item).html(Utils.fromMinutes(item)),
+                $("<option></option>").val(DateUtils.toMinutes(item)).html(DateUtils.toString(item)),
             );
         });
 
         // add <option> fields to end time <select>
         this.endTimes.forEach((item) => {
             this.jqToTime.append(
-                $("<option></option>").val(item).html(Utils.fromMinutes(item)),
+                $("<option></option>").val(DateUtils.toMinutes(item)).html(DateUtils.toString(item)),
             );
         });
 
         // pre-select the closest start time in the past (or one up to 15 minutes in the future)
-        const today = new Date();
-        const currentMinutes = today.getHours() * 60 + today.getMinutes();
-        const setpoint = this.startTimes.slice().reverse().find((e) => currentMinutes >= e - 15);
+        const now = LocalTime.now();
+        const setpoint = this.startTimes.slice().reverse().find((e) => now.isAfter(e.minusMinutes(15)));
         if (setpoint) {
-            this.jqFromTime.val(setpoint.toString());
+            this.jqFromTime.val(DateUtils.toMinutes(setpoint));
         }
 
         // bind change listeners
