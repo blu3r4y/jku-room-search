@@ -74,6 +74,8 @@ function submitHandler(event: Event) {
                     frontend.render("😟 Sorry, no free rooms found", null, ColorStatus.NoResult);
                 }
 
+                results[0].scrollIntoView();
+
             } else {
                 console.error("The search algorithm could not process the query.");
                 frontend.render("😟 Sorry, something broke <tt>[ERR_SEARCH_ROOMS]</tt>", null, ColorStatus.Error);
