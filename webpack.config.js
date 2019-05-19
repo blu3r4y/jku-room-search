@@ -46,6 +46,11 @@ module.exports = {
         ]
     },
     plugins: [
+        // add the global data url
+        new webpack.DefinePlugin(
+            {
+                "DATA_URL": JSON.stringify("./data/rooms.json")
+            }),
         // expose the build hash as an environment variable
         new webpack.ExtendedAPIPlugin(),
         // add jquery, if we observe that its being used

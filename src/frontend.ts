@@ -1,7 +1,7 @@
 import "air-datepicker";
 import { Duration, LocalDate, LocalDateTime, LocalTime } from "js-joda";
 
-import { IFreeRoom, IQuery, IResult } from "./api";
+import { IQuery, IResult } from "./api";
 import { DateUtils } from "./utils";
 
 const language: AirDatepickerLanguageInstance = {

@@ -8,26 +8,16 @@ import "./index.css";
 
 import { LocalDateTime, LocalTime } from "js-joda";
 
-import { IResult, RoomSearch } from "./api";
+import { IResult, IRoomData, RoomSearch } from "./api";
 import { ColorStatus, RoomSearchFrontend } from "./frontend";
 import { Jku } from "./jku";
 import { DateUtils } from "./utils";
 
 /* globals */
 
-// webpack will declare this global hash for us
-declare var __webpack_hash__: any;
-
-declare interface IRoomSearchData {
-    version: string;
-    rooms: { [id: string]: "string" };
-    available: { [id: string]: { [id: string]: number[][] } };
-}
-
-const ROOMS_PATH: string = "./data/rooms.json?" + __webpack_hash__;
-
-// store with the parsed json rooms data
-let ROOMS_DATA: IRoomSearchData | null = null;
+// webpack will declare this global variables for us
+declare var __webpack_hash__: string;
+declare var DATA_URL: string;
 
 /* gui elements */
 
@@ -47,6 +37,8 @@ const buttonText = $("#buttonText");
 const versionText = $("#versionText");
 
 /* app logic */
+
+let api: RoomSearch | null = null;
 
 const startTimes: LocalTime[] = Jku.getRasterTimes(DateUtils.fromString("08:30"), DateUtils.fromString("21:30"));
 const endTimes: LocalTime[] = Jku.getRasterTimes(DateUtils.fromString("09:15"), DateUtils.fromString("22:15"));
@@ -68,10 +60,10 @@ function submitHandler(event: Event) {
 
     if (query != null) {
 
-        if (ROOMS_DATA != null) {
+        if (api != null) {
 
             // process user request
-            const result: IResult | null = RoomSearch.searchFreeRooms(query);
+            const result: IResult | null = api.searchFreeRooms(query);
             console.log("result", result);
 
             if (result != null) {
@@ -106,18 +98,19 @@ form.on("submit", submitHandler);
 
 /* room data loading */
 
-function dataLoadSuccessHandler(data: IRoomSearchData) {
+function dataLoadSuccessHandler(data: IRoomData) {
     console.log("data", data);
-    ROOMS_DATA = data;
+    api = new RoomSearch(data);
+
     frontend.renderVersion(LocalDateTime.parse(data.version));
     frontend.renderButton(true);
 }
 
 function dataLoadFailHandler() {
-    console.error(`The XHR request 'GET ${ROOMS_PATH}' failed.`);
+    console.error(`The XHR request 'GET ${DATA_URL}' failed.`);
     frontend.render("😟 Sorry, something broke <tt>[ERR_LOAD_DATA]</tt>", null, ColorStatus.Error);
 }
 
-const xhr: JQuery.jqXHR = $.getJSON(ROOMS_PATH);
+const xhr: JQuery.jqXHR = $.getJSON(DATA_URL);
 xhr.done(dataLoadSuccessHandler);
 xhr.fail(dataLoadFailHandler);

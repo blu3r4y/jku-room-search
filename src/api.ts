@@ -25,36 +25,67 @@ export declare interface IFreeRoom {
 }
 
 /**
+ * The structure of the room data index
+ */
+export declare interface IRoomData {
+    version: string;
+    rooms: { [id: string]: string };
+    available: { [id: string]: { [id: string]: Array<[number, number]> } };
+}
+
+/**
  * Endpoint for performing queries on free rooms
  */
 export class RoomSearch {
 
-    public static searchFreeRooms(query: IQuery): IResult | null {
+    private data: IRoomData;
+
+    constructor(data: IRoomData) {
+        this.data = data;
+    }
+
+    /**
+     * Search the index for free rooms
+     *
+     * @param query The user query object
+     */
+    public searchFreeRooms(query: IQuery): IResult | null {
         try {
 
-            // TODO: mocked output
-
-            if (query.to == null) {
+            // check if we got any data on this day
+            if (!(query.day.toString() in this.data.available)) {
                 return [];
-            } else {
-                const todo: IResult = [
-                    {
-                        available: [
-                            [DateUtils.fromString("08:30"), DateUtils.fromString("10:00")],
-                            [DateUtils.fromString("15:30"), DateUtils.fromString("17:00")],
-                        ],
-                        room: "S3 218",
-                    },
-                    {
-                        available: [
-                            [DateUtils.fromString("08:30"), DateUtils.fromString("12:00")],
-                        ],
-                        room: "BA 9901",
-                    },
-                ];
-
-                return todo;
             }
+
+            const result: IResult = [];
+            const cursor = this.data.available[query.day.toString()];
+
+            const from: number = DateUtils.toMinutes(query.from);
+            const to: number = query.to != null ? DateUtils.toMinutes(query.to) : -1;
+
+            // iterate over free rooms
+            Object.keys(cursor).forEach((roomId: string) => {
+                let matches: number[][] = [];
+
+                if (query.to == null) {
+                    matches = cursor[roomId].filter((duration) =>
+                        from >= duration[0] && from < duration[1]);
+                } else {
+                    matches = cursor[roomId].filter((duration) =>
+                        from >= duration[0] && to <= duration[1]);
+                }
+
+                // append the result if we found some matches
+                if (matches.length > 0) {
+                    result.push({
+                        available: matches.map((duration) =>
+                            [DateUtils.fromMinutes(duration[0]), DateUtils.fromMinutes(duration[1])]),
+                        room: this.data.rooms[roomId],
+                    });
+                }
+            });
+
+            return result;
 
         } catch (e) {
             console.error(e);
