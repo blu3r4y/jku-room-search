@@ -134,7 +134,7 @@ export class RoomSearchFrontend {
             readableDuration = `${duration.toMinutes()} minutes ago`;
         }
 
-        this.jqVersionText.html(`Last updated ${readableDuration}`);
+        this.jqVersionText.html(`Index updated ${readableDuration}`);
     }
 
     /**
