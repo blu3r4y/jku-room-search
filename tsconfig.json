@@ -1,16 +1,14 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "module": "commonjs",
-        "outDir": "./dist",
-        "sourceMap": true,
-        "strict": true,
-        "allowJs": false,
-        "esModuleInterop": true,
-        "downlevelIteration": true,
-        "lib": ["dom", "es6"]
+        "target": "es5",             /* target, i.e. compile to es5 runtimes */
+        "lib": ["dom", "es6"],       /* include some libraries during compilation */
+        "strict": true,              /* strict type checking */
+        "downlevelIteration": true,  /* downlevel es6 iterables to es5 syntax */
+        "esModuleInterop": true,     /* allow proper import statements */
+        "sourceMap": true,           /* generate .map files for easy debugging */
+        "outDir": "./dist"           /* build output */
     },
     "include": [
-        "src/**/*"
+        "src/**/*"                   /* typescript source files */
     ]
 }
