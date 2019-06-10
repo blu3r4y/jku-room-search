@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "es5",             /* target, i.e. compile to es5 runtimes */
-        "lib": ["dom", "es6"],       /* include some libraries during compilation */
+        "lib": ["es5", "dom"],       /* include some libraries during compilation */
         "strict": true,              /* strict type checking */
         "downlevelIteration": true,  /* downlevel es6 iterables to es5 syntax */
         "esModuleInterop": true,     /* allow proper import statements */
