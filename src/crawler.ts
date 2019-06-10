@@ -24,6 +24,18 @@ const COURSE_DETAILS = "/kusss/selectcoursegroup.action?coursegroupid={{coursegr
 
 /* crawler logic */
 
+declare interface IRoom {
+    htmlValue: string;
+    id: number;
+    name: string;
+}
+
+declare interface ICourse {
+    courseclassid: number;
+    coursegroupid: number;
+    showdetails: number;
+}
+
 class JkuRoomCrawler {
 
     private headers: request.CoreOptions;
@@ -34,25 +46,72 @@ class JkuRoomCrawler {
     }
 
     public crawl() {
-        this.crawlRooms((rooms: string[]) => Logger.info("done", "rooms"));
+        // request frontpage and scrape room names
+        this.scrapeRooms((rooms: IRoom[]) => {
+            for (const room of rooms) {
+                // perform search and scrape course numbers
+                this.scrapeCourses(room, (courses: ICourse[]) => Logger.info("done"));
+            }
+        });
     }
 
-    private crawlRooms(callback: (rooms: string[]) => void) {
-        this.request(CRAWLER_BASE_URL + SEARCH_PAGE, (ch: CheerioStatic) => {
-            // extract option values in the room selector
-            const rooms: string[] = ch("#room").children().map((i, el) => ch(el).val()).get();
-            Logger.info(`extracted ${rooms.length} room values`, "rooms", null, rooms.length === 0);
+    private scrapeRooms(callback: (rooms: IRoom[]) => void) {
+        const url = CRAWLER_BASE_URL + SEARCH_PAGE;
+        this.request(url, (ch: CheerioStatic) => {
+            const values = ch("select#room > option")  // the <option> children of <select id="room">
+                .slice(1)                              // remove the first 'all' <option>
+                .map((i, el) => {                      // the 'value' attr of each <option>
+                    return {
+                        name: ch(el).text(),
+                        value: ch(el).val(),
+                    };
+                });
+
+            // build room objects
+            let rid = 0;
+            const rooms: IRoom[] = values.get().map((pair: { name: string, value: string }) => {
+                return {
+                    htmlValue: pair.value,
+                    id: rid++,
+                    name: pair.name.trim().replace(/\s+/g, " "),
+                };
+            });
+
+            Logger.info(`scraped ${rooms.length} room names`, "rooms", null, rooms.length === 0);
 
             if (rooms.length > 0) {
-                // remove first all-quantifier value
-                const firstValue = (rooms.shift() as string).trim();
-                if (firstValue !== "all") {
-                    Logger.err(`first value expected to be 'all' but was '${firstValue}'`, "rooms");
-                } else {
-                    Logger.info(rooms);
-                    callback(rooms);
-                }
+                Logger.info(rooms);
+                callback(rooms);
             }
+
+        });
+    }
+
+    private scrapeCourses(room: IRoom, callback: (courses: ICourse[]) => void) {
+        const url = CRAWLER_BASE_URL + SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.htmlValue));
+        this.request(url, (ch: CheerioStatic) => {
+            const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
+                .children("tr").slice(1)                                // the <tr> children (rows)
+                .slice(1)                                               // remove the first row which is the header
+                .map((i, el) => ch(el).children("td").first()           // the first <td> (first column) in each <tr>
+                    .find("a").first().attr("href").trim());             // the 'href' attr of the first found <a>
+
+            // build course objects
+            const courses: ICourse[] = hrefs.get().map((href: string) => {
+                const params = new URLSearchParams(href.split("?")[1]);
+                return {
+                    courseclassid: parseInt(params.get("courseclassid") as string, 10),
+                    coursegroupid: parseInt(params.get("coursegroupid") as string, 10),
+                    showdetails: parseInt(params.get("showdetails") as string, 10),
+                };
+            });
+
+            Logger.info(`scraped ${courses.length} course numbers`, "courses", null, courses.length === 0);
+
+            if (courses.length > 0) {
+                callback(courses);
+            }
+
         });
     }
 
@@ -63,21 +122,20 @@ class JkuRoomCrawler {
      * @param callback The callback function to call when done loading (optional)
      */
     private request(url: string, callback: ((ch: CheerioStatic) => void) | null | undefined = null) {
-
         const listener = (error: any, response: http.IncomingMessage, body: string) => {
             const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
 
             Logger.info(`GET ${url}`, "request", code, code !== 200);
 
+            // parse and callback on success
             if (response && code === 200) {
-
-                // parse with cheerio
                 const ch: CheerioStatic = cheerio.load(body);
                 if (callback != null) {
                     callback(ch);
                 }
+            }
 
-            } else if (error != null) {
+            if (error != null) {
                 Logger.err(error);
             }
         };
