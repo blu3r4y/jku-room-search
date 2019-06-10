@@ -29,6 +29,7 @@ export declare interface IFreeRoom {
  */
 export declare interface IRoomData {
     version: string;
+    range: { start: string, end: string };
     rooms: { [id: string]: string };
     available: { [id: string]: { [id: string]: Array<[number, number]> } };
 }
