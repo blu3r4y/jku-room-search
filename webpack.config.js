@@ -16,11 +16,13 @@ const JsMinimizerPlugin = require("terser-webpack-plugin");
 // minimizer for css
 const CssMinimizerPlugin = require("optimize-css-assets-webpack-plugin");
 
-module.exports = {
+const appConfig = {
     target: "web",
     mode: "production",
     devtool: "source-map",
-    entry: "./src/index.ts",
+    entry: {
+        app: "./src/app.ts",
+    },
     output: {
         filename: "./js/[name].js",
         path: path.resolve(__dirname, "dist"),
@@ -72,7 +74,7 @@ module.exports = {
     plugins: [
         // add the global data url
         new webpack.DefinePlugin({
-            "DATA_URL": JSON.stringify("./data/rooms.json"),
+            "APP_DATA_URL": JSON.stringify("./data/rooms.json"),
         }),
         // expose the build hash as an environment variable
         new webpack.ExtendedAPIPlugin(),
@@ -91,7 +93,7 @@ module.exports = {
         }]),
         // inject variables into html files
         new HtmlPlugin({
-            template: "./src/index.ejs",
+            template: "./src/app.ejs",
             hash: true,
         }),
     ],
@@ -102,3 +104,42 @@ module.exports = {
         hints: "warning",
     },
 };
+
+const crawlerConfig = {
+    target: "node",
+    mode: "production",
+    entry: {
+        crawler: "./src/crawler.ts",
+    },
+    output: {
+        filename: "./js/[name].js",
+        path: path.resolve(__dirname, "dist"),
+    },
+    resolve: {
+        extensions: [".tsx", ".ts", ".js"],
+    },
+    module: {
+        rules: [{
+                // load and compile type script sources
+                test: /\.tsx?$/,
+                use: "ts-loader",
+                exclude: /node_modules/,
+            },
+            {
+                // lint typescript files
+                test: /\.ts$/,
+                enforce: "pre",
+                use: "tslint-loader",
+            },
+        ],
+    },
+    plugins: [
+        // add the global crawl url and user agent
+        new webpack.DefinePlugin({
+            "CRAWLER_BASE_URL": JSON.stringify("https://www.kusss.jku.at"),
+            "CRAWLER_USER_AGENT": JSON.stringify("jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"),
+        }),
+    ],
+};
+
+module.exports = [appConfig, crawlerConfig];

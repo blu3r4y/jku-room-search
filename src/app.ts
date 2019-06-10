@@ -2,7 +2,7 @@
 
 import "air-datepicker/dist/css/datepicker.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./index.css";
+import "./app.css";
 
 /* packages */
 
@@ -17,7 +17,7 @@ import { DateUtils } from "./utils";
 
 // webpack will declare this global variables for us
 declare var __webpack_hash__: string;
-declare var DATA_URL: string;
+declare var APP_DATA_URL: string;
 
 /* gui elements */
 
@@ -109,10 +109,10 @@ function dataLoadSuccessHandler(data: IRoomData) {
 }
 
 function dataLoadFailHandler() {
-    console.error(`The XHR request 'GET ${DATA_URL}' failed.`);
+    console.error(`The XHR request 'GET ${APP_DATA_URL}' failed.`);
     frontend.render("😟 Sorry, something broke <tt>[ERR_LOAD_DATA]</tt>", null, ColorStatus.Error);
 }
 
-const xhr: JQuery.jqXHR = $.getJSON(DATA_URL);
+const xhr: JQuery.jqXHR = $.getJSON(APP_DATA_URL);
 xhr.done(dataLoadSuccessHandler);
 xhr.fail(dataLoadFailHandler);

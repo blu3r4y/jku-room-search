@@ -4,7 +4,8 @@
   "description": "Search for free rooms on the campus of the Johannes Kepler University Linz",
   "scripts": {
     "build": "webpack",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "crawl": "webpack && node ./dist/js/crawler.js"
   },
   "repository": {
     "type": "git",
@@ -17,9 +18,14 @@
   },
   "homepage": "https://github.com/blu3r4y/jku-room-search#readme",
   "devDependencies": {
-    "@types/air-datepicker": "git+https://git@github.com/blu3r4y/air-datepicker.d.ts.git",
+    "@types/air-datepicker": "github:blu3r4y/air-datepicker.d.ts",
+    "@types/ansicolors": "0.0.31",
+    "@types/bootstrap": "^4.3.0",
+    "@types/cheerio": "^0.22.11",
     "@types/jquery": "^3.3.29",
+    "@types/request": "^2.48.1",
     "copy-webpack-plugin": "^5.0.3",
+    "css-loader": "^2.1.1",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.5.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
@@ -32,9 +38,11 @@
   },
   "dependencies": {
     "air-datepicker": "^2.2.3",
+    "ansicolors": "^0.3.2",
     "bootstrap": "^4.3.1",
-    "css-loader": "^2.1.1",
+    "cheerio": "^1.0.0-rc.3",
     "jquery": "^3.4.1",
-    "js-joda": "^1.10.1"
+    "js-joda": "^1.10.1",
+    "request": "^2.88.0"
   }
 }
