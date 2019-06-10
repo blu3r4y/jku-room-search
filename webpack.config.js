@@ -105,11 +105,11 @@ const appConfig = {
     },
 };
 
-const crawlerConfig = {
+const scraperConfig = {
     target: "node",
     mode: "production",
     entry: {
-        crawler: "./src/crawler.ts",
+        scraper: "./src/scraper.ts",
     },
     output: {
         filename: "./js/[name].js",
@@ -134,12 +134,12 @@ const crawlerConfig = {
         ],
     },
     plugins: [
-        // add the global crawl url and user agent
+        // add the global scrape url and user agent
         new webpack.DefinePlugin({
-            "CRAWLER_BASE_URL": JSON.stringify("https://www.kusss.jku.at"),
-            "CRAWLER_USER_AGENT": JSON.stringify("jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"),
+            "SCRAPER_BASE_URL": JSON.stringify("https://www.kusss.jku.at"),
+            "SCRAPER_USER_AGENT": JSON.stringify("jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"),
         }),
     ],
 };
 
-module.exports = [appConfig, crawlerConfig];
+module.exports = [appConfig, scraperConfig];

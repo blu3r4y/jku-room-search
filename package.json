@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "crawl": "webpack && node ./dist/js/crawler.js"
+    "scrape": "webpack && node ./dist/js/scraper.js"
   },
   "repository": {
     "type": "git",

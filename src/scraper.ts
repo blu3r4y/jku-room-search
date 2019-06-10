@@ -7,12 +7,12 @@ import { Logger } from "./log";
 /* globals*/
 
 // TODO: just for debugging purpose
-const CRAWLER_BASE_URL = "https://mario.ac";
-const CRAWLER_USER_AGENT = "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)";
+const SCRAPER_BASE_URL = "https://mario.ac";
+const SCRAPER_USER_AGENT = "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)";
 
 // webpack will declare this global variables for us
-// declare var CRAWLER_BASE_URL: string;
-// declare var CRAWLER_USER_AGENT: string;
+// declare var SCRAPER_BASE_URL: string;
+// declare var SCRAPER_USER_AGENT: string;
 
 const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";
 const SEARCH_RESULTS = "/kusss/coursecatalogue-search-lvas.action?sortParam0courses=lvaName&asccourses=true" +
@@ -22,7 +22,7 @@ const SEARCH_RESULTS = "/kusss/coursecatalogue-search-lvas.action?sortParam0cour
 const COURSE_DETAILS = "/kusss/selectcoursegroup.action?coursegroupid={{coursegroupid}}&showdetails={{showdetails}}" +
     "&abhart=all&courseclassid={{courseclassid}}";
 
-/* crawler logic */
+/* scraper logic */
 
 declare interface IRoom {
     htmlValue: string;
@@ -36,16 +36,16 @@ declare interface ICourse {
     showdetails: number;
 }
 
-class JkuRoomCrawler {
+class JkuRoomScraper {
 
     private headers: request.CoreOptions;
 
     constructor() {
         // set request headers
-        this.headers = { headers: { "User-Agent": CRAWLER_USER_AGENT } };
+        this.headers = { headers: { "User-Agent": SCRAPER_USER_AGENT } };
     }
 
-    public crawl() {
+    public scrape() {
         // request frontpage and scrape room names
         this.scrapeRooms((rooms: IRoom[]) => {
             for (const room of rooms) {
@@ -56,7 +56,7 @@ class JkuRoomCrawler {
     }
 
     private scrapeRooms(callback: (rooms: IRoom[]) => void) {
-        const url = CRAWLER_BASE_URL + SEARCH_PAGE;
+        const url = SCRAPER_BASE_URL + SEARCH_PAGE;
         this.request(url, (ch: CheerioStatic) => {
             const values = ch("select#room > option")  // the <option> children of <select id="room">
                 .slice(1)                              // remove the first 'all' <option>
@@ -88,7 +88,7 @@ class JkuRoomCrawler {
     }
 
     private scrapeCourses(room: IRoom, callback: (courses: ICourse[]) => void) {
-        const url = CRAWLER_BASE_URL + SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.htmlValue));
+        const url = SCRAPER_BASE_URL + SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.htmlValue));
         this.request(url, (ch: CheerioStatic) => {
             const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
                 .children("tr").slice(1)                                // the <tr> children (rows)
@@ -144,7 +144,7 @@ class JkuRoomCrawler {
     }
 }
 
-/* start the crawler */
+/* start the scraper */
 
-const jrc = new JkuRoomCrawler();
-jrc.crawl();
+const jrc = new JkuRoomScraper();
+jrc.scrape();
