@@ -80,7 +80,7 @@ class JkuRoomScraper {
             Logger.info(`scraped ${rooms.length} room names`, "rooms", null, rooms.length === 0);
 
             if (rooms.length > 0) {
-                Logger.info(rooms);
+                Logger.info(rooms.map((room: IRoom) => room.name));
                 callback(rooms);
             }
 
