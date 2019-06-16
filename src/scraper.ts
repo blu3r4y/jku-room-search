@@ -1,5 +1,6 @@
 import cheerio from "cheerio";
 import http from "http";
+import { DateTimeFormatter, LocalDate, LocalTime } from "js-joda";
 import request from "request";
 
 import { Logger } from "./log";
@@ -42,8 +43,22 @@ declare interface ICourse {
     showdetails: string;
 }
 
+/**
+ * A scraped booking for some course
+ * (one course usually has multiple bookings)
+ */
+declare interface IBooking {
+    date: LocalDate;
+    from: LocalTime;
+    roomName: string;
+    to: LocalTime;
+}
+
 class JkuRoomScraper {
 
+    /**
+     * Headers sent with every query (only contains modified User-Agent)
+     */
     private headers: request.CoreOptions;
 
     constructor() {
@@ -56,7 +71,13 @@ class JkuRoomScraper {
         this.scrapeRooms((rooms: IRoom[]) => {
             for (const room of rooms) {
                 // perform search and scrape course numbers
-                this.scrapeCourses(room, (courses: ICourse[]) => Logger.info("done"));
+                this.scrapeCourses(room, (courses: ICourse[]) => {
+                    for (const course of courses) {
+                        this.scrapeBookings(course, (bookings: IBooking[]) => Logger.info("done"));
+                        // break;
+                    }
+                });
+                break;
             }
         });
     }
@@ -67,9 +88,9 @@ class JkuRoomScraper {
             try {
                 const values = ch("select#room > option")  // the <option> children of <select id="room">
                     .slice(1)                              // remove the first 'all' <option>
-                    .map((i, el) => {                      // the 'value' attr of each <option>
+                    .map((i, el) => {
                         return {
-                            name: ch(el).text(),
+                            name: ch(el).text(),           // the text and 'value' attr of each <option>
                             value: ch(el).val(),
                         };
                     });
@@ -135,6 +156,52 @@ class JkuRoomScraper {
         });
     }
 
+    private scrapeBookings(course: ICourse, callback: (bookings: IBooking[]) => void) {
+        const url = SCRAPER_BASE_URL + COURSE_DETAILS.replace("{{courseclassid}}", encodeURIComponent(course.courseclassid))
+            .replace("{{coursegroupid}}", encodeURIComponent(course.coursegroupid))
+            .replace("{{showdetails}}", encodeURIComponent(course.showdetails));
+        this.request(url, (ch: CheerioStatic) => {
+            try {
+
+                const values = ch("table.subinfo > tbody > tr table > tbody")  // the <tbody> which holds the date and times
+                    .children("tr")                                            // the <tr> children (rows)
+                    .slice(1)                                                  // remove the first row which is the header
+                    .map((i, el) => {
+                        const tds = ch(el).children("td");                     // the <td> children (columns)
+                        if (tds.length === 4) {                                // ignore col-spanning description fields
+                            return {
+                                date: tds.eq(1).text().trim() as string,       // the date, time and room fields
+                                room: tds.eq(3).text().trim() as string,
+                                time: tds.eq(2).text().trim() as string,
+                            };
+                        }
+                    });
+
+                // build bookings objects
+                const formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
+                const bookings: IBooking[] = values.get().map((tuple: { date: string, time: string, room: string }) => {
+                    const times = tuple.time.split(" – ");
+                    return {
+                        date: LocalDate.parse(tuple.date, formatter),
+                        from: LocalTime.parse(times[0].trim()),
+                        roomName: tuple.room,
+                        to: LocalTime.parse(times[1].trim()),
+                    };
+                });
+
+                Logger.info(`scraped ${bookings.length} room bookings for course '${course.showdetails}'`,
+                    "bookings", null, bookings.length === 0);
+
+                if (bookings.length > 0) {
+                    callback(bookings);
+                }
+
+            } catch (e) {
+                Logger.err(e, "bookings");
+            }
+        });
+    }
+
     /**
      * Perform a HTTP GET request, load the HTML with Cheerio and call the supplied callback function
      *
@@ -160,6 +227,7 @@ class JkuRoomScraper {
             }
         };
 
+        // rate limit these calls
         request.get(url, this.headers, listener);
     }
 }
