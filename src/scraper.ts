@@ -24,16 +24,22 @@ const COURSE_DETAILS = "/kusss/selectcoursegroup.action?coursegroupid={{coursegr
 
 /* scraper logic */
 
+/**
+ * A scraped room entity
+ */
 declare interface IRoom {
     htmlValue: string;
     id: number;
     name: string;
 }
 
+/**
+ * A scraped course entity
+ */
 declare interface ICourse {
-    courseclassid: number;
-    coursegroupid: number;
-    showdetails: number;
+    courseclassid: string;
+    coursegroupid: string;
+    showdetails: string;
 }
 
 class JkuRoomScraper {
@@ -58,60 +64,74 @@ class JkuRoomScraper {
     private scrapeRooms(callback: (rooms: IRoom[]) => void) {
         const url = SCRAPER_BASE_URL + SEARCH_PAGE;
         this.request(url, (ch: CheerioStatic) => {
-            const values = ch("select#room > option")  // the <option> children of <select id="room">
-                .slice(1)                              // remove the first 'all' <option>
-                .map((i, el) => {                      // the 'value' attr of each <option>
+            try {
+                const values = ch("select#room > option")  // the <option> children of <select id="room">
+                    .slice(1)                              // remove the first 'all' <option>
+                    .map((i, el) => {                      // the 'value' attr of each <option>
+                        return {
+                            name: ch(el).text(),
+                            value: ch(el).val(),
+                        };
+                    });
+
+                // build room objects
+                let rid = 0;
+                const rooms: IRoom[] = values.get().map((pair: { name: string, value: string }) => {
                     return {
-                        name: ch(el).text(),
-                        value: ch(el).val(),
+                        htmlValue: pair.value,
+                        id: rid++,
+                        name: pair.name.trim().replace(/\s+/g, " "),
                     };
                 });
 
-            // build room objects
-            let rid = 0;
-            const rooms: IRoom[] = values.get().map((pair: { name: string, value: string }) => {
-                return {
-                    htmlValue: pair.value,
-                    id: rid++,
-                    name: pair.name.trim().replace(/\s+/g, " "),
-                };
-            });
+                Logger.info(`scraped ${rooms.length} room names`, "rooms", null, rooms.length === 0);
 
-            Logger.info(`scraped ${rooms.length} room names`, "rooms", null, rooms.length === 0);
+                if (rooms.length > 0) {
+                    Logger.info(rooms.map((room: IRoom) => room.name));
+                    callback(rooms);
+                }
 
-            if (rooms.length > 0) {
-                Logger.info(rooms.map((room: IRoom) => room.name));
-                callback(rooms);
+            } catch (e) {
+                Logger.err(e, "rooms");
             }
-
         });
     }
 
     private scrapeCourses(room: IRoom, callback: (courses: ICourse[]) => void) {
         const url = SCRAPER_BASE_URL + SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.htmlValue));
         this.request(url, (ch: CheerioStatic) => {
-            const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
-                .children("tr").slice(1)                                // the <tr> children (rows)
-                .slice(1)                                               // remove the first row which is the header
-                .map((i, el) => ch(el).children("td").first()           // the first <td> (first column) in each <tr>
-                    .find("a").first().attr("href").trim());             // the 'href' attr of the first found <a>
+            try {
 
-            // build course objects
-            const courses: ICourse[] = hrefs.get().map((href: string) => {
-                const params = new URLSearchParams(href.split("?")[1]);
-                return {
-                    courseclassid: parseInt(params.get("courseclassid") as string, 10),
-                    coursegroupid: parseInt(params.get("coursegroupid") as string, 10),
-                    showdetails: parseInt(params.get("showdetails") as string, 10),
-                };
-            });
+                const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
+                    .children("tr")                                         // the <tr> children (rows)
+                    .slice(1)                                               // remove the first row which is the header
+                    .map((i, el) => ch(el).children("td").first()           // the first <td> (first column) in each <tr>
+                        .find("a").first().attr("href").trim());            // the 'href' attr of the first found <a>
 
-            Logger.info(`scraped ${courses.length} course numbers`, "courses", null, courses.length === 0);
+                // build course objects
+                const courses: ICourse[] = hrefs.get().map((href: string) => {
+                    const params = new URLSearchParams(href.split("?")[1]);
+                    const cid = params.get("courseclassid");
+                    const gid = params.get("coursegroupid");
+                    const det = params.get("showdetails");
+                    if (cid && gid && det) {
+                        return { courseclassid: cid, coursegroupid: gid, showdetails: det };
+                    } else {
+                        throw Error("required parameters 'courseclassid', 'coursegroupid', 'showdetails' " +
+                            `are missing in scraped url '${href}'`);
+                    }
+                });
 
-            if (courses.length > 0) {
-                callback(courses);
+                Logger.info(`scraped ${courses.length} course numbers for room '${room.name}'`,
+                    "courses", null, courses.length === 0);
+
+                if (courses.length > 0) {
+                    callback(courses);
+                }
+
+            } catch (e) {
+                Logger.err(e, "courses");
             }
-
         });
     }
 
