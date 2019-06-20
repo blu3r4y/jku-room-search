@@ -1,7 +1,6 @@
 import cheerio from "cheerio";
-import http from "http";
 import { DateTimeFormatter, LocalDate, LocalTime } from "js-joda";
-import request from "request";
+import request from "request-promise-native";
 
 import { Logger } from "./log";
 
@@ -59,11 +58,11 @@ class JkuRoomScraper {
     /**
      * Headers sent with every query (only contains modified User-Agent)
      */
-    private headers: request.CoreOptions;
+    private headers: request.RequestPromiseOptions;
 
     constructor() {
         // set request headers
-        this.headers = { headers: { "User-Agent": SCRAPER_USER_AGENT } };
+        this.headers = { headers: { "User-Agent": SCRAPER_USER_AGENT }, resolveWithFullResponse: true };
     }
 
     public scrape() {
@@ -73,7 +72,7 @@ class JkuRoomScraper {
                 // perform search and scrape course numbers
                 this.scrapeCourses(room, (courses: ICourse[]) => {
                     for (const course of courses) {
-                        this.scrapeBookings(course, (bookings: IBooking[]) => Logger.info("done"));
+                        this.scrapeBookings(course, (bookings: IBooking[]) => { /* todo */ });
                         // break;
                     }
                 });
@@ -84,7 +83,7 @@ class JkuRoomScraper {
 
     private scrapeRooms(callback: (rooms: IRoom[]) => void) {
         const url = SCRAPER_BASE_URL + SEARCH_PAGE;
-        this.request(url, (ch: CheerioStatic) => {
+        this.request(url).then((ch) => {
             try {
                 const values = ch("select#room > option")  // the <option> children of <select id="room">
                     .slice(1)                              // remove the first 'all' <option>
@@ -120,7 +119,7 @@ class JkuRoomScraper {
 
     private scrapeCourses(room: IRoom, callback: (courses: ICourse[]) => void) {
         const url = SCRAPER_BASE_URL + SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.htmlValue));
-        this.request(url, (ch: CheerioStatic) => {
+        this.request(url).then((ch) => {
             try {
 
                 const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
@@ -160,7 +159,7 @@ class JkuRoomScraper {
         const url = SCRAPER_BASE_URL + COURSE_DETAILS.replace("{{courseclassid}}", encodeURIComponent(course.courseclassid))
             .replace("{{coursegroupid}}", encodeURIComponent(course.coursegroupid))
             .replace("{{showdetails}}", encodeURIComponent(course.showdetails));
-        this.request(url, (ch: CheerioStatic) => {
+        this.request(url).then((ch) => {
             try {
 
                 const values = ch("table.subinfo > tbody > tr table > tbody")  // the <tbody> which holds the date and times
@@ -203,32 +202,31 @@ class JkuRoomScraper {
     }
 
     /**
-     * Perform a HTTP GET request, load the HTML with Cheerio and call the supplied callback function
+     * Perform a HTTP GET request, load the HTML with Cheerio and return the cheerio-parsed DOM
      *
-     * @param url The URL do load with Cheerio
-     * @param callback The callback function to call when done loading (optional)
+     * @param url The URL to load and parse with Cheerio
      */
-    private request(url: string, callback: ((ch: CheerioStatic) => void) | null | undefined = null) {
-        const listener = (error: any, response: http.IncomingMessage, body: string) => {
+    private async request(url: string): Promise<CheerioStatic> {
+        try {
+
+            const response = await request.get(url, this.headers);
             const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
 
             Logger.info(`GET ${url}`, "request", code, code !== 200);
 
-            // parse and callback on success
+            // parse and return on success
             if (response && code === 200) {
-                const ch: CheerioStatic = cheerio.load(body);
-                if (callback != null) {
-                    callback(ch);
-                }
+                const ch: CheerioStatic = cheerio.load(response.body);
+                return Promise.resolve(ch);
+            } else {
+                throw Error(`request returned unexpected status code ${code}`);
             }
 
-            if (error != null) {
-                Logger.err(error);
-            }
-        };
-
-        // rate limit these calls
-        request.get(url, this.headers, listener);
+        } catch (error) {
+            Logger.err(`GET ${url}`, "request");
+            Logger.err(error);
+            return Promise.reject(error);
+        }
     }
 }
 
