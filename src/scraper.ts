@@ -1,3 +1,4 @@
+import Bottleneck from "bottleneck";
 import cheerio from "cheerio";
 import { DateTimeFormatter, LocalDate, LocalTime } from "js-joda";
 import request from "request-promise-native";
@@ -60,9 +61,19 @@ class JkuRoomScraper {
      */
     private headers: request.RequestPromiseOptions;
 
+    /**
+     * Job queue for GET requests
+     */
+    private limiter: Bottleneck;
+
     constructor() {
         // set request headers
         this.headers = { headers: { "User-Agent": SCRAPER_USER_AGENT }, resolveWithFullResponse: true };
+        // prepare request rate-limit
+        this.limiter = new Bottleneck({
+            maxConcurrent: 1,
+            minTime: 100,
+        });
     }
 
     public scrape() {
@@ -209,7 +220,7 @@ class JkuRoomScraper {
     private async request(url: string): Promise<CheerioStatic> {
         try {
 
-            const response = await request.get(url, this.headers);
+            const response = await this.limiter.schedule(() => request.get(url, this.headers));
             const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
 
             Logger.info(`GET ${url}`, "request", code, code !== 200);

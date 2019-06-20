@@ -41,6 +41,7 @@
     "air-datepicker": "^2.2.3",
     "ansicolors": "^0.3.2",
     "bootstrap": "^4.3.1",
+    "bottleneck": "^2.19.1",
     "cheerio": "^1.0.0-rc.3",
     "jquery": "^3.4.1",
     "js-joda": "^1.10.1",
