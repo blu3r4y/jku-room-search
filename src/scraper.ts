@@ -76,140 +76,126 @@ class JkuRoomScraper {
         });
     }
 
-    public scrape() {
-        // request frontpage and scrape room names
-        this.scrapeRooms((rooms: IRoom[]) => {
+    public async scrape() {
+        try {
+
+            const rooms: IRoom[] = await this.scrapeRooms();
+            Logger.info(rooms.map((room: IRoom) => room.name));
             for (const room of rooms) {
-                // perform search and scrape course numbers
-                this.scrapeCourses(room, (courses: ICourse[]) => {
-                    for (const course of courses) {
-                        this.scrapeBookings(course, (bookings: IBooking[]) => { /* todo */ });
-                        // break;
-                    }
-                });
+
+                const courses: ICourse[] = await this.scrapeCourses(room);
+                for (const course of courses) {
+
+                    const bookings: IBooking[] = await this.scrapeBookings(course);
+                    // break;
+                }
                 break;
             }
-        });
+
+        } catch (error) {
+            Logger.err("scraping failed", "scrape");
+            if (error != null) {
+                Logger.err(error);
+            }
+        }
     }
 
-    private scrapeRooms(callback: (rooms: IRoom[]) => void) {
+    private async scrapeRooms(): Promise<IRoom[]> {
         const url = SCRAPER_BASE_URL + SEARCH_PAGE;
-        this.request(url).then((ch) => {
-            try {
-                const values = ch("select#room > option")  // the <option> children of <select id="room">
-                    .slice(1)                              // remove the first 'all' <option>
-                    .map((i, el) => {
-                        return {
-                            name: ch(el).text(),           // the text and 'value' attr of each <option>
-                            value: ch(el).val(),
-                        };
-                    });
+        const ch: CheerioStatic = await this.request(url);
 
-                // build room objects
-                let rid = 0;
-                const rooms: IRoom[] = values.get().map((pair: { name: string, value: string }) => {
-                    return {
-                        htmlValue: pair.value,
-                        id: rid++,
-                        name: pair.name.trim().replace(/\s+/g, " "),
-                    };
-                });
+        const values = ch("select#room > option")  // the <option> children of <select id="room">
+            .slice(1)                              // remove the first 'all' <option>
+            .map((i, el) => {
+                return {
+                    name: ch(el).text(),           // the text and 'value' attr of each <option>
+                    value: ch(el).val(),
+                };
+            });
 
-                Logger.info(`scraped ${rooms.length} room names`, "rooms", null, rooms.length === 0);
-
-                if (rooms.length > 0) {
-                    Logger.info(rooms.map((room: IRoom) => room.name));
-                    callback(rooms);
-                }
-
-            } catch (e) {
-                Logger.err(e, "rooms");
-            }
+        // build room objects
+        let rid = 0;
+        const rooms: IRoom[] = values.get().map((pair: { name: string, value: string }) => {
+            return {
+                htmlValue: pair.value,
+                id: rid++,
+                name: pair.name.trim().replace(/\s+/g, " "),
+            };
         });
+
+        Logger.info(`scraped ${rooms.length} room names`, "rooms", null, rooms.length === 0);
+
+        return rooms;
     }
 
-    private scrapeCourses(room: IRoom, callback: (courses: ICourse[]) => void) {
-        const url = SCRAPER_BASE_URL + SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.htmlValue));
-        this.request(url).then((ch) => {
-            try {
+    private async scrapeCourses(room: IRoom): Promise<ICourse[]> {
+        const url = SCRAPER_BASE_URL + SEARCH_RESULTS
+            .replace("{{room}}", encodeURIComponent(room.htmlValue));
+        const ch: CheerioStatic = await this.request(url);
 
-                const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
-                    .children("tr")                                         // the <tr> children (rows)
-                    .slice(1)                                               // remove the first row which is the header
-                    .map((i, el) => ch(el).children("td").first()           // the first <td> (first column) in each <tr>
-                        .find("a").first().attr("href").trim());            // the 'href' attr of the first found <a>
+        const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
+            .children("tr")                                         // the <tr> children (rows)
+            .slice(1)                                               // remove the first row which is the header
+            .map((i, el) => ch(el).children("td").first()           // the first <td> (first column) in each <tr>
+                .find("a").first().attr("href").trim());            // the 'href' attr of the first found <a>
 
-                // build course objects
-                const courses: ICourse[] = hrefs.get().map((href: string) => {
-                    const params = new URLSearchParams(href.split("?")[1]);
-                    const cid = params.get("courseclassid");
-                    const gid = params.get("coursegroupid");
-                    const det = params.get("showdetails");
-                    if (cid && gid && det) {
-                        return { courseclassid: cid, coursegroupid: gid, showdetails: det };
-                    } else {
-                        throw Error("required parameters 'courseclassid', 'coursegroupid', 'showdetails' " +
-                            `are missing in scraped url '${href}'`);
-                    }
-                });
-
-                Logger.info(`scraped ${courses.length} course numbers for room '${room.name}'`,
-                    "courses", null, courses.length === 0);
-
-                if (courses.length > 0) {
-                    callback(courses);
-                }
-
-            } catch (e) {
-                Logger.err(e, "courses");
+        // build course objects
+        const courses: ICourse[] = hrefs.get().map((href: string) => {
+            const params = new URLSearchParams(href.split("?")[1]);
+            const cid = params.get("courseclassid");
+            const gid = params.get("coursegroupid");
+            const det = params.get("showdetails");
+            if (cid && gid && det) {
+                return { courseclassid: cid, coursegroupid: gid, showdetails: det };
+            } else {
+                throw Error("required parameters 'courseclassid', 'coursegroupid', 'showdetails' " +
+                    `are missing in scraped url '${href}'`);
             }
         });
+
+        Logger.info(`scraped ${courses.length} course numbers for room '${room.name}'`,
+            "courses", null, courses.length === 0);
+
+        return courses;
     }
 
-    private scrapeBookings(course: ICourse, callback: (bookings: IBooking[]) => void) {
-        const url = SCRAPER_BASE_URL + COURSE_DETAILS.replace("{{courseclassid}}", encodeURIComponent(course.courseclassid))
+    private async scrapeBookings(course: ICourse): Promise<IBooking[]> {
+        const url = SCRAPER_BASE_URL + COURSE_DETAILS
+            .replace("{{courseclassid}}", encodeURIComponent(course.courseclassid))
             .replace("{{coursegroupid}}", encodeURIComponent(course.coursegroupid))
             .replace("{{showdetails}}", encodeURIComponent(course.showdetails));
-        this.request(url).then((ch) => {
-            try {
+        const ch: CheerioStatic = await this.request(url);
 
-                const values = ch("table.subinfo > tbody > tr table > tbody")  // the <tbody> which holds the date and times
-                    .children("tr")                                            // the <tr> children (rows)
-                    .slice(1)                                                  // remove the first row which is the header
-                    .map((i, el) => {
-                        const tds = ch(el).children("td");                     // the <td> children (columns)
-                        if (tds.length === 4) {                                // ignore col-spanning description fields
-                            return {
-                                date: tds.eq(1).text().trim() as string,       // the date, time and room fields
-                                room: tds.eq(3).text().trim() as string,
-                                time: tds.eq(2).text().trim() as string,
-                            };
-                        }
-                    });
-
-                // build bookings objects
-                const formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
-                const bookings: IBooking[] = values.get().map((tuple: { date: string, time: string, room: string }) => {
-                    const times = tuple.time.split(" – ");
+        const values = ch("table.subinfo > tbody > tr table > tbody")  // the <tbody> which holds the date and times
+            .children("tr")                                            // the <tr> children (rows)
+            .slice(1)                                                  // remove the first row which is the header
+            .map((i, el) => {
+                const tds = ch(el).children("td");                     // the <td> children (columns)
+                if (tds.length === 4) {                                // ignore col-spanning description fields
                     return {
-                        date: LocalDate.parse(tuple.date, formatter),
-                        from: LocalTime.parse(times[0].trim()),
-                        roomName: tuple.room,
-                        to: LocalTime.parse(times[1].trim()),
+                        date: tds.eq(1).text().trim() as string,       // the date, time and room fields
+                        room: tds.eq(3).text().trim() as string,
+                        time: tds.eq(2).text().trim() as string,
                     };
-                });
-
-                Logger.info(`scraped ${bookings.length} room bookings for course '${course.showdetails}'`,
-                    "bookings", null, bookings.length === 0);
-
-                if (bookings.length > 0) {
-                    callback(bookings);
                 }
+            });
 
-            } catch (e) {
-                Logger.err(e, "bookings");
-            }
+        // build bookings objects
+        const formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
+        const bookings: IBooking[] = values.get().map((tuple: { date: string, time: string, room: string }) => {
+            const times = tuple.time.split(" – ");
+            return {
+                date: LocalDate.parse(tuple.date, formatter),
+                from: LocalTime.parse(times[0].trim()),
+                roomName: tuple.room,
+                to: LocalTime.parse(times[1].trim()),
+            };
         });
+
+        Logger.info(`scraped ${bookings.length} room bookings for course '${course.showdetails}'`,
+            "bookings", null, bookings.length === 0);
+
+        return bookings;
     }
 
     /**
@@ -227,8 +213,7 @@ class JkuRoomScraper {
 
             // parse and return on success
             if (response && code === 200) {
-                const ch: CheerioStatic = cheerio.load(response.body);
-                return Promise.resolve(ch);
+                return cheerio.load(response.body);
             } else {
                 throw Error(`request returned unexpected status code ${code}`);
             }
@@ -236,7 +221,7 @@ class JkuRoomScraper {
         } catch (error) {
             Logger.err(`GET ${url}`, "request");
             Logger.err(error);
-            return Promise.reject(error);
+            return Promise.reject(null);
         }
     }
 }
