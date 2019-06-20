@@ -138,6 +138,7 @@ const scraperConfig = {
         new webpack.DefinePlugin({
             "SCRAPER_BASE_URL": JSON.stringify("https://www.kusss.jku.at"),
             "SCRAPER_USER_AGENT": JSON.stringify("jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"),
+            "SCRAPER_DATA_PATH": JSON.stringify("rooms.json"),
         }),
     ],
 };

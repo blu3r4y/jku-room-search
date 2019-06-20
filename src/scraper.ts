@@ -1,19 +1,24 @@
 import Bottleneck from "bottleneck";
 import cheerio from "cheerio";
-import { DateTimeFormatter, LocalDate, LocalTime } from "js-joda";
+import { writeFile } from "fs";
+import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "js-joda";
 import request from "request-promise-native";
 
+import { IRoomData } from "./api";
 import { Logger } from "./log";
+import { SplitTree } from "./split-tree";
+import { DateUtils } from "./utils";
 
 /* globals*/
 
-// TODO: just for debugging purpose
-const SCRAPER_BASE_URL = "https://mario.ac";
-const SCRAPER_USER_AGENT = "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)";
+// const SCRAPER_BASE_URL = "https://mario.ac";
+// const SCRAPER_USER_AGENT = "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)";
+// const SCRAPER_DATA_PATH = "rooms.json";
 
 // webpack will declare this global variables for us
-// declare var SCRAPER_BASE_URL: string;
-// declare var SCRAPER_USER_AGENT: string;
+declare var SCRAPER_BASE_URL: string;
+declare var SCRAPER_USER_AGENT: string;
+declare var SCRAPER_DATA_PATH: string;
 
 const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";
 const SEARCH_RESULTS = "/kusss/coursecatalogue-search-lvas.action?sortParam0courses=lvaName&asccourses=true" +
@@ -57,10 +62,21 @@ declare interface IBooking {
 class JkuRoomScraper {
 
     /**
+     * The booking interval which will be considered as free by default
+     */
+    private fullInterval: [number, number];
+
+    /**
      * Stores various scraping statistics
      */
     private statistics: {
-        numberOfRequest: number,
+        numBookings: number;
+        numCourses: number;
+        numDays: number;
+        numRequests: number;
+        numRooms: number;
+        rangeEnd: string | undefined;
+        rangeStart: string | undefined;
     };
 
     /**
@@ -73,47 +89,165 @@ class JkuRoomScraper {
      */
     private limiter: Bottleneck;
 
+    /**
+     * Date formatters for the entries in rooms.json
+     */
+    private dateFormatter: DateTimeFormatter;
+    private dateTimeFormatter: DateTimeFormatter;
+
     constructor() {
+        // booking interval which will be considered free
+        this.fullInterval = [
+            DateUtils.toMinutes(DateUtils.fromString("08:30")),
+            DateUtils.toMinutes(DateUtils.fromString("22:15")),
+        ];
+
         // zero statistics
         this.statistics = {
-            numberOfRequest: 0,
+            numBookings: 0,
+            numCourses: 0,
+            numDays: 0,
+            numRequests: 0,
+            numRooms: 0,
+            rangeEnd: undefined,
+            rangeStart: undefined,
         };
+
         // set request headers
         this.headers = {
             headers: { "User-Agent": SCRAPER_USER_AGENT },
             resolveWithFullResponse: true,
         };
+
         // prepare request rate-limit
         this.limiter = new Bottleneck({
             maxConcurrent: 1,
             minTime: 100,
         });
+
+        // date formatters
+        this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        this.dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     }
 
-    public async scrape() {
+    public async scrape(): Promise<IRoomData> {
         try {
+
+            // prepare final result object
+            const data: IRoomData = {
+                available: {},
+                range: { start: "", end: "" },
+                rooms: {},
+                version: LocalDateTime.now().format(this.dateTimeFormatter),
+            };
 
             const rooms: IRoom[] = await this.scrapeRooms();
             Logger.info(rooms.map((room: IRoom) => room.name));
+            this.statistics.numRooms = rooms.length;
+
+            this.addRooms(data, rooms);
+
             for (const room of rooms) {
 
                 const courses: ICourse[] = await this.scrapeCourses(room);
+                this.statistics.numCourses += courses.length;
+
                 for (const course of courses) {
 
                     const bookings: IBooking[] = await this.scrapeBookings(course);
-                    // break;
+                    this.statistics.numBookings += bookings.length;
+
+                    for (const booking of bookings) {
+                        this.addBooking(data, booking);
+                    }
                 }
-                break;
             }
 
-            Logger.info(`scraping done with a total of ${this.statistics.numberOfRequest} GET requests`, "scrape");
+            // get full day range
+            const days = Object.keys(data.available).map((e) => LocalDate.parse(e, this.dateFormatter)).sort();
+            this.statistics.numDays = days.length;
+            if (days.length === 0) {
+                throw Error("0 days have been scraped");
+            }
+
+            data.range.start = days[0].atTime(LocalTime.MIN).format(this.dateTimeFormatter);
+            data.range.end = days[days.length - 1].atTime(LocalTime.MAX).format(this.dateTimeFormatter);
+
+            this.statistics.rangeStart = data.range.start;
+            this.statistics.rangeEnd = data.range.end;
+
+            // build the reverse index of all those intervals
+            this.reverseIndex(data);
+
+            return data;
 
         } catch (error) {
             Logger.err("scraping failed", "scrape");
             if (error != null) {
                 Logger.err(error);
             }
+            return Promise.reject(null);
+        } finally {
+            Logger.info("scrapping done", "scrape");
+            Logger.info(this.statistics);
         }
+    }
+
+    private reverseIndex(data: IRoomData) {
+        const start = LocalDate.parse(data.range.start, this.dateTimeFormatter);
+        const end = LocalDate.parse(data.range.end, this.dateTimeFormatter);
+
+        const roomKeys = Object.keys(data.rooms);
+
+        // traverse all days
+        let curr = start;
+        while (curr <= end) {
+            const dayKey = curr.format(this.dateFormatter);
+
+            // traverse all rooms
+            for (const roomKey of roomKeys) {
+                const intervals: Array<[number, number]> = this.getBookingsList(data, dayKey, roomKey);
+
+                // reverse and overwrite intervals
+                const reversed = SplitTree.split(this.fullInterval, intervals);
+                intervals.length = 0;
+                intervals.push.apply(intervals, reversed);
+            }
+
+            curr = curr.plusDays(1);
+        }
+    }
+
+    private addRooms(data: IRoomData, rooms: IRoom[]) {
+        for (const room of rooms) {
+            data.rooms[room.id.toString()] = room.name;
+        }
+    }
+
+    private addBooking(data: IRoomData, booking: IBooking) {
+        const dayKey = booking.date.format(this.dateFormatter);
+
+        // lookup the room id
+        const roomKey = Object.keys(data.rooms).find((key) => data.rooms[key] === booking.roomName);
+        if (!roomKey) {
+            throw Error(`room '${booking.roomName}' is unknown`);
+        }
+
+        // book this room
+        const bookVal: [number, number] = [DateUtils.toMinutes(booking.from), DateUtils.toMinutes(booking.to)];
+        this.getBookingsList(data, dayKey, roomKey).push(bookVal);
+    }
+
+    private getBookingsList(data: IRoomData, dayKey: string, roomKey: string) {
+        // add missing keys if necessary
+        if (!(dayKey in data.available)) {
+            data.available[dayKey] = {};
+        }
+        if (!(roomKey in data.available[dayKey])) {
+            data.available[dayKey][roomKey] = new Array<[number, number]>();
+        }
+
+        return data.available[dayKey][roomKey];
     }
 
     private async scrapeRooms(): Promise<IRoom[]> {
@@ -226,7 +360,7 @@ class JkuRoomScraper {
             const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
 
             Logger.info(`GET ${url}`, "request", code, code !== 200);
-            this.statistics.numberOfRequest++;
+            this.statistics.numRequests++;
 
             // parse and return on success
             if (response && code === 200) {
@@ -245,5 +379,17 @@ class JkuRoomScraper {
 
 /* start the scraper */
 
+Logger.info("initializing scraper", "main");
 const jrc = new JkuRoomScraper();
-jrc.scrape();
+
+jrc.scrape()
+    .then((data: IRoomData) => {
+        writeFile(SCRAPER_DATA_PATH, JSON.stringify(data), "utf-8", (error) => {
+            if (error) {
+                Logger.err(`could not store result in '${SCRAPER_DATA_PATH}'`, "main");
+                Logger.err(error);
+            } else {
+                Logger.info(`stored result in '${SCRAPER_DATA_PATH}'`, "main");
+            }
+        });
+    });
