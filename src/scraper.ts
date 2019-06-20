@@ -122,7 +122,7 @@ class JkuRoomScraper {
         // prepare request rate-limit
         this.limiter = new Bottleneck({
             maxConcurrent: 1,
-            minTime: 100,
+            minTime: 500,
         });
 
         // date formatters
@@ -228,9 +228,11 @@ class JkuRoomScraper {
         const dayKey = booking.date.format(this.dateFormatter);
 
         // lookup the room id
-        const roomKey = Object.keys(data.rooms).find((key) => data.rooms[key] === booking.roomName);
+        const canonicalName = booking.roomName.replace(/\s/g, "").toLowerCase();
+        const roomKey = Object.keys(data.rooms).find((key) => data.rooms[key].replace(/\s/g, "").toLowerCase() === canonicalName);
         if (!roomKey) {
-            throw Error(`room '${booking.roomName}' is unknown`);
+            Logger.err(`room '${booking.roomName}' is unknown, ignoring`, "scrape");
+            return;  // just ignore this room then
         }
 
         // book this room
