@@ -57,6 +57,13 @@ declare interface IBooking {
 class JkuRoomScraper {
 
     /**
+     * Stores various scraping statistics
+     */
+    private statistics: {
+        numberOfRequest: number,
+    };
+
+    /**
      * Headers sent with every query (only contains modified User-Agent)
      */
     private headers: request.RequestPromiseOptions;
@@ -67,8 +74,15 @@ class JkuRoomScraper {
     private limiter: Bottleneck;
 
     constructor() {
+        // zero statistics
+        this.statistics = {
+            numberOfRequest: 0,
+        };
         // set request headers
-        this.headers = { headers: { "User-Agent": SCRAPER_USER_AGENT }, resolveWithFullResponse: true };
+        this.headers = {
+            headers: { "User-Agent": SCRAPER_USER_AGENT },
+            resolveWithFullResponse: true,
+        };
         // prepare request rate-limit
         this.limiter = new Bottleneck({
             maxConcurrent: 1,
@@ -91,6 +105,8 @@ class JkuRoomScraper {
                 }
                 break;
             }
+
+            Logger.info(`scraping done with a total of ${this.statistics.numberOfRequest} GET requests`, "scrape");
 
         } catch (error) {
             Logger.err("scraping failed", "scrape");
@@ -210,6 +226,7 @@ class JkuRoomScraper {
             const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
 
             Logger.info(`GET ${url}`, "request", code, code !== 200);
+            this.statistics.numberOfRequest++;
 
             // parse and return on success
             if (response && code === 200) {
