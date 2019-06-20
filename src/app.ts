@@ -109,10 +109,10 @@ function dataLoadSuccessHandler(data: IRoomData) {
 }
 
 function dataLoadFailHandler() {
-    console.error(`The XHR request 'GET ${APP_DATA_URL}' failed.`);
+    console.error(`The XHR request 'GET ${APP_DATA_URL + "?v=" + __webpack_hash__}' failed.`);
     frontend.render("😟 Sorry, something broke <tt>[ERR_LOAD_DATA]</tt>", null, ColorStatus.Error);
 }
 
-const xhr: JQuery.jqXHR = $.getJSON(APP_DATA_URL);
+const xhr: JQuery.jqXHR = $.getJSON(APP_DATA_URL + "?v=" + __webpack_hash__);
 xhr.done(dataLoadSuccessHandler);
 xhr.fail(dataLoadFailHandler);
