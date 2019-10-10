@@ -19,6 +19,7 @@ import { DateUtils } from "./utils";
 declare var SCRAPER_BASE_URL: string;
 declare var SCRAPER_USER_AGENT: string;
 declare var SCRAPER_DATA_PATH: string;
+declare var SCRAPER_MAX_RETRIES: number;
 
 const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";
 const SEARCH_RESULTS = "/kusss/coursecatalogue-search-lvas.action?sortParam0courses=lvaName&asccourses=true" +
@@ -358,18 +359,26 @@ class JkuRoomScraper {
     private async request(url: string): Promise<CheerioStatic> {
         try {
 
-            const response = await this.limiter.schedule(() => request.get(url, this.headers));
-            const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
+            let trial: number = 1;
+            while (trial <= SCRAPER_MAX_RETRIES) {
+                const response = await this.limiter.schedule(() => request.get(url, this.headers));
+                const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
 
-            Logger.info(`GET ${url}`, "request", code, code !== 200);
-            this.statistics.numRequests++;
+                Logger.info(`GET ${url}`, "request", code, code !== 200);
+                this.statistics.numRequests++;
 
-            // parse and return on success
-            if (response && code === 200) {
-                return cheerio.load(response.body);
-            } else {
-                throw Error(`request returned unexpected status code ${code}`);
+                // parse and return on success
+                if (response && code === 200) {
+                    return cheerio.load(response.body);
+                } else {
+                    Logger.err(`request returned unexpected status code ${code} on ` +
+                        `try ${trial} of ${SCRAPER_MAX_RETRIES}`, "request");
+                }
+
+                trial++;
             }
+
+            throw Error(`exceeded maximum number of retries for request`);
 
         } catch (error) {
             Logger.err(`GET ${url}`, "request");
