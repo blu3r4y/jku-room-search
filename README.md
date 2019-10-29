@@ -6,11 +6,11 @@
 
 Search for free rooms on the campus of the Johannes Kepler University Linz.
 
-## Use this app
+## Use this App
 
 Go to [blu3r4y.github.io/jku-room-search](https://blu3r4y.github.io/jku-room-search/).
 
-## Build this app
+## Build this App
 
 Install Node.JS and simply enter
 
@@ -24,3 +24,11 @@ For interactive builds, use
 Before committing, start the linter and let it fix errors
 
     npx tslint -p . -c tslint.json --fix
+
+### Create the Index
+
+Simply enter
+
+    npm run scrape
+
+On success, you should find a `rooms.json` in the root directory.
