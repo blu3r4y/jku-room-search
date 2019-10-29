@@ -20,6 +20,7 @@ declare var SCRAPER_BASE_URL: string;
 declare var SCRAPER_USER_AGENT: string;
 declare var SCRAPER_DATA_PATH: string;
 declare var SCRAPER_MAX_RETRIES: number;
+declare var SCRAPER_RETRY_DELAY: number;
 
 const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";
 const SEARCH_RESULTS = "/kusss/coursecatalogue-search-lvas.action?sortParam0courses=lvaName&asccourses=true" +
@@ -126,6 +127,18 @@ class JkuRoomScraper {
             minTime: 500,
         });
 
+        // prepare request retries (e.g., on timeout errors)
+        this.limiter.on("failed", async (error, jobInfo) => {
+            Logger.err(`scheduled job ${jobInfo.options.id} failed on ` +
+                `try ${jobInfo.retryCount + 1} of ${SCRAPER_MAX_RETRIES}`, "limiter");
+            Logger.err(error);
+
+            if (jobInfo.retryCount + 1 < SCRAPER_MAX_RETRIES) {
+                Logger.info(`retrying job ${jobInfo.options.id} in ${SCRAPER_RETRY_DELAY} milliseconds`, "limiter");
+                return SCRAPER_RETRY_DELAY;
+            }
+        });
+
         // date formatters
         this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -189,7 +202,7 @@ class JkuRoomScraper {
             }
             return Promise.reject(null);
         } finally {
-            Logger.info("scrapping done", "scrape");
+            Logger.info("scrapping done, showing statistics", "scrape");
             Logger.info(this.statistics);
         }
     }
@@ -403,4 +416,7 @@ jrc.scrape()
                 Logger.info(`stored result in '${SCRAPER_DATA_PATH}'`, "main");
             }
         });
+    })
+    .catch(() => {
+        process.exit(-1);
     });
