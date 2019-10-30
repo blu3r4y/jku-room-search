@@ -8,7 +8,7 @@ Search for free rooms on the campus of the Johannes Kepler University Linz.
 
 ## Use this App
 
-Go to [blu3r4y.github.io/jku-room-search](https://blu3r4y.github.io/jku-room-search/).
+Go to [jkuroomsearch.app](https://jkuroomsearch.app).
 
 ## Build this App
 
