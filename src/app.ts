@@ -30,6 +30,7 @@ const form = $("#form");
 const results = $("#results");
 const teaserText = $("#teaserText");
 const teaserBlock = $("#teaserBlock");
+const resultsInfo = $("#resultsInfo");
 
 const button = $("#button");
 const spinner = $("#spinner");
@@ -44,7 +45,7 @@ const startTimes: LocalTime[] = Jku.getRasterTimes(DateUtils.fromString("08:30")
 const endTimes: LocalTime[] = Jku.getRasterTimes(DateUtils.fromString("09:15"), DateUtils.fromString("22:15"));
 
 const frontend = new RoomSearchFrontend(datepicker, fromTime, toTime,
-    results, teaserText, teaserBlock,
+    results, teaserText, teaserBlock, resultsInfo,
     button, spinner, buttonText, versionText);
 
 frontend.init(startTimes, endTimes);

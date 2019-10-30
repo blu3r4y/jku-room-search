@@ -40,6 +40,7 @@ export class RoomSearchFrontend {
     private jqResults: JQuery<HTMLElement>;
     private jqTeaserText: JQuery<HTMLElement>;
     private jqTeaserBlock: JQuery<HTMLElement>;
+    private jqResultsInfo: JQuery<HTMLElement>;
     private jqButton: HTMLInputElement;
     private jqSpinner: JQuery<HTMLElement>;
     private jqButtonText: JQuery<HTMLElement>;
@@ -51,8 +52,8 @@ export class RoomSearchFrontend {
 
     constructor(datepicker: JQuery<HTMLElement>, fromTime: JQuery<HTMLElement>, toTime: JQuery<HTMLElement>,
         results: JQuery<HTMLElement>, teaserText: JQuery<HTMLElement>, teaserBlock: JQuery<HTMLElement>,
-        button: JQuery<HTMLElement>, spinner: JQuery<HTMLElement>, buttonText: JQuery<HTMLElement>,
-        versionText: JQuery<HTMLElement>) {
+        resultsInfo: JQuery<HTMLElement>, button: JQuery<HTMLElement>, spinner: JQuery<HTMLElement>,
+        buttonText: JQuery<HTMLElement>, versionText: JQuery<HTMLElement>) {
 
         this.jqDatepicker = datepicker;
         this.jqFromTime = fromTime;
@@ -60,6 +61,7 @@ export class RoomSearchFrontend {
         this.jqResults = results;
         this.jqTeaserText = teaserText;
         this.jqTeaserBlock = teaserBlock;
+        this.jqResultsInfo = resultsInfo;
         this.jqButton = button[0] as HTMLInputElement;
         this.jqSpinner = spinner;
         this.jqButtonText = buttonText;
@@ -202,6 +204,7 @@ export class RoomSearchFrontend {
     private renderTable(result: IResult | null) {
         if (!result || (result as IResult).length === 0) {
             this.jqResults.hide();
+            this.jqResultsInfo.hide();
         } else {
 
             const d = document;
@@ -244,6 +247,7 @@ export class RoomSearchFrontend {
             body.empty();
             body.append(fragment);
 
+            this.jqResultsInfo.show();
             this.jqResults.show();
         }
     }
