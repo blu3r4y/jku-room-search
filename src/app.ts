@@ -7,6 +7,7 @@ import "./app.css";
 /* packages */
 
 import { LocalDateTime, LocalTime } from "js-joda";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 import { IResult, IRoomData, RoomSearch } from "./api";
 import { ColorStatus, RoomSearchFrontend } from "./frontend";
@@ -75,7 +76,7 @@ function submitHandler(event: Event) {
                     frontend.render("😟 Sorry, no free rooms found", null, ColorStatus.NoResult);
                 }
 
-                results[0].scrollIntoView();
+                scrollIntoView(resultsInfo[0], { behavior: "smooth", scrollMode: "if-needed" });
 
             } else {
                 console.error("The search algorithm could not process the query.");
