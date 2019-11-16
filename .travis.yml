@@ -8,6 +8,14 @@ install:
 
 script:
   - npm run build
+  - if [ "$TRAVIS_EVENT_TYPE" = "cron" ];
+    then node ./dist/js/scraper.js;
+    else curl --fail https://jkuroomsearch.app/data/rooms.json -o rooms.json;
+    fi
+
+after_success:
+  - mkdir ./dist/data
+  - mv rooms.json ./dist/data
 
 deploy:
   provider: pages
