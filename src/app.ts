@@ -6,7 +6,7 @@ import "./app.css";
 
 /* packages */
 
-import { LocalDateTime, LocalTime } from "js-joda";
+import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "js-joda";
 import scrollIntoView from "scroll-into-view-if-needed";
 
 import { IResult, IRoomData, RoomSearch } from "./api";
@@ -102,6 +102,9 @@ form.on("submit", submitHandler);
 
 /* room data loading */
 
+// cache the result by the current build id and the current day
+const ajaxUrl = APP_DATA_URL + "?v=" + __webpack_hash__ + "_" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
 function dataLoadSuccessHandler(data: IRoomData) {
     console.log("data", data);
     api = new RoomSearch(data);
@@ -111,10 +114,10 @@ function dataLoadSuccessHandler(data: IRoomData) {
 }
 
 function dataLoadFailHandler() {
-    console.error(`The XHR request 'GET ${APP_DATA_URL + "?v=" + __webpack_hash__}' failed.`);
+    console.error(`The XHR request 'GET ${ajaxUrl}' failed.`);
     frontend.render("😟 Sorry, something broke <tt>[ERR_LOAD_DATA]</tt>", null, ColorStatus.Error);
 }
 
-const xhr: JQuery.jqXHR = $.getJSON(APP_DATA_URL + "?v=" + __webpack_hash__);
+const xhr: JQuery.jqXHR = $.getJSON(ajaxUrl);
 xhr.done(dataLoadSuccessHandler);
 xhr.fail(dataLoadFailHandler);

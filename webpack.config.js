@@ -16,6 +16,9 @@ const JsMinimizerPlugin = require("terser-webpack-plugin");
 // minimizer for css
 const CssMinimizerPlugin = require("optimize-css-assets-webpack-plugin");
 
+// inject the git commit hash into links
+var GitRevisionPlugin = require('git-revision-webpack-plugin');
+
 const appConfig = {
     target: "web",
     mode: "production",
@@ -24,7 +27,7 @@ const appConfig = {
         app: "./src/app.ts",
     },
     output: {
-        filename: "./js/[name].js",
+        filename: "./js/[name].[git-revision-hash].js",
         path: path.resolve(__dirname, "dist"),
     },
     resolve: {
@@ -78,6 +81,8 @@ const appConfig = {
         }),
         // expose the build hash as an environment variable
         new webpack.ExtendedAPIPlugin(),
+        // expose git commit hash for outputs
+        new GitRevisionPlugin(),
         // add jquery, if we observe that its being used
         new webpack.ProvidePlugin({
             $: "jquery",
@@ -85,7 +90,7 @@ const appConfig = {
         }),
         // extract css files to a separate file
         new CssPlugin({
-            filename: "./css/[name].css",
+            filename: "./css/[name].[git-revision-hash].css",
         }),
         // copy static assets
         new CopyPlugin([{
@@ -93,8 +98,7 @@ const appConfig = {
         }]),
         // inject variables into html files
         new HtmlPlugin({
-            template: "./src/app.ejs",
-            hash: true,
+            template: "./src/app.ejs"
         }),
     ],
     performance: {
