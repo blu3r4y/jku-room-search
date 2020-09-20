@@ -303,10 +303,10 @@ class JkuRoomScraper {
             .children("tr")                                         // the <tr> children (rows)
             .slice(1)                                               // remove the first row which is the header
             .map((i, el) => ch(el).children("td").first()           // the first <td> (first column) in each <tr>
-                .find("a").first().attr("href").trim());            // the 'href' attr of the first found <a>
+                .find("a").first().attr("href"));                   // the 'href' attr of the first found <a>
 
         // build course objects
-        const courses: ICourse[] = hrefs.get().map((href: string) => {
+        const courses: ICourse[] = hrefs.get().map(href => href.trim()).map((href: string) => {
             const params = new URLSearchParams(href.split("?")[1]);
             const cid = params.get("courseclassid");
             const gid = params.get("coursegroupid");
