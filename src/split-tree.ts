@@ -6,7 +6,7 @@ export class SplitTree {
      * @param interval The full interval
      * @param exclusions A list of exclusions, which shall be cut out of the full interval
      */
-    public static split(interval: [number, number], exclusions: Array<[number, number]>): Array<[number, number]> {
+    public static split(interval: [number, number], exclusions: [number, number][]): [number, number][] {
         const root = new Interval(interval[0], interval[1]);
         for (const exclusion of exclusions) {
             root.split(exclusion[0], exclusion[1]);
@@ -18,7 +18,7 @@ export class SplitTree {
         return list;
     }
 
-    private static appendLeafs(interval: Interval, list: Array<[number, number]>) {
+    private static appendLeafs(interval: Interval, list: [number, number][]) {
         // prune empty intervals
         if (interval.empty) { return; }
 

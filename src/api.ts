@@ -21,7 +21,7 @@ export type IResult = IFreeRoom[];
  */
 export declare interface IFreeRoom {
     room: string;
-    available: Array<[LocalTime, LocalTime]>;
+    available: [LocalTime, LocalTime][];
 }
 
 /**
@@ -31,7 +31,7 @@ export declare interface IRoomData {
     version: string;
     range: { start: string, end: string };
     rooms: { [id: string]: string };
-    available: { [id: string]: { [id: string]: Array<[number, number]> } };
+    available: { [id: string]: { [id: string]: [number, number][] } };
 }
 
 /**

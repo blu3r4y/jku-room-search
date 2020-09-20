@@ -220,7 +220,7 @@ class JkuRoomScraper {
 
             // traverse all rooms
             for (const roomKey of roomKeys) {
-                const intervals: Array<[number, number]> = this.getBookingsList(data, dayKey, roomKey);
+                const intervals: [number, number][] = this.getBookingsList(data, dayKey, roomKey);
 
                 // reverse and overwrite intervals
                 const reversed = SplitTree.split(this.fullInterval, intervals);
