@@ -155,25 +155,34 @@ class JkuRoomScraper {
                 version: LocalDateTime.now().format(this.dateTimeFormatter),
             };
 
+            // scrape rooms
             const rooms: IRoom[] = await this.scrapeRooms();
             Logger.info(rooms.map((room: IRoom) => room.name));
             this.statistics.numRooms = rooms.length;
 
             this.addRooms(data, rooms);
 
+            // scrape courses for all rooms
+            let unfilteredCourseCount = 0;
+            const allCourses: Set<ICourse> = new Set([]);
             for (const room of rooms) {
-
                 const courses: ICourse[] = await this.scrapeCourses(room);
-                this.statistics.numCourses += courses.length;
+                unfilteredCourseCount += courses.length;
+                courses.forEach(allCourses.add, allCourses);
+            }
 
-                for (const course of courses) {
+            this.statistics.numCourses += allCourses.size;
+            Logger.info(`scraped ${allCourses.size} course numbers in total (removed ${unfilteredCourseCount - allCourses.size} duplicates)`,
+                "scrape", null, allCourses.size === 0);
+            console.log(allCourses);
 
-                    const bookings: IBooking[] = await this.scrapeBookings(course);
-                    this.statistics.numBookings += bookings.length;
+            // scrape bookings
+            for (const course of allCourses) {
+                const bookings: IBooking[] = await this.scrapeBookings(course);
+                this.statistics.numBookings += bookings.length;
 
-                    for (const booking of bookings) {
-                        this.addBooking(data, booking);
-                    }
+                for (const booking of bookings) {
+                    this.addBooking(data, booking);
                 }
             }
 
