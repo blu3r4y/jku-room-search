@@ -35,26 +35,26 @@ const appConfig = {
     },
     module: {
         rules: [{
-                // load css stylesheets, extract source maps and extract them separately
-                test: /\.css$/,
-                use: [{
-                        loader: CssPlugin.loader,
-                    },
-                    "css-loader?sourceMap",
-                ],
+            // load css stylesheets, extract source maps and extract them separately
+            test: /\.css$/,
+            use: [{
+                loader: CssPlugin.loader,
             },
-            {
-                // load and compile type script sources
-                test: /\.tsx?$/,
-                use: "ts-loader",
-                exclude: /node_modules/,
-            },
-            {
-                // lint typescript files
-                test: /\.ts$/,
-                enforce: "pre",
-                use: "tslint-loader",
-            },
+                "css-loader?sourceMap",
+            ],
+        },
+        {
+            // load and compile type script sources
+            test: /\.tsx?$/,
+            use: "ts-loader",
+            exclude: /node_modules/,
+        },
+        {
+            // lint typescript files
+            test: /\.ts$/,
+            enforce: "pre",
+            use: "tslint-loader",
+        },
         ],
     },
     optimization: {
@@ -93,9 +93,11 @@ const appConfig = {
             filename: "./css/[name].[git-revision-hash].css",
         }),
         // copy static assets
-        new CopyPlugin([{
-            from: "./src/public/",
-        }]),
+        new CopyPlugin({
+            patterns: [
+                { from: "./src/public/" }
+            ]
+        }),
         // inject variables into html files
         new HtmlPlugin({
             template: "./src/app.ejs"
@@ -124,17 +126,17 @@ const scraperConfig = {
     },
     module: {
         rules: [{
-                // load and compile type script sources
-                test: /\.tsx?$/,
-                use: "ts-loader",
-                exclude: /node_modules/,
-            },
-            {
-                // lint typescript files
-                test: /\.ts$/,
-                enforce: "pre",
-                use: "tslint-loader",
-            },
+            // load and compile type script sources
+            test: /\.tsx?$/,
+            use: "ts-loader",
+            exclude: /node_modules/,
+        },
+        {
+            // lint typescript files
+            test: /\.ts$/,
+            enforce: "pre",
+            use: "tslint-loader",
+        },
         ],
     },
     plugins: [
