@@ -1,8 +1,8 @@
 import "air-datepicker";
 import { Duration, LocalDate, LocalDateTime, LocalTime } from "js-joda";
-
 import { IQuery, IResult } from "./api";
 import { DateUtils } from "./utils";
+
 
 const language: AirDatepickerLanguageInstance = {
     clear: "Clear",
@@ -202,9 +202,11 @@ export class RoomSearchFrontend {
     }
 
     private renderTable(result: IResult | null) {
+        this.jqResults.hide();
+        this.jqResultsInfo.hide();
+
         if (!result || (result as IResult).length === 0) {
-            this.jqResults.hide();
-            this.jqResultsInfo.hide();
+            return;
         } else {
 
             const d = document;
@@ -247,8 +249,8 @@ export class RoomSearchFrontend {
             body.empty();
             body.append(fragment);
 
-            this.jqResultsInfo.show();
-            this.jqResults.show();
+            this.jqResultsInfo.fadeIn();
+            this.jqResults.fadeIn();
         }
     }
 
