@@ -202,10 +202,11 @@ export class RoomSearchFrontend {
     }
 
     private renderTable(result: IResult | null) {
-        this.jqResults.hide();
+        this.jqResults.fadeTo(150, 0.33);
         this.jqResultsInfo.hide();
 
         if (!result || (result as IResult).length === 0) {
+            this.jqResults.hide();
             return;
         } else {
 
@@ -249,8 +250,8 @@ export class RoomSearchFrontend {
             body.empty();
             body.append(fragment);
 
-            this.jqResultsInfo.fadeIn();
-            this.jqResults.fadeIn();
+            this.jqResultsInfo.show();
+            this.jqResults.fadeTo(300, 1.0);
         }
     }
 
