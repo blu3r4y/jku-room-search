@@ -2,7 +2,7 @@ import Bottleneck from "bottleneck";
 import cheerio from "cheerio";
 import got, { OptionsOfTextResponseBody } from "got";
 import { writeFile } from "fs";
-import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "js-joda";
+import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "@js-joda/core";
 import { Set } from 'typescript-collections';
 
 import { IRoomData } from "./api";

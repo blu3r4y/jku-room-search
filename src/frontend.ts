@@ -1,5 +1,5 @@
 import "air-datepicker";
-import { Duration, LocalDate, LocalDateTime, LocalTime } from "js-joda";
+import { Duration, LocalDate, LocalDateTime, LocalTime } from "@js-joda/core";
 import { IQuery, IResult } from "./api";
 import { DateUtils } from "./utils";
 

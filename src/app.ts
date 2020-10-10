@@ -6,7 +6,7 @@ import "./app.css";
 
 /* packages */
 
-import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "js-joda";
+import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "@js-joda/core";
 import scrollIntoView from "scroll-into-view-if-needed";
 
 import { IResult, IRoomData, RoomSearch } from "./api";

@@ -1,4 +1,4 @@
-import { LocalTime } from "js-joda";
+import { LocalTime } from "@js-joda/core";
 
 import { DateUtils } from "./utils";
 

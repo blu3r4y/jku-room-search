@@ -1,4 +1,4 @@
-import { ChronoUnit, DateTimeFormatter, LocalTime } from "js-joda";
+import { ChronoUnit, DateTimeFormatter, LocalTime } from "@js-joda/core";
 
 export class DateUtils {
 
