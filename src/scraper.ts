@@ -2,6 +2,7 @@ import Bottleneck from "bottleneck";
 import cheerio from "cheerio";
 import { writeFile } from "fs";
 import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "js-joda";
+import { Set } from 'typescript-collections';
 import request from "request-promise-native";
 
 import { IRoomData } from "./api";
@@ -155,25 +156,33 @@ class JkuRoomScraper {
                 version: LocalDateTime.now().format(this.dateTimeFormatter),
             };
 
+            // scrape rooms
             const rooms: IRoom[] = await this.scrapeRooms();
             Logger.info(rooms.map((room: IRoom) => room.name));
             this.statistics.numRooms = rooms.length;
 
             this.addRooms(data, rooms);
 
+            // scrape courses for all rooms (and remove duplicates based on JSON.stringify)
+            let unfilteredCourseCount = 0;
+            const uniqueCourses: Set<ICourse> = new Set<ICourse>(JSON.stringify);
             for (const room of rooms) {
-
                 const courses: ICourse[] = await this.scrapeCourses(room);
-                this.statistics.numCourses += courses.length;
+                unfilteredCourseCount += courses.length;
+                courses.forEach(uniqueCourses.add, uniqueCourses);
+            }
 
-                for (const course of courses) {
+            this.statistics.numCourses += uniqueCourses.size();
+            Logger.info(`scraped ${uniqueCourses.size()} course numbers in total (removed ${unfilteredCourseCount - uniqueCourses.size()} duplicates)`,
+                "scrape", null, uniqueCourses.size() === 0);
 
-                    const bookings: IBooking[] = await this.scrapeBookings(course);
-                    this.statistics.numBookings += bookings.length;
+            // scrape bookings
+            for (const course of uniqueCourses.toArray()) {
+                const bookings: IBooking[] = await this.scrapeBookings(course);
+                this.statistics.numBookings += bookings.length;
 
-                    for (const booking of bookings) {
-                        this.addBooking(data, booking);
-                    }
+                for (const booking of bookings) {
+                    this.addBooking(data, booking);
                 }
             }
 
