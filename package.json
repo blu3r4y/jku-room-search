@@ -5,6 +5,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
+    "serve": "webpack-dev-server --open",
     "scrape": "webpack && node ./dist/js/scraper.js"
   },
   "repository": {
@@ -36,7 +37,8 @@
     "tslint-loader": "^3.5.4",
     "typescript": "^4.0.3",
     "webpack": "^4.44.2",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
     "air-datepicker": "^2.2.3",
