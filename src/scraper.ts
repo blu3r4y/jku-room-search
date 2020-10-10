@@ -2,6 +2,7 @@ import Bottleneck from "bottleneck";
 import cheerio from "cheerio";
 import { writeFile } from "fs";
 import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "js-joda";
+import { Set } from 'typescript-collections';
 import request from "request-promise-native";
 
 import { IRoomData } from "./api";
@@ -162,22 +163,21 @@ class JkuRoomScraper {
 
             this.addRooms(data, rooms);
 
-            // scrape courses for all rooms
+            // scrape courses for all rooms (and remove duplicates based on JSON.stringify)
             let unfilteredCourseCount = 0;
-            const allCourses: Set<ICourse> = new Set([]);
+            const uniqueCourses: Set<ICourse> = new Set<ICourse>(JSON.stringify);
             for (const room of rooms) {
                 const courses: ICourse[] = await this.scrapeCourses(room);
                 unfilteredCourseCount += courses.length;
-                courses.forEach(allCourses.add, allCourses);
+                courses.forEach(uniqueCourses.add, uniqueCourses);
             }
 
-            this.statistics.numCourses += allCourses.size;
-            Logger.info(`scraped ${allCourses.size} course numbers in total (removed ${unfilteredCourseCount - allCourses.size} duplicates)`,
-                "scrape", null, allCourses.size === 0);
-            console.log(allCourses);
+            this.statistics.numCourses += uniqueCourses.size();
+            Logger.info(`scraped ${uniqueCourses.size()} course numbers in total (removed ${unfilteredCourseCount - uniqueCourses.size()} duplicates)`,
+                "scrape", null, uniqueCourses.size() === 0);
 
             // scrape bookings
-            for (const course of allCourses) {
+            for (const course of uniqueCourses.toArray()) {
                 const bookings: IBooking[] = await this.scrapeBookings(course);
                 this.statistics.numBookings += bookings.length;
 
