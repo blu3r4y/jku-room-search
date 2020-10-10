@@ -1,9 +1,9 @@
 import Bottleneck from "bottleneck";
 import cheerio from "cheerio";
+import got from "got";
 import { writeFile } from "fs";
 import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "js-joda";
 import { Set } from 'typescript-collections';
-import request from "request-promise-native";
 
 import { IRoomData } from "./api";
 import { Logger } from "./log";
@@ -85,7 +85,7 @@ class JkuRoomScraper {
     /**
      * Headers sent with every query (only contains modified User-Agent)
      */
-    private headers: request.RequestPromiseOptions;
+    private headers: Record<string, string>;
 
     /**
      * Job queue for GET requests
@@ -117,10 +117,7 @@ class JkuRoomScraper {
         };
 
         // set request headers
-        this.headers = {
-            headers: { "User-Agent": SCRAPER_USER_AGENT },
-            resolveWithFullResponse: true,
-        };
+        this.headers = { "User-Agent": SCRAPER_USER_AGENT };
 
         // prepare request rate-limit
         this.limiter = new Bottleneck({
@@ -277,7 +274,7 @@ class JkuRoomScraper {
 
     private async scrapeRooms(): Promise<IRoom[]> {
         const url = SCRAPER_BASE_URL + SEARCH_PAGE;
-        const ch: CheerioStatic = await this.request(url);
+        const ch: cheerio.Root = await this.request(url);
 
         const values = ch("select#room > option")  // the <option> children of <select id="room">
             .slice(1)                              // remove the first 'all' <option>
@@ -306,7 +303,7 @@ class JkuRoomScraper {
     private async scrapeCourses(room: IRoom): Promise<ICourse[]> {
         const url = SCRAPER_BASE_URL + SEARCH_RESULTS
             .replace("{{room}}", encodeURIComponent(room.htmlValue));
-        const ch: CheerioStatic = await this.request(url);
+        const ch: cheerio.Root = await this.request(url);
 
         const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
             .children("tr")                                         // the <tr> children (rows)
@@ -339,7 +336,7 @@ class JkuRoomScraper {
             .replace("{{courseclassid}}", encodeURIComponent(course.courseclassid))
             .replace("{{coursegroupid}}", encodeURIComponent(course.coursegroupid))
             .replace("{{showdetails}}", encodeURIComponent(course.showdetails));
-        const ch: CheerioStatic = await this.request(url);
+        const ch: cheerio.Root = await this.request(url);
 
         const values = ch("table.subinfo > tbody > tr table > tbody")  // the <tbody> which holds the date and times
             .children("tr")                                            // the <tr> children (rows)
@@ -378,12 +375,12 @@ class JkuRoomScraper {
      *
      * @param url The URL to load and parse with Cheerio
      */
-    private async request(url: string): Promise<CheerioStatic> {
+    private async request(url: string): Promise<cheerio.Root> {
         try {
 
             let trial: number = 1;
             while (trial <= SCRAPER_MAX_RETRIES) {
-                const response = await this.limiter.schedule(() => request.get(url, this.headers));
+                const response = await this.limiter.schedule(() => got.get(url, { headers: this.headers }));
                 const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
 
                 Logger.info(`GET ${url}`, "request", code, code !== 200);
