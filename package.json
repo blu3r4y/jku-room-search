@@ -13,7 +13,7 @@
     "url": "git+https://github.com/blu3r4y/jku-room-search.git"
   },
   "author": "Mario Kahlhofer",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/blu3r4y/jku-room-search/issues"
   },
