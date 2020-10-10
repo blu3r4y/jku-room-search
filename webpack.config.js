@@ -146,7 +146,8 @@ const scraperConfig = {
             "SCRAPER_USER_AGENT": JSON.stringify("jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"),
             "SCRAPER_DATA_PATH": JSON.stringify("rooms.json"),
             "SCRAPER_MAX_RETRIES": JSON.stringify(5),
-            "SCRAPER_RETRY_DELAY": JSON.stringify(1 * 1000),  // in milliseconds
+            "SCRAPER_REQUEST_TIMEOUT": JSON.stringify(5 * 1000),  // in milliseconds
+            "SCRAPER_REQUEST_DELAY": JSON.stringify(500),  // in milliseconds
         }),
     ],
 };
