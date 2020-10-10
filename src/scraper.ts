@@ -1,9 +1,9 @@
 import Bottleneck from "bottleneck";
 import cheerio from "cheerio";
+import got, { OptionsOfTextResponseBody } from "got";
 import { writeFile } from "fs";
 import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "js-joda";
 import { Set } from 'typescript-collections';
-import request from "request-promise-native";
 
 import { IRoomData } from "./api";
 import { Logger } from "./log";
@@ -12,16 +12,13 @@ import { DateUtils } from "./utils";
 
 /* globals*/
 
-// const SCRAPER_BASE_URL = "https://mario.ac";
-// const SCRAPER_USER_AGENT = "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)";
-// const SCRAPER_DATA_PATH = "rooms.json";
-
 // webpack will declare this global variables for us
 declare var SCRAPER_BASE_URL: string;
 declare var SCRAPER_USER_AGENT: string;
 declare var SCRAPER_DATA_PATH: string;
 declare var SCRAPER_MAX_RETRIES: number;
-declare var SCRAPER_RETRY_DELAY: number;
+declare var SCRAPER_REQUEST_TIMEOUT: number;
+declare var SCRAPER_REQUEST_DELAY: number;
 
 const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";
 const SEARCH_RESULTS = "/kusss/coursecatalogue-search-lvas.action?sortParam0courses=lvaName&asccourses=true" +
@@ -83,14 +80,14 @@ class JkuRoomScraper {
     };
 
     /**
-     * Headers sent with every query (only contains modified User-Agent)
+     * Request options sent with every query
      */
-    private headers: request.RequestPromiseOptions;
+    private requestOptions: OptionsOfTextResponseBody;
 
     /**
      * Job queue for GET requests
      */
-    private limiter: Bottleneck;
+    private requestLimiter: Bottleneck;
 
     /**
      * Date formatters for the entries in rooms.json
@@ -117,27 +114,16 @@ class JkuRoomScraper {
         };
 
         // set request headers
-        this.headers = {
+        this.requestOptions = {
             headers: { "User-Agent": SCRAPER_USER_AGENT },
-            resolveWithFullResponse: true,
+            timeout: SCRAPER_REQUEST_TIMEOUT,
+            retry: { limit: SCRAPER_MAX_RETRIES }
         };
 
         // prepare request rate-limit
-        this.limiter = new Bottleneck({
+        this.requestLimiter = new Bottleneck({
             maxConcurrent: 1,
-            minTime: 500,
-        });
-
-        // prepare request retries (e.g., on timeout errors)
-        this.limiter.on("failed", async (error, jobInfo) => {
-            Logger.err(`scheduled job ${jobInfo.options.id} failed on ` +
-                `try ${jobInfo.retryCount + 1} of ${SCRAPER_MAX_RETRIES}`, "limiter");
-            Logger.err(error);
-
-            if (jobInfo.retryCount + 1 < SCRAPER_MAX_RETRIES) {
-                Logger.info(`retrying job ${jobInfo.options.id} in ${SCRAPER_RETRY_DELAY} milliseconds`, "limiter");
-                return SCRAPER_RETRY_DELAY;
-            }
+            minTime: SCRAPER_REQUEST_DELAY,
         });
 
         // date formatters
@@ -277,7 +263,7 @@ class JkuRoomScraper {
 
     private async scrapeRooms(): Promise<IRoom[]> {
         const url = SCRAPER_BASE_URL + SEARCH_PAGE;
-        const ch: CheerioStatic = await this.request(url);
+        const ch: cheerio.Root = await this.request(url);
 
         const values = ch("select#room > option")  // the <option> children of <select id="room">
             .slice(1)                              // remove the first 'all' <option>
@@ -306,7 +292,7 @@ class JkuRoomScraper {
     private async scrapeCourses(room: IRoom): Promise<ICourse[]> {
         const url = SCRAPER_BASE_URL + SEARCH_RESULTS
             .replace("{{room}}", encodeURIComponent(room.htmlValue));
-        const ch: CheerioStatic = await this.request(url);
+        const ch: cheerio.Root = await this.request(url);
 
         const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
             .children("tr")                                         // the <tr> children (rows)
@@ -339,7 +325,7 @@ class JkuRoomScraper {
             .replace("{{courseclassid}}", encodeURIComponent(course.courseclassid))
             .replace("{{coursegroupid}}", encodeURIComponent(course.coursegroupid))
             .replace("{{showdetails}}", encodeURIComponent(course.showdetails));
-        const ch: CheerioStatic = await this.request(url);
+        const ch: cheerio.Root = await this.request(url);
 
         const values = ch("table.subinfo > tbody > tr table > tbody")  // the <tbody> which holds the date and times
             .children("tr")                                            // the <tr> children (rows)
@@ -378,30 +364,18 @@ class JkuRoomScraper {
      *
      * @param url The URL to load and parse with Cheerio
      */
-    private async request(url: string): Promise<CheerioStatic> {
+    private async request(url: string): Promise<cheerio.Root> {
         try {
+            const response = await this.requestLimiter.schedule(() => got.get(url, this.requestOptions));
+            Logger.info(`GET ${url}`, "request", response.statusCode, response.statusCode !== 200);
+            this.statistics.numRequests++;
 
-            let trial: number = 1;
-            while (trial <= SCRAPER_MAX_RETRIES) {
-                const response = await this.limiter.schedule(() => request.get(url, this.headers));
-                const code: number = response != null ? (response.statusCode != null ? response.statusCode : -1) : -1;
-
-                Logger.info(`GET ${url}`, "request", code, code !== 200);
-                this.statistics.numRequests++;
-
-                // parse and return on success
-                if (response && code === 200) {
-                    return cheerio.load(response.body);
-                } else {
-                    Logger.err(`request returned unexpected status code ${code} on ` +
-                        `try ${trial} of ${SCRAPER_MAX_RETRIES}`, "request");
-                }
-
-                trial++;
+            // parse and return on success
+            if (response.statusCode === 200) {
+                return cheerio.load(response.body);
+            } else {
+                throw Error(`request returned unexpected status code ${response.statusCode}`);
             }
-
-            throw Error(`exceeded maximum number of retries for request`);
-
         } catch (error) {
             Logger.err(`GET ${url}`, "request");
             Logger.err(error);
