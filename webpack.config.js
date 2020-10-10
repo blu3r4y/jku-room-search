@@ -23,6 +23,9 @@ const appConfig = {
     target: "web",
     mode: "production",
     devtool: "source-map",
+    devServer: {
+        contentBase: './dist',
+    },
     entry: {
         app: "./src/app.ts",
     },

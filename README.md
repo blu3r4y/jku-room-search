@@ -21,6 +21,11 @@ For interactive builds, use
 
     npm run watch
 
+For the local development start a webserver in watch mode by entering
+
+    npm run serve
+
+
 ### Create the Index
 
 Once installed, simply enter
