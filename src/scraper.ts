@@ -134,7 +134,9 @@ class JkuRoomScraper {
     public async scrape(): Promise<IRoomData> {
         try {
 
-            // prepare final result object
+            /* ---------------- */
+            /* (4) preparations */
+
             const data: IRoomData = {
                 available: {},
                 range: { start: "", end: "" },
@@ -142,50 +144,71 @@ class JkuRoomScraper {
                 version: LocalDateTime.now().format(this.dateTimeFormatter),
             };
 
-            // scrape rooms
+            /* ---------------- */
+            /* (1) scrape rooms */
+
             const rooms: IRoom[] = await this.scrapeRooms();
-            Logger.info(rooms.map((room: IRoom) => room.name));
+            rooms.forEach((room) => data.rooms[room.id.toString()] = room.name);
+
             this.statistics.numRooms = rooms.length;
+            Logger.info(`scraped ${rooms.length} room names`, "rooms", undefined, undefined, rooms.length === 0);
+            Logger.info(rooms.map((room: IRoom) => room.name), "rooms");
 
-            this.addRooms(data, rooms);
+            /* ------------------ */
+            /* (2) scrape courses */
 
-            // scrape courses for all rooms (and remove duplicates based on JSON.stringify)
-            let unfilteredCourseCount = 0;
+            let unfilteredCoursesCount = 0;
             const uniqueCourses: Set<ICourse> = new Set<ICourse>(JSON.stringify);
-            for (const room of rooms) {
+
+            for (const [i, room] of rooms.entries()) {
                 const courses: ICourse[] = await this.scrapeCourses(room);
-                unfilteredCourseCount += courses.length;
+
+                // remove duplicate course entries based on JSON.stringify
+                unfilteredCoursesCount += courses.length;
                 courses.forEach(uniqueCourses.add, uniqueCourses);
+
+                Logger.info(`scraped ${courses.length} course numbers for room '${room.name}'`,
+                    "courses", undefined, (i + 1) / rooms.length, courses.length === 0);
             }
 
-            this.statistics.numCourses += uniqueCourses.size();
-            Logger.info(`scraped ${uniqueCourses.size()} course numbers in total (removed ${unfilteredCourseCount - uniqueCourses.size()} duplicates)`,
-                "scrape", null, uniqueCourses.size() === 0);
+            this.statistics.numCourses = uniqueCourses.size();
+            Logger.info(`scraped ${uniqueCourses.size()} course numbers in total (removed ${unfilteredCoursesCount - uniqueCourses.size()} duplicates)`,
+                "scrape", undefined, undefined, uniqueCourses.size() === 0);
 
-            // scrape bookings
-            for (const course of uniqueCourses.toArray()) {
+            /* ------------------- */
+            /* (3) scrape bookings */
+
+            for (const [i, course] of uniqueCourses.toArray().entries()) {
                 const bookings: IBooking[] = await this.scrapeBookings(course);
-                this.statistics.numBookings += bookings.length;
+                bookings.forEach((booking) => this.addBooking(data, booking));
 
-                for (const booking of bookings) {
-                    this.addBooking(data, booking);
-                }
+                this.statistics.numBookings += bookings.length;
+                Logger.info(`scraped ${bookings.length} room bookings for course '${course.showdetails}'`,
+                    "bookings", undefined, (i + 1) / uniqueCourses.size(), bookings.length === 0);
             }
 
-            // get full day range
+            /* -------------- */
+            /* (4) statistics */
+
+            // query how many days we scraped in total
             const days = Object.keys(data.available).map((e) => LocalDate.parse(e, this.dateFormatter)).sort();
+
             this.statistics.numDays = days.length;
             if (days.length === 0) {
                 throw Error("0 days have been scraped");
             }
 
+            // query the earlierst and latest day that we scraped
             data.range.start = days[0].atTime(LocalTime.MIN).format(this.dateTimeFormatter);
             data.range.end = days[days.length - 1].atTime(LocalTime.MAX).format(this.dateTimeFormatter);
 
             this.statistics.rangeStart = data.range.start;
             this.statistics.rangeEnd = data.range.end;
 
-            // build the reverse index of all those intervals
+            /* ------------------ */
+            /* (5) index reversal */
+
+            // build the reverse index of all those intervals with a SplitTree
             this.reverseIndex(data);
 
             return data;
@@ -197,7 +220,7 @@ class JkuRoomScraper {
             }
             return Promise.reject(null);
         } finally {
-            Logger.info("scrapping done, showing statistics", "scrape");
+            Logger.info("scrapping done", "scrape");
             Logger.info(this.statistics);
         }
     }
@@ -224,12 +247,6 @@ class JkuRoomScraper {
             }
 
             curr = curr.plusDays(1);
-        }
-    }
-
-    private addRooms(data: IRoomData, rooms: IRoom[]) {
-        for (const room of rooms) {
-            data.rooms[room.id.toString()] = room.name;
         }
     }
 
@@ -284,8 +301,6 @@ class JkuRoomScraper {
             };
         });
 
-        Logger.info(`scraped ${rooms.length} room names`, "rooms", null, rooms.length === 0);
-
         return rooms;
     }
 
@@ -313,9 +328,6 @@ class JkuRoomScraper {
                     `are missing in scraped url '${href}'`);
             }
         });
-
-        Logger.info(`scraped ${courses.length} course numbers for room '${room.name}'`,
-            "courses", null, courses.length === 0);
 
         return courses;
     }
@@ -353,9 +365,6 @@ class JkuRoomScraper {
             };
         });
 
-        Logger.info(`scraped ${bookings.length} room bookings for course '${course.showdetails}'`,
-            "bookings", null, bookings.length === 0);
-
         return bookings;
     }
 
@@ -367,7 +376,7 @@ class JkuRoomScraper {
     private async request(url: string): Promise<cheerio.Root> {
         try {
             const response = await this.requestLimiter.schedule(() => got.get(url, this.requestOptions));
-            Logger.info(`GET ${url}`, "request", response.statusCode, response.statusCode !== 200);
+            Logger.info(`GET ${url}`, "request", response.statusCode.toString(), undefined, response.statusCode !== 200);
             this.statistics.numRequests++;
 
             // parse and return on success
