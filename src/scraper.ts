@@ -6,6 +6,7 @@ import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "@js-joda
 import { Set } from 'typescript-collections';
 
 import { IRoomData } from "./api";
+import { Jku } from "./jku";
 import { Logger } from "./log";
 import { SplitTree } from "./split-tree";
 import { DateUtils } from "./utils";
@@ -98,8 +99,8 @@ class JkuRoomScraper {
     constructor() {
         // booking interval which will be considered free
         this.fullInterval = [
-            DateUtils.toMinutes(DateUtils.fromString("08:30")),
-            DateUtils.toMinutes(DateUtils.fromString("22:15")),
+            DateUtils.toMinutes(Jku.FIRST_COURSE_START),
+            DateUtils.toMinutes(Jku.LAST_COURSE_END),
         ];
 
         // zero statistics
@@ -228,8 +229,12 @@ class JkuRoomScraper {
     private reverseIndex(data: IRoomData) {
         const start = LocalDate.parse(data.range.start, this.dateTimeFormatter);
         const end = LocalDate.parse(data.range.end, this.dateTimeFormatter);
-
         const roomKeys = Object.keys(data.rooms);
+
+        // compute and zip the break times
+        const breakStartTimes: LocalTime[] = Jku.getPauseTimes(Jku.FIRST_PAUSE_START, Jku.LAST_PAUSE_START);
+        const breakEndTimes: LocalTime[] = Jku.getPauseTimes(Jku.FIRST_PAUSE_END, Jku.LAST_PAUSE_END);
+        const breakTimes = breakStartTimes.map((e, i) => [DateUtils.toMinutes(e), DateUtils.toMinutes(breakEndTimes[i])]);
 
         // traverse all days
         let curr = start;
@@ -240,8 +245,13 @@ class JkuRoomScraper {
             for (const roomKey of roomKeys) {
                 const intervals: [number, number][] = this.getBookingsList(data, dayKey, roomKey);
 
-                // reverse and overwrite intervals
-                const reversed = SplitTree.split(this.fullInterval, intervals);
+                // reverse intervals by cutting from the full interval
+                let reversed = SplitTree.split(this.fullInterval, intervals);
+
+                // drop stand-alone break times because those short intervals can't be selected anyway
+                reversed = reversed.filter(itv => !breakTimes.some(brk => brk[0] === itv[0] && brk[1] === itv[1]));
+
+                // overwrite intervals
                 intervals.length = 0;
                 intervals.push.apply(intervals, reversed);
             }

@@ -42,8 +42,8 @@ const versionText = $("#versionText");
 
 let api: RoomSearch | null = null;
 
-const startTimes: LocalTime[] = Jku.getRasterTimes(DateUtils.fromString("08:30"), DateUtils.fromString("21:30"));
-const endTimes: LocalTime[] = Jku.getRasterTimes(DateUtils.fromString("09:15"), DateUtils.fromString("22:15"));
+const startTimes: LocalTime[] = Jku.getCourseTimes(Jku.FIRST_COURSE_START, Jku.LAST_COURSE_START);
+const endTimes: LocalTime[] = Jku.getCourseTimes(Jku.FIRST_COURSE_END, Jku.LAST_COURSE_END);
 
 const frontend = new RoomSearchFrontend(datepicker, fromTime, toTime,
     results, teaserText, teaserBlock, resultsInfo,
