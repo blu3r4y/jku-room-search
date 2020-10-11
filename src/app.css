@@ -1,3 +1,7 @@
+html {
+    overflow-y: scroll;
+}
+
 .subtitle-logo {
     padding-right: 0.15rem;
     padding-bottom: 0.15rem;
