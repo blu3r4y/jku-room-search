@@ -45,6 +45,7 @@ export class RoomSearchFrontend {
     private jqSpinner: JQuery<HTMLElement>;
     private jqButtonText: JQuery<HTMLElement>;
     private jqVersionText: JQuery<HTMLElement>;
+    private jqCover: JQuery<HTMLElement>;
 
     private currentColorStatus: ColorStatus;
     private startTimes?: LocalTime[] = undefined;
@@ -53,7 +54,7 @@ export class RoomSearchFrontend {
     constructor(datepicker: JQuery<HTMLElement>, fromTime: JQuery<HTMLElement>, toTime: JQuery<HTMLElement>,
         results: JQuery<HTMLElement>, teaserText: JQuery<HTMLElement>, teaserBlock: JQuery<HTMLElement>,
         resultsInfo: JQuery<HTMLElement>, button: JQuery<HTMLElement>, spinner: JQuery<HTMLElement>,
-        buttonText: JQuery<HTMLElement>, versionText: JQuery<HTMLElement>) {
+        buttonText: JQuery<HTMLElement>, versionText: JQuery<HTMLElement>, cover: JQuery<HTMLElement>) {
 
         this.jqDatepicker = datepicker;
         this.jqFromTime = fromTime;
@@ -66,6 +67,7 @@ export class RoomSearchFrontend {
         this.jqSpinner = spinner;
         this.jqButtonText = buttonText;
         this.jqVersionText = versionText;
+        this.jqCover = cover;
 
         this.currentColorStatus = ColorStatus.Error;
     }
@@ -82,6 +84,13 @@ export class RoomSearchFrontend {
 
         this.initDatePicker();
         this.initTimePickers();
+    }
+
+    /**
+     * Hides the cover that waited until the whole page got loaded
+     */
+    public hideCover() {
+        this.jqCover.fadeOut("fast");
     }
 
     /**

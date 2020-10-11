@@ -12,7 +12,6 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import { IResult, IRoomData, RoomSearch } from "./api";
 import { ColorStatus, RoomSearchFrontend } from "./frontend";
 import { Jku } from "./jku";
-import { DateUtils } from "./utils";
 
 /* globals */
 
@@ -38,6 +37,8 @@ const spinner = $("#spinner");
 const buttonText = $("#buttonText");
 const versionText = $("#versionText");
 
+const cover = $("#cover");
+
 /* app logic */
 
 let api: RoomSearch | null = null;
@@ -47,7 +48,7 @@ const endTimes: LocalTime[] = Jku.getCourseTimes(Jku.FIRST_COURSE_END, Jku.LAST_
 
 const frontend = new RoomSearchFrontend(datepicker, fromTime, toTime,
     results, teaserText, teaserBlock, resultsInfo,
-    button, spinner, buttonText, versionText);
+    button, spinner, buttonText, versionText, cover);
 
 frontend.init(startTimes, endTimes);
 frontend.render();
@@ -121,3 +122,6 @@ function dataLoadFailHandler() {
 const xhr: JQuery.jqXHR = $.getJSON(ajaxUrl);
 xhr.done(dataLoadSuccessHandler);
 xhr.fail(dataLoadFailHandler);
+
+/* show page content when loading finished */
+$(window).on("load", () => frontend.hideCover());

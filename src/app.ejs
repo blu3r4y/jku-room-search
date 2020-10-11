@@ -3,91 +3,101 @@
 
 <head>
 
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <title>JKU Room Search</title>
+    <title>JKU Room Search</title>
 
-  <meta name="description" content="Search for free rooms on the campus of the Johannes Kepler University Linz">
-  <meta name="author" content="Mario Kahlhofer">
-  
-  <meta name="google-site-verification" content="UE1rw2-rFebYbiMAHFe9wla7bkV-gpLZQgU4PjZUe0Q" />
+    <meta name="description" content="Search for free rooms on the campus of the Johannes Kepler University Linz">
+    <meta name="author" content="Mario Kahlhofer">
 
-  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-  <link rel="manifest" href="site.webmanifest">
+    <meta name="google-site-verification" content="UE1rw2-rFebYbiMAHFe9wla7bkV-gpLZQgU4PjZUe0Q" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
 
 </head>
 
 <body>
 
-  <div class="text-center mt-5">
-    <h2 class="font-weight-normal">jkuroomsearch<span class="font-weight-light">.app</span></h2>
-    <h6 class="font-weight-normal">
-      <img src="images/favicon-32x32.png" class="subtitle-logo" />
-      SPACE FOR FREE ROOMS
-    </h6>
-  </div>
-
-  <div class="container py-3">
-    <form id="form" action="#">
-      <div class="row d-flex justify-content-center">
-
-        <div class="col-auto-shrink m-3">
-          <div id="datepicker" class="datepicker-prerender"></div>
-        </div>
-
-        <div class="col-md-3 m-3">
-          <div class="form-row form-group">
-            <label for="fromTime">I need a room from</label>
-            <select class="form-control" id="fromTime">
-            </select>
-          </div>
-          <div class="form-row form-group">
-            <label for="toTime">and at least until <small class="small text-muted pl-2">(optional)</small></label>
-            <select class="form-control" id="toTime">
-              <option value="-1">doesn't matter</option>
-            </select>
-          </div>
-          <div class="form-row pt-4">
-            <button id="button" type="submit" class="btn btn-primary btn-block">
-              <span id="spinner" class="spinner-border spinner-border-sm" style="display: none;" role="status"></span>
-              <span id="buttonText">Search for free rooms</span>
-            </button>
-          </div>
-          <small id="versionText" class="form-text text-center text-muted"></small>
-        </div>
-
-      </div>
-    </form>
-  </div>
-
-  <div class="container py-3">
-    <div class="row">
-      <div class="col-md-6 mx-auto table-responsive">
-
-        <div id="teaserBlock" class="text-center mb-3 pt-2 pb-1 bg-danger text-white">
-          <h5 id="teaserText" class="font-weight-light">🤖 Please enable JavaScript</h5>
-        </div>
-
-        <small id="resultsInfo" class="form-text text-center text-muted mb-3" style="display: none;">
-          Please note that these results are based on room bookings from <a href="http://kusss.jku.at">kusss.jku.at</a>.
-          Extraordinary room bookings may still occur.
-        </small>
-
-        <table id="results" class="table table-sm">
-          <tbody>
-          </tbody>
-        </table>
-
-      </div>
+    <div id="cover">
+        <noscript>
+            <div class="text-center mb-3 pt-2 pb-1 bg-danger text-white">
+                <h5 class="font-weight-light">🤖 Please enable JavaScript</h5>
+            </div>
+        </noscript>
     </div>
-  </div>
 
-  <a href="https://github.com/blu3r4y/jku-room-search">
-    <img src="images/github-corner.svg" class="github-corner" />
-  </a>
+    <div class="text-center mt-5">
+        <h2 class="font-weight-normal">jkuroomsearch<span class="font-weight-light">.app</span></h2>
+        <h6 class="font-weight-normal">
+            <img src="images/favicon-32x32.png" class="subtitle-logo" /> SPACE FOR FREE ROOMS
+        </h6>
+    </div>
+
+    <div class="container py-3">
+        <form id="form" action="#">
+            <div class="row d-flex justify-content-center">
+
+                <div class="col-auto-shrink m-3">
+                    <div id="datepicker" class="datepicker-prerender"></div>
+                </div>
+
+                <div class="col-md-3 m-3">
+                    <div class="form-row form-group">
+                        <label for="fromTime">I need a room from</label>
+                        <select class="form-control" id="fromTime">
+                        </select>
+                    </div>
+                    <div class="form-row form-group">
+                        <label for="toTime">and at least until <small
+                                class="small text-muted pl-2">(optional)</small></label>
+                        <select class="form-control" id="toTime">
+                            <option value="-1">doesn't matter</option>
+                        </select>
+                    </div>
+                    <div class="form-row pt-4">
+                        <button id="button" type="submit" class="btn btn-primary btn-block">
+                            <span id="spinner" class="spinner-border spinner-border-sm" style="display: none;"
+                                role="status"></span>
+                            <span id="buttonText">Search for free rooms</span>
+                        </button>
+                    </div>
+                    <small id="versionText" class="form-text text-center text-muted"></small>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <div class="container py-3">
+        <div class="row">
+            <div class="col-md-6 mx-auto table-responsive">
+
+                <div id="teaserBlock" class="text-center mb-3 pt-2 pb-1 bg-secondary text-white" style="display: none;">
+                    <h5 id="teaserText" class="font-weight-light"></h5>
+                </div>
+
+                <small id="resultsInfo" class="form-text text-center text-muted mb-3" style="display: none;">
+                    Please note that these results are based on room bookings from <a
+                        href="http://kusss.jku.at">kusss.jku.at</a>.
+                    Extraordinary room bookings may still occur.
+                </small>
+
+                <table id="results" class="table table-sm">
+                    <tbody>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <a href="https://github.com/blu3r4y/jku-room-search">
+        <img src="images/github-corner.svg" class="github-corner" />
+    </a>
 
 </body>
 

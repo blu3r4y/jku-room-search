@@ -2,6 +2,16 @@ html {
     overflow-y: scroll;
 }
 
+#cover {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: #fff;
+    z-index: 9999;
+}
+
 .subtitle-logo {
     padding-right: 0.15rem;
     padding-bottom: 0.15rem;
