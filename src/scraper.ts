@@ -160,7 +160,7 @@ class JkuRoomScraper {
 
             this.statistics.numCourses += uniqueCourses.size();
             Logger.info(`scraped ${uniqueCourses.size()} course numbers in total (removed ${unfilteredCourseCount - uniqueCourses.size()} duplicates)`,
-                "scrape", null, uniqueCourses.size() === 0);
+                "scrape", undefined, undefined, uniqueCourses.size() === 0);
 
             // scrape bookings
             for (const course of uniqueCourses.toArray()) {
@@ -284,7 +284,7 @@ class JkuRoomScraper {
             };
         });
 
-        Logger.info(`scraped ${rooms.length} room names`, "rooms", null, rooms.length === 0);
+        Logger.info(`scraped ${rooms.length} room names`, "rooms", undefined, undefined, rooms.length === 0);
 
         return rooms;
     }
@@ -315,7 +315,7 @@ class JkuRoomScraper {
         });
 
         Logger.info(`scraped ${courses.length} course numbers for room '${room.name}'`,
-            "courses", null, courses.length === 0);
+            "courses", undefined, undefined, courses.length === 0);
 
         return courses;
     }
@@ -354,7 +354,7 @@ class JkuRoomScraper {
         });
 
         Logger.info(`scraped ${bookings.length} room bookings for course '${course.showdetails}'`,
-            "bookings", null, bookings.length === 0);
+            "bookings", undefined, undefined, bookings.length === 0);
 
         return bookings;
     }
@@ -367,7 +367,7 @@ class JkuRoomScraper {
     private async request(url: string): Promise<cheerio.Root> {
         try {
             const response = await this.requestLimiter.schedule(() => got.get(url, this.requestOptions));
-            Logger.info(`GET ${url}`, "request", response.statusCode, response.statusCode !== 200);
+            Logger.info(`GET ${url}`, "request", response.statusCode.toString(), undefined, response.statusCode !== 200);
             this.statistics.numRequests++;
 
             // parse and return on success
