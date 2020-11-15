@@ -4,9 +4,13 @@
   "description": "Search for free rooms on the campus of the Johannes Kepler University Linz",
   "scripts": {
     "build": "webpack",
+    "check": "npx tslint -p . -c tslint.json && npx prettier --check .",
+    "fix": "npm run format && npm run lint",
+    "lint": "npx tslint -p . -c tslint.json --fix",
+    "format": "npx prettier --write .",
     "watch": "webpack --watch",
     "serve": "webpack-dev-server --open",
-    "scrape": "webpack && node ./dist/js/scraper.js"
+    "scrape": "npm run build && node ./dist/js/scraper.js"
   },
   "repository": {
     "type": "git",
@@ -31,8 +35,10 @@
     "html-webpack-plugin": "^4.4.1",
     "mini-css-extract-plugin": "^0.11.2",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
+    "prettier": "^2.1.2",
     "ts-loader": "^8.0.4",
     "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
     "tslint-loader": "^3.5.4",
     "typescript": "^4.0.3",
     "webpack": "^4.44.2",

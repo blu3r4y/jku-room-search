@@ -7,6 +7,7 @@ install:
   - npm ci
 
 script:
+  - npm run check
   - npm run build
   - if [ "$TRAVIS_EVENT_TYPE" = "cron" ];
     then node ./dist/js/scraper.js;

@@ -6,7 +6,12 @@ import "./app.css";
 
 /* packages */
 
-import { DateTimeFormatter, LocalDate, LocalDateTime, LocalTime } from "@js-joda/core";
+import {
+  DateTimeFormatter,
+  LocalDate,
+  LocalDateTime,
+  LocalTime,
+} from "@js-joda/core";
 import scrollIntoView from "scroll-into-view-if-needed";
 
 import { IResult, IRoomData, RoomSearch } from "./api";
@@ -43,60 +48,96 @@ const cover = $("#cover");
 
 let api: RoomSearch | null = null;
 
-const startTimes: LocalTime[] = Jku.getCourseTimes(Jku.FIRST_COURSE_START, Jku.LAST_COURSE_START);
-const endTimes: LocalTime[] = Jku.getCourseTimes(Jku.FIRST_COURSE_END, Jku.LAST_COURSE_END);
+const startTimes: LocalTime[] = Jku.getCourseTimes(
+  Jku.FIRST_COURSE_START,
+  Jku.LAST_COURSE_START
+);
+const endTimes: LocalTime[] = Jku.getCourseTimes(
+  Jku.FIRST_COURSE_END,
+  Jku.LAST_COURSE_END
+);
 
-const frontend = new RoomSearchFrontend(datepicker, fromTime, toTime,
-    results, teaserText, teaserBlock, resultsInfo,
-    button, spinner, buttonText, versionText, cover);
+const frontend = new RoomSearchFrontend(
+  datepicker,
+  fromTime,
+  toTime,
+  results,
+  teaserText,
+  teaserBlock,
+  resultsInfo,
+  button,
+  spinner,
+  buttonText,
+  versionText,
+  cover
+);
 
 frontend.init(startTimes, endTimes);
 frontend.render();
 frontend.renderButton(false, false);
 
 function submitHandler(event: Event) {
-    frontend.renderButton(false);
+  frontend.renderButton(false);
 
-    // user request
-    const query = frontend.getQuery();
-    console.log("query", query);
+  // user request
+  const query = frontend.getQuery();
+  console.log("query", query);
 
-    if (query != null) {
+  if (query != null) {
+    if (api != null) {
+      // process user request
+      const result: IResult | null = api.searchFreeRooms(query);
+      console.log("result", result);
 
-        if (api != null) {
-
-            // process user request
-            const result: IResult | null = api.searchFreeRooms(query);
-            console.log("result", result);
-
-            if (result != null) {
-
-                if (result.length > 0) {
-                    frontend.render("😊 We found some free rooms", result, ColorStatus.Success);
-                } else {
-                    frontend.render("😟 Sorry, no free rooms found", null, ColorStatus.NoResult);
-                }
-
-                scrollIntoView(resultsInfo[0], { behavior: "smooth", scrollMode: "if-needed" });
-
-            } else {
-                console.error("The search algorithm could not process the query.");
-                frontend.render("😟 Sorry, something broke <tt>[ERR_SEARCH_ROOMS]</tt>", null, ColorStatus.Error);
-            }
-
+      if (result != null) {
+        if (result.length > 0) {
+          frontend.render(
+            "😊 We found some free rooms",
+            result,
+            ColorStatus.Success
+          );
         } else {
-            console.error("Room data wasn't loaded properly.");
-            frontend.render("😟 Sorry, something broke <tt>[ERR_NO_DATA]</tt>", null, ColorStatus.Error);
+          frontend.render(
+            "😟 Sorry, no free rooms found",
+            null,
+            ColorStatus.NoResult
+          );
         }
 
+        scrollIntoView(resultsInfo[0], {
+          behavior: "smooth",
+          scrollMode: "if-needed",
+        });
+      } else {
+        console.error("The search algorithm could not process the query.");
+        frontend.render(
+          "😟 Sorry, something broke <tt>[ERR_SEARCH_ROOMS]</tt>",
+          null,
+          ColorStatus.Error
+        );
+      }
     } else {
-        console.error("The frontend input could not be parsed into a valid user query.");
-        frontend.render("😟 Sorry, something broke <tt>[ERR_PARSE_INPUT]</tt>", null, ColorStatus.Error);
+      console.error("Room data wasn't loaded properly.");
+      frontend.render(
+        "😟 Sorry, something broke <tt>[ERR_NO_DATA]</tt>",
+        null,
+        ColorStatus.Error
+      );
     }
+  } else {
+    console.error(
+      "The frontend input could not be parsed into a valid user query."
+    );
+    frontend.render(
+      "😟 Sorry, something broke <tt>[ERR_PARSE_INPUT]</tt>",
+      null,
+      ColorStatus.Error
+    );
+  }
 
-    // disable the spinner shortly
-    setTimeout(() => frontend.renderButton(true), 150);
-    event.preventDefault();
+  // disable the spinner shortly
+  setTimeout(() => frontend.renderButton(true), 150);
+  event.preventDefault();
 }
 
 form.on("submit", submitHandler);
@@ -104,19 +145,28 @@ form.on("submit", submitHandler);
 /* room data loading */
 
 // cache the result by the current build id and the current day
-const ajaxUrl = APP_DATA_URL + "?v=" + __webpack_hash__ + "_" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+const ajaxUrl =
+  APP_DATA_URL +
+  "?v=" +
+  __webpack_hash__ +
+  "_" +
+  LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
 function dataLoadSuccessHandler(data: IRoomData) {
-    console.log("data", data);
-    api = new RoomSearch(data);
+  console.log("data", data);
+  api = new RoomSearch(data);
 
-    frontend.renderVersion(LocalDateTime.parse(data.version));
-    frontend.renderButton(true);
+  frontend.renderVersion(LocalDateTime.parse(data.version));
+  frontend.renderButton(true);
 }
 
 function dataLoadFailHandler() {
-    console.error(`The XHR request 'GET ${ajaxUrl}' failed.`);
-    frontend.render("😟 Sorry, something broke <tt>[ERR_LOAD_DATA]</tt>", null, ColorStatus.Error);
+  console.error(`The XHR request 'GET ${ajaxUrl}' failed.`);
+  frontend.render(
+    "😟 Sorry, something broke <tt>[ERR_LOAD_DATA]</tt>",
+    null,
+    ColorStatus.Error
+  );
 }
 
 const xhr: JQuery.jqXHR = $.getJSON(ajaxUrl);

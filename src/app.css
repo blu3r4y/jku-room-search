@@ -1,56 +1,56 @@
 html {
-    overflow-y: scroll;
+  overflow-y: scroll;
 }
 
 #cover {
-    position: fixed;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    left: 0;
-    background: #fff;
-    z-index: 9999;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background: #fff;
+  z-index: 9999;
 }
 
 .subtitle-logo {
-    padding-right: 0.15rem;
-    padding-bottom: 0.15rem;
-    width: 18px;
-    height: 18px;
+  padding-right: 0.15rem;
+  padding-bottom: 0.15rem;
+  width: 18px;
+  height: 18px;
 }
 
 .github-corner {
-    position: absolute;
-    top: 0;
-    border: 0;
-    right: 0;
+  position: absolute;
+  top: 0;
+  border: 0;
+  right: 0;
 }
 
 .datepicker-prerender {
-    min-width: 250px;
-    min-height: 250px;
+  min-width: 250px;
+  min-height: 250px;
 }
 
 .datepicker--cell.-current- {
-    color: #007bff;
+  color: #007bff;
 }
 
 .datepicker--cell.-selected- {
-    background: #007bff;
+  background: #007bff;
 }
 
 .datepicker--cell.-selected-.-current- {
-    background: #007bff;
+  background: #007bff;
 }
 
 .datepicker--cell.-selected-.-focus- {
-    background: #0069d9;
+  background: #0069d9;
 }
 
 .datepicker--day-name {
-    color: #007bff;
+  color: #007bff;
 }
 
 .datepicker--button {
-    color: #007bff;
+  color: #007bff;
 }

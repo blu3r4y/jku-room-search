@@ -1,14 +1,12 @@
 {
-    "compilerOptions": {
-        "target": "es5",             /* target, i.e. compile to es5 runtimes */
-        "lib": ["es5", "dom"],       /* include some libraries during compilation */
-        "strict": true,              /* strict type checking */
-        "downlevelIteration": true,  /* downlevel es6 iterables to es5 syntax */
-        "esModuleInterop": true,     /* allow proper import statements */
-        "sourceMap": true,           /* generate .map files for easy debugging */
-        "outDir": "./dist"           /* build output */
-    },
-    "include": [
-        "src/**/*"                   /* typescript source files */
-    ]
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es5", "dom"],
+    "strict": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"]
 }

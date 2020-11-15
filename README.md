@@ -8,7 +8,7 @@ Search for free rooms on the campus of the Johannes Kepler University Linz.
 
 ## Use this App
 
-Go to [jkuroomsearch.app](https://jkuroomsearch.app).
+Go to [jkuroomsearch.app](https://jkuroomsearch.app)
 
 ## Build this App
 
@@ -17,14 +17,13 @@ Install Node.JS and simply enter
     npm install
     npm run build
 
-For interactive builds, use
-
-    npm run watch
-
-For the local development start a webserver in watch mode by entering
+During development, start a local webserver and trigger builds automatically with
 
     npm run serve
 
+If you use your own local webserver, you can instead use
+
+    npm run watch
 
 ### Create the Index
 
@@ -36,6 +35,15 @@ On success, you find a `rooms.json` file in the root directory that should go to
 
 ## Contributing
 
-Before committing, start the linter and let it fix errors
+Before committing, format and lint the code with
 
-    npx tslint -p . -c tslint.json --fix
+    npm run format
+    npm run lint
+
+As a shortcut, you can run both with
+
+    npm run fix
+
+You can mimic the checks on the pipeline with
+
+    npm run check

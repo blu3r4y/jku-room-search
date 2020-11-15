@@ -1,0 +1,11 @@
+# editors
+.idea
+.vscode
+*.iml
+
+# ignore build directory
+dist
+
+# dependency directory
+node_modules
+bower_components

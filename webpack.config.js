@@ -17,143 +17,146 @@ const JsMinimizerPlugin = require("terser-webpack-plugin");
 const CssMinimizerPlugin = require("optimize-css-assets-webpack-plugin");
 
 // inject the git commit hash into links
-var GitRevisionPlugin = require('git-revision-webpack-plugin');
+var GitRevisionPlugin = require("git-revision-webpack-plugin");
 
 const appConfig = {
-    target: "web",
-    mode: "production",
-    devtool: "source-map",
-    devServer: {
-        contentBase: './dist',
-    },
-    entry: {
-        app: "./src/app.ts",
-    },
-    output: {
-        filename: "./js/[name].[git-revision-hash].js",
-        path: path.resolve(__dirname, "dist"),
-    },
-    resolve: {
-        extensions: [".tsx", ".ts", ".js"],
-    },
-    module: {
-        rules: [{
-                // load css stylesheets, extract source maps and extract them separately
-                test: /\.css$/,
-                use: [{
-                        loader: CssPlugin.loader,
-                    },
-                    "css-loader?sourceMap",
-                ],
-            },
-            {
-                // load and compile type script sources
-                test: /\.tsx?$/,
-                use: "ts-loader",
-                exclude: /node_modules/,
-            },
-            {
-                // lint typescript files
-                test: /\.ts$/,
-                enforce: "pre",
-                use: "tslint-loader",
-            },
+  target: "web",
+  mode: "production",
+  devtool: "source-map",
+  devServer: {
+    contentBase: "./dist",
+  },
+  entry: {
+    app: "./src/app.ts",
+  },
+  output: {
+    filename: "./js/[name].[git-revision-hash].js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
+  module: {
+    rules: [
+      {
+        // load css stylesheets, extract source maps and extract them separately
+        test: /\.css$/,
+        use: [
+          {
+            loader: CssPlugin.loader,
+          },
+          "css-loader?sourceMap",
         ],
-    },
-    optimization: {
-        minimizer: [
-            // minimize javascript and build source map
-            new JsMinimizerPlugin({
-                sourceMap: true,
-            }),
-            // minimize css and build (and link) source map
-            new CssMinimizerPlugin({
-                cssProcessorOptions: {
-                    map: {
-                        inline: false,
-                        annotation: true,
-                    },
-                },
-            }),
-        ],
-    },
-    plugins: [
-        // add the global data url
-        new webpack.DefinePlugin({
-            "APP_DATA_URL": JSON.stringify("./data/rooms.json"),
-        }),
-        // expose the build hash as an environment variable
-        new webpack.ExtendedAPIPlugin(),
-        // expose git commit hash for outputs
-        new GitRevisionPlugin(),
-        // add jquery, if we observe that its being used
-        new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery",
-        }),
-        // extract css files to a separate file
-        new CssPlugin({
-            filename: "./css/[name].[git-revision-hash].css",
-        }),
-        // copy static assets
-        new CopyPlugin({
-            patterns: [
-                { from: "./src/public/" }
-            ]
-        }),
-        // inject variables into html files
-        new HtmlPlugin({
-            template: "./src/app.ejs"
-        }),
+      },
+      {
+        // load and compile type script sources
+        test: /\.tsx?$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
+      {
+        // lint typescript files
+        test: /\.ts$/,
+        enforce: "pre",
+        use: "tslint-loader",
+      },
     ],
-    performance: {
-        // only warn if assets are larger than 1 MiB
-        maxEntrypointSize: 1024000,
-        maxAssetSize: 1024000,
-        hints: "warning",
-    },
+  },
+  optimization: {
+    minimizer: [
+      // minimize javascript and build source map
+      new JsMinimizerPlugin({
+        sourceMap: true,
+      }),
+      // minimize css and build (and link) source map
+      new CssMinimizerPlugin({
+        cssProcessorOptions: {
+          map: {
+            inline: false,
+            annotation: true,
+          },
+        },
+      }),
+    ],
+  },
+  plugins: [
+    // add the global data url
+    new webpack.DefinePlugin({
+      APP_DATA_URL: JSON.stringify("./data/rooms.json"),
+    }),
+    // expose the build hash as an environment variable
+    new webpack.ExtendedAPIPlugin(),
+    // expose git commit hash for outputs
+    new GitRevisionPlugin(),
+    // add jquery, if we observe that its being used
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery",
+    }),
+    // extract css files to a separate file
+    new CssPlugin({
+      filename: "./css/[name].[git-revision-hash].css",
+    }),
+    // copy static assets
+    new CopyPlugin({
+      patterns: [{ from: "./src/public/" }],
+    }),
+    // inject variables into html files
+    new HtmlPlugin({
+      template: "./src/app.ejs",
+    }),
+  ],
+  performance: {
+    // only warn if assets are larger than 1 MiB
+    maxEntrypointSize: 1024000,
+    maxAssetSize: 1024000,
+    hints: "warning",
+  },
 };
 
 const scraperConfig = {
-    target: "node",
-    mode: "production",
-    entry: {
-        scraper: "./src/scraper.ts",
-    },
-    output: {
-        filename: "./js/[name].js",
-        path: path.resolve(__dirname, "dist"),
-    },
-    resolve: {
-        extensions: [".tsx", ".ts", ".js"],
-    },
-    module: {
-        rules: [{
-                // load and compile type script sources
-                test: /\.tsx?$/,
-                use: "ts-loader",
-                exclude: /node_modules/,
-            },
-            {
-                // lint typescript files
-                test: /\.ts$/,
-                enforce: "pre",
-                use: "tslint-loader",
-            },
-        ],
-    },
-    plugins: [
-        // add the global scrape url and user agent
-        new webpack.DefinePlugin({
-            "SCRAPER_BASE_URL_KUSSS": JSON.stringify("https://www.kusss.jku.at"),
-            "SCRAPER_BASE_URL_JKU": JSON.stringify("https://www.jku.at"),
-            "SCRAPER_USER_AGENT": JSON.stringify("jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"),
-            "SCRAPER_DATA_PATH": JSON.stringify("rooms.json"),
-            "SCRAPER_MAX_RETRIES": JSON.stringify(5),
-            "SCRAPER_REQUEST_TIMEOUT": JSON.stringify(5 * 1000), // in milliseconds
-            "SCRAPER_REQUEST_DELAY": JSON.stringify(500), // in milliseconds
-        }),
+  target: "node",
+  mode: "production",
+  entry: {
+    scraper: "./src/scraper.ts",
+  },
+  output: {
+    filename: "./js/[name].js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
+  module: {
+    rules: [
+      {
+        // load and compile type script sources
+        test: /\.tsx?$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
+      {
+        // lint typescript files
+        test: /\.ts$/,
+        enforce: "pre",
+        use: "tslint-loader",
+      },
     ],
+  },
+  plugins: [
+    // add the global scrape url and user agent
+    new webpack.DefinePlugin({
+      SCRAPER_BASE_URL_KUSSS: JSON.stringify("https://www.kusss.jku.at"),
+      SCRAPER_BASE_URL_JKU: JSON.stringify("https://www.jku.at"),
+      SCRAPER_USER_AGENT: JSON.stringify(
+        "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"
+      ),
+      SCRAPER_DATA_PATH: JSON.stringify("rooms.json"),
+      SCRAPER_MAX_RETRIES: JSON.stringify(5),
+      SCRAPER_REQUEST_TIMEOUT: JSON.stringify(5 * 1000), // in milliseconds
+      SCRAPER_REQUEST_DELAY: JSON.stringify(500), // in milliseconds
+    }),
+  ],
 };
 
 module.exports = [appConfig, scraperConfig];
