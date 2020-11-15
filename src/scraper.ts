@@ -14,7 +14,8 @@ import { DateUtils } from "./utils";
 /* globals*/
 
 // webpack will declare this global variables for us
-declare var SCRAPER_BASE_URL: string;
+declare var SCRAPER_BASE_URL_KUSSS: string;
+declare var SCRAPER_BASE_URL_JKU: string;
 declare var SCRAPER_USER_AGENT: string;
 declare var SCRAPER_DATA_PATH: string;
 declare var SCRAPER_MAX_RETRIES: number;
@@ -29,15 +30,29 @@ const SEARCH_RESULTS = "/kusss/coursecatalogue-search-lvas.action?sortParam0cour
 const COURSE_DETAILS = "/kusss/selectcoursegroup.action?coursegroupid={{coursegroupid}}&showdetails={{showdetails}}" +
     "&abhart=all&courseclassid={{courseclassid}}";
 
+const BUILDINGS_PAGE = "/en/campus/the-jku-campus/buildings/";
+const BUILDING_DETAILS = "/en/campus/the-jku-campus/buildings/{{building}}/";
+
 /* scraper logic */
+
+/**
+ * A scraped building entity
+ */
+declare interface IBuilding {
+    id: number;
+    name: string;
+    url: string;  // the identifier used at the jku.at homepage
+}
 
 /**
  * A scraped room entity
  */
 declare interface IRoom {
-    htmlValue: string;
-    id: number;
+    id: number | undefined;
     name: string;
+    capacity: number | undefined;
+    buildingId: number | undefined;
+    kusssId: string | undefined; // the <option> identifier used at the kusss.jku.at homepage
 }
 
 /**
@@ -56,8 +71,8 @@ declare interface ICourse {
 declare interface IBooking {
     date: LocalDate;
     from: LocalTime;
-    roomName: string;
     to: LocalTime;
+    roomName: string;
 }
 
 class JkuRoomScraper {
@@ -76,6 +91,7 @@ class JkuRoomScraper {
         numDays: number;
         numRequests: number;
         numRooms: number;
+        numBuildings: number;
         rangeEnd: string | undefined;
         rangeStart: string | undefined;
     };
@@ -110,6 +126,7 @@ class JkuRoomScraper {
             numDays: 0,
             numRequests: 0,
             numRooms: 0,
+            numBuildings: 0,
             rangeEnd: undefined,
             rangeStart: undefined,
         };
@@ -136,32 +153,102 @@ class JkuRoomScraper {
         try {
 
             /* ---------------- */
-            /* (4) preparations */
+            /* (1) preparations */
 
             const data: IRoomData = {
                 available: {},
                 range: { start: "", end: "" },
                 rooms: {},
+                buildings: {},
                 version: LocalDateTime.now().format(this.dateTimeFormatter),
             };
 
-            /* ---------------- */
-            /* (1) scrape rooms */
+            // a map for rooms, identified by their canonical name
+            const rooms: { [key: string]: IRoom } = {};
 
-            const rooms: IRoom[] = await this.scrapeRooms();
-            rooms.forEach((room) => data.rooms[room.id.toString()] = room.name);
+            /* -------------------- */
+            /* (2) scrape buildings */
 
-            this.statistics.numRooms = rooms.length;
-            Logger.info(`scraped ${rooms.length} room names`, "rooms", undefined, undefined, rooms.length === 0);
-            Logger.info(rooms.map((room: IRoom) => room.name), "rooms");
+            const buildings: IBuilding[] = await this.scrapeBuildings();
+            buildings.forEach(b => data.buildings[b.id] = b.name);
 
-            /* ------------------ */
-            /* (2) scrape courses */
+            this.statistics.numBuildings = buildings.length;
+            Logger.info(`scraped ${buildings.length} building names`, "buildings", undefined, undefined, buildings.length === 0);
+            Logger.info(buildings.map((building: IBuilding) => building.name), "buildings");
+
+            /* --------------------------------- */
+            /* (3) scrape rooms inside buildings */
+
+            const jkuRooms: IRoom[] = new Array<IRoom>();
+            for (const [i, building] of buildings.entries()) {
+                const buildingRooms: IRoom[] = await this.scrapeJkuRooms(building);
+                jkuRooms.push.apply(jkuRooms, buildingRooms);
+
+                Logger.info(`found ${buildingRooms.length} room entries for building '${building.name}'`,
+                    "buildings", undefined, (i + 1) / buildings.length);
+            }
+
+            /* ---------------------- */
+            /* (4) scrape kusss rooms */
+
+            const kusssRooms: IRoom[] = await this.scrapeKusssRooms();
+
+            // use this as the base array for rooms
+            kusssRooms.forEach(r => rooms[this.getCanonicalRoomName(r.name)] = r);
+
+            this.statistics.numRooms = kusssRooms.length;
+            Logger.info(`scraped ${kusssRooms.length} bookable room names from KUSSS`, "rooms", undefined, undefined,
+                kusssRooms.length === 0);
+            Logger.info(kusssRooms.map(r => r.name), "rooms");
+
+            for (const room of jkuRooms) {
+                const canonical = this.getCanonicalRoomName(room.name);
+
+                // update existing rooms with buildingId and capacity
+                if (canonical in rooms) {
+                    rooms[canonical].buildingId = room.buildingId;
+                    rooms[canonical].capacity = room.capacity;
+                }
+            }
+
+            /* ------------------------ */
+            /* (5) observe room metadata */
+
+            // assign a numeric id to each room
+            let rid = 0;
+            for (const roomKey of Object.keys(rooms)) {
+                rooms[roomKey].id = rid++;
+            }
+
+            // store rooms
+            Object.values(rooms).forEach(r => data.rooms[r.id!.toString()] =
+                { name: r.name, building: r.buildingId != null ? r.buildingId : -1 });
+
+            const withMeta = Object.values(rooms).filter((room: IRoom) => room.buildingId != null && room.capacity != null);
+            const woBuilding = Object.values(rooms).filter((room: IRoom) => room.buildingId == null);
+            const woCapacity = Object.values(rooms).filter((room: IRoom) => room.capacity == null);
+
+            Logger.info(`merged room metadata of ${withMeta.length} rooms`, "rooms");
+            Logger.info(Object.values(rooms).map(r => r.name), "rooms");
+
+            if (woBuilding.length > 0) {
+                Logger.err(`there are ${woBuilding.length} rooms without building information`, "rooms");
+                Logger.info(woBuilding.map((room: IRoom) => room.name), "rooms");
+            }
+            if (woCapacity.length > 0) {
+                Logger.err(`there are ${woCapacity.length} rooms without capacity information`, "rooms");
+                Logger.info(woCapacity.map((room: IRoom) => room.name), "rooms");
+            }
+
+            /* ------------------------ */
+            /* (6) scrape kusss courses */
 
             let unfilteredCoursesCount = 0;
             const uniqueCourses: Set<ICourse> = new Set<ICourse>(JSON.stringify);
 
-            for (const [i, room] of rooms.entries()) {
+            for (const [i, room] of Object.values(rooms).entries()) {
+                if (room.kusssId == null) continue;
+
                 const courses: ICourse[] = await this.scrapeCourses(room);
 
                 // remove duplicate course entries based on JSON.stringify
@@ -169,15 +256,15 @@ class JkuRoomScraper {
                 courses.forEach(uniqueCourses.add, uniqueCourses);
 
                 Logger.info(`scraped ${courses.length} course numbers for room '${room.name}'`,
-                    "courses", undefined, (i + 1) / rooms.length, courses.length === 0);
+                    "courses", undefined, (i + 1) / Object.keys(rooms).length, courses.length === 0);
             }
 
             this.statistics.numCourses = uniqueCourses.size();
             Logger.info(`scraped ${uniqueCourses.size()} course numbers in total (removed ${unfilteredCoursesCount - uniqueCourses.size()} duplicates)`,
                 "scrape", undefined, undefined, uniqueCourses.size() === 0);
 
-            /* ------------------- */
-            /* (3) scrape bookings */
+            /* ------------------------- */
+            /* (7) scrape kusss bookings */
 
             for (const [i, course] of uniqueCourses.toArray().entries()) {
                 const bookings: IBooking[] = await this.scrapeBookings(course);
@@ -189,7 +276,7 @@ class JkuRoomScraper {
             }
 
             /* -------------- */
-            /* (4) statistics */
+            /* (8) statistics */
 
             // query how many days we scraped in total
             const days = Object.keys(data.available).map((e) => LocalDate.parse(e, this.dateFormatter)).sort();
@@ -207,7 +294,7 @@ class JkuRoomScraper {
             this.statistics.rangeEnd = data.range.end;
 
             /* ------------------ */
-            /* (5) index reversal */
+            /* (9) index reversal */
 
             // build the reverse index of all those intervals with a SplitTree
             this.reverseIndex(data);
@@ -264,8 +351,8 @@ class JkuRoomScraper {
         const dayKey = booking.date.format(this.dateFormatter);
 
         // lookup the room id
-        const canonicalName = booking.roomName.replace(/\s/g, "").toLowerCase();
-        const roomKey = Object.keys(data.rooms).find((key) => data.rooms[key].replace(/\s/g, "").toLowerCase() === canonicalName);
+        const canonicalName = this.getCanonicalRoomName(booking.roomName);
+        const roomKey = Object.keys(data.rooms).find((key) => this.getCanonicalRoomName(data.rooms[key].name) === canonicalName);
         if (!roomKey) {
             Logger.err(`room '${booking.roomName}' is unknown, ignoring`, "scrape");
             return;  // just ignore this room then
@@ -274,6 +361,11 @@ class JkuRoomScraper {
         // book this room
         const bookVal: [number, number] = [DateUtils.toMinutes(booking.from), DateUtils.toMinutes(booking.to)];
         this.getBookingsList(data, dayKey, roomKey).push(bookVal);
+    }
+
+    private getCanonicalRoomName(name: string) {
+        // all characters in lower case and without whitespace
+        return name.replace(/\s/g, "").toLowerCase();
     }
 
     private getBookingsList(data: IRoomData, dayKey: string, roomKey: string) {
@@ -288,8 +380,82 @@ class JkuRoomScraper {
         return data.available[dayKey][roomKey];
     }
 
-    private async scrapeRooms(): Promise<IRoom[]> {
-        const url = SCRAPER_BASE_URL + SEARCH_PAGE;
+    private async scrapeBuildings(): Promise<IBuilding[]> {
+        const url = SCRAPER_BASE_URL_JKU + BUILDINGS_PAGE;
+        const ch: cheerio.Root = await this.request(url);
+
+        const values = ch("div.stripe_element > article")       // the <article> elements in all div.stripe_element
+            .map((i, el) => {
+                return {
+                    header: ch(el).children("h3").first()       // the first found <h3> in there
+                        .children().remove().end().text(),      // the text in that, without all of its other children
+                    href: ch(el).children("a.stripe_btn")
+                        .first().attr("href")                   // the 'href' of the first <a> with 'stripe_btn' class
+                };
+            });
+
+        // build building objects
+        let bid = 0;
+        const buildings: IBuilding[] = values.get().map((pair: { header: string, href: string }) => {
+            const match = pair.href.match(/buildings\/(.*?)\//); // check for a link to '/buildings/'
+            if (match != null) {
+                return {
+                    id: bid++,
+                    url: match[1],
+                    // remove whitespace and leading numbers from the name
+                    name: pair.header.trim().replace(/\s+/g, " ").replace(/^\d+\s+/, ""),
+                };
+            } else {
+                // ignore building names that don't refer to a valid "/buildings/" sub-page
+                return null;
+            }
+        }).filter(x => x).map(x => x as IBuilding);
+
+        return buildings;
+    }
+
+    private async scrapeJkuRooms(building: IBuilding): Promise<IRoom[]> {
+        const url = SCRAPER_BASE_URL_JKU + BUILDING_DETAILS
+            .replace("{{building}}", building.url);
+        const ch: cheerio.Root = await this.request(url);
+
+        const values = ch("div.content_container > div.text > div.body > table.contenttable")
+            .map((i, el) => {                   // traverse each table individually
+                return ch(el).find("tr")        // the <tr> children (rows) - any of them, not just direct children
+                    .slice(1)                   // remove the first row which is the header
+                    .map((j, em) => {
+                        const tds = ch(em).children("td");
+
+                        // only scrape 3 columns-mode with room name, number, and capacity
+                        if (tds.length === 3) {
+                            // check if this is a lecture hall (HS)
+                            const match = tds.eq(0).text().match(/(HS \d+)/);
+                            return {
+                                name: match == null ? tds.eq(1).text() : match[1],
+                                capacity: tds.eq(2).text(),
+                            }
+                        }
+                    });
+            })
+            // flat map the map of rows
+            .get().reduce((acc, x) => acc.concat(x.get()), []);
+
+        // build room objects
+        const rooms: IRoom[] = values.map((pair: { name: string, capacity: string }) => {
+            return {
+                id: undefined,
+                name: pair.name.trim().replace(/\s+/g, " "),
+                kusssId: undefined,
+                capacity: parseInt(pair.capacity, 10),
+                buildingId: building.id,
+            };
+        });
+
+        return rooms;
+    }
+
+    private async scrapeKusssRooms(): Promise<IRoom[]> {
+        const url = SCRAPER_BASE_URL_KUSSS + SEARCH_PAGE;
         const ch: cheerio.Root = await this.request(url);
 
         const values = ch("select#room > option")  // the <option> children of <select id="room">
@@ -302,12 +468,13 @@ class JkuRoomScraper {
             });
 
         // build room objects
-        let rid = 0;
         const rooms: IRoom[] = values.get().map((pair: { name: string, value: string }) => {
             return {
-                htmlValue: pair.value,
-                id: rid++,
+                id: undefined,
+                kusssId: pair.value,
                 name: pair.name.trim().replace(/\s+/g, " "),
+                capacity: undefined,
+                buildingId: undefined,
             };
         });
 
@@ -315,8 +482,8 @@ class JkuRoomScraper {
     }
 
     private async scrapeCourses(room: IRoom): Promise<ICourse[]> {
-        const url = SCRAPER_BASE_URL + SEARCH_RESULTS
-            .replace("{{room}}", encodeURIComponent(room.htmlValue));
+        const url = SCRAPER_BASE_URL_KUSSS + SEARCH_RESULTS
+            .replace("{{room}}", encodeURIComponent(room.kusssId!));
         const ch: cheerio.Root = await this.request(url);
 
         const hrefs = ch("div.contentcell > table > tbody").last()  // the last <tbody> in the div.contentcell
@@ -343,7 +510,7 @@ class JkuRoomScraper {
     }
 
     private async scrapeBookings(course: ICourse): Promise<IBooking[]> {
-        const url = SCRAPER_BASE_URL + COURSE_DETAILS
+        const url = SCRAPER_BASE_URL_KUSSS + COURSE_DETAILS
             .replace("{{courseclassid}}", encodeURIComponent(course.courseclassid))
             .replace("{{coursegroupid}}", encodeURIComponent(course.coursegroupid))
             .replace("{{showdetails}}", encodeURIComponent(course.showdetails));

@@ -16,7 +16,7 @@ export class Logger {
             // pure unmodified logging
             console.log(text);
         } else {
-            category = (category == null ? "" : category.toString()).padEnd(8, " ");
+            category = (category == null ? "" : category.toString()).padEnd(10, " ");
             category = colors.cyan(category);
 
             status = (status == null ? (error ? "ERR" : "OK") : status.toString()).padStart(5, " ");

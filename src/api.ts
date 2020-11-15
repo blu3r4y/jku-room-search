@@ -30,7 +30,11 @@ export declare interface IFreeRoom {
 export declare interface IRoomData {
     version: string;
     range: { start: string, end: string };
-    rooms: { [id: string]: string };
+    // { room identifier -> (room name, building identifier) }
+    rooms: { [id: string]: {name: string, building: number} };
+    // { building identifier -> building name }
+    buildings: { [id: string]: string};
+    // { day identifier -> {room identifier -> [ (free from, free until) ]} }
     available: { [id: string]: { [id: string]: [number, number][] } };
 }
 
@@ -81,7 +85,7 @@ export class RoomSearch {
                     result.push({
                         available: matches.map((duration) =>
                             [DateUtils.fromMinutes(duration[0]), DateUtils.fromMinutes(duration[1])]),
-                        room: this.data.rooms[roomId],
+                        room: this.data.rooms[roomId].name,
                     });
                 }
             });

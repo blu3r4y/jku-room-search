@@ -38,26 +38,26 @@ const appConfig = {
     },
     module: {
         rules: [{
-            // load css stylesheets, extract source maps and extract them separately
-            test: /\.css$/,
-            use: [{
-                loader: CssPlugin.loader,
+                // load css stylesheets, extract source maps and extract them separately
+                test: /\.css$/,
+                use: [{
+                        loader: CssPlugin.loader,
+                    },
+                    "css-loader?sourceMap",
+                ],
             },
-                "css-loader?sourceMap",
-            ],
-        },
-        {
-            // load and compile type script sources
-            test: /\.tsx?$/,
-            use: "ts-loader",
-            exclude: /node_modules/,
-        },
-        {
-            // lint typescript files
-            test: /\.ts$/,
-            enforce: "pre",
-            use: "tslint-loader",
-        },
+            {
+                // load and compile type script sources
+                test: /\.tsx?$/,
+                use: "ts-loader",
+                exclude: /node_modules/,
+            },
+            {
+                // lint typescript files
+                test: /\.ts$/,
+                enforce: "pre",
+                use: "tslint-loader",
+            },
         ],
     },
     optimization: {
@@ -129,28 +129,29 @@ const scraperConfig = {
     },
     module: {
         rules: [{
-            // load and compile type script sources
-            test: /\.tsx?$/,
-            use: "ts-loader",
-            exclude: /node_modules/,
-        },
-        {
-            // lint typescript files
-            test: /\.ts$/,
-            enforce: "pre",
-            use: "tslint-loader",
-        },
+                // load and compile type script sources
+                test: /\.tsx?$/,
+                use: "ts-loader",
+                exclude: /node_modules/,
+            },
+            {
+                // lint typescript files
+                test: /\.ts$/,
+                enforce: "pre",
+                use: "tslint-loader",
+            },
         ],
     },
     plugins: [
         // add the global scrape url and user agent
         new webpack.DefinePlugin({
-            "SCRAPER_BASE_URL": JSON.stringify("https://www.kusss.jku.at"),
+            "SCRAPER_BASE_URL_KUSSS": JSON.stringify("https://www.kusss.jku.at"),
+            "SCRAPER_BASE_URL_JKU": JSON.stringify("https://www.jku.at"),
             "SCRAPER_USER_AGENT": JSON.stringify("jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"),
             "SCRAPER_DATA_PATH": JSON.stringify("rooms.json"),
             "SCRAPER_MAX_RETRIES": JSON.stringify(5),
-            "SCRAPER_REQUEST_TIMEOUT": JSON.stringify(5 * 1000),  // in milliseconds
-            "SCRAPER_REQUEST_DELAY": JSON.stringify(500),  // in milliseconds
+            "SCRAPER_REQUEST_TIMEOUT": JSON.stringify(5 * 1000), // in milliseconds
+            "SCRAPER_REQUEST_DELAY": JSON.stringify(500), // in milliseconds
         }),
     ],
 };
