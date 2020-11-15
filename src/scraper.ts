@@ -19,13 +19,13 @@ import { DateUtils } from "./utils";
 /* globals*/
 
 // webpack will declare this global variables for us
-declare var BASE_URL_KUSSS: string;
-declare var BASE_URL_JKU: string;
-declare var USER_AGENT: string;
-declare var DATA_PATH: string;
-declare var MAX_RETRIES: number;
-declare var REQUEST_TIMEOUT_MS: number;
-declare var REQUEST_DELAY_MS: number;
+declare let BASE_URL_KUSSS: string;
+declare let BASE_URL_JKU: string;
+declare let USER_AGENT: string;
+declare let DATA_PATH: string;
+declare let MAX_RETRIES: number;
+declare let REQUEST_TIMEOUT_MS: number;
+declare let REQUEST_DELAY_MS: number;
 
 const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";
 const SEARCH_RESULTS =
@@ -55,7 +55,7 @@ declare interface IBuilding {
  * A scraped room entity
  */
 declare interface IRoom {
-  id: number | undefined;
+  id: number;
   name: string;
   capacity: number | undefined;
   buildingId: number | undefined;
@@ -198,7 +198,7 @@ class JkuRoomScraper {
       const jkuRooms: IRoom[] = new Array<IRoom>();
       for (const [i, building] of buildings.entries()) {
         const buildingRooms: IRoom[] = await this.scrapeJkuRooms(building);
-        jkuRooms.push.apply(jkuRooms, buildingRooms);
+        jkuRooms.push(...buildingRooms);
 
         Logger.info(
           `found ${buildingRooms.length} room entries for building '${building.name}'`,
@@ -242,16 +242,10 @@ class JkuRoomScraper {
       /* ------------------------ */
       /* (5) observe room metadata */
 
-      // assign a numeric id to each room
-      let rid = 0;
-      for (const roomKey of Object.keys(rooms)) {
-        rooms[roomKey].id = rid++;
-      }
-
       // store rooms
       Object.values(rooms).forEach(
         (r) =>
-          (data.rooms[r.id!.toString()] = {
+          (data.rooms[r.id.toString()] = {
             name: r.name,
             building: r.buildingId != null ? r.buildingId : -1,
           })
@@ -429,7 +423,7 @@ class JkuRoomScraper {
 
         // overwrite intervals
         intervals.length = 0;
-        intervals.push.apply(intervals, reversed);
+        intervals.push(...reversed);
       }
 
       curr = curr.plusDays(1);
@@ -555,10 +549,11 @@ class JkuRoomScraper {
       .reduce((acc, x) => acc.concat(x.get()), []);
 
     // build room objects
+    let rid = 0;
     const rooms: IRoom[] = values.map(
       (pair: { name: string; capacity: string }) => {
         return {
-          id: undefined,
+          id: rid++,
           name: pair.name.trim().replace(/\s+/g, " "),
           kusssId: undefined,
           capacity: parseInt(pair.capacity, 10),
@@ -588,7 +583,7 @@ class JkuRoomScraper {
       .get()
       .map((pair: { name: string; value: string }) => {
         return {
-          id: undefined,
+          id: -1,
           kusssId: pair.value,
           name: pair.name.trim().replace(/\s+/g, " "),
           capacity: undefined,
@@ -600,9 +595,11 @@ class JkuRoomScraper {
   }
 
   private async scrapeCourses(room: IRoom): Promise<ICourse[]> {
+    if (room.kusssId == null) throw "room.kusssId can not be null here";
+
     const url =
       BASE_URL_KUSSS +
-      SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.kusssId!));
+      SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.kusssId));
     const ch: cheerio.Root = await this.request(url);
 
     const hrefs = ch("div.contentcell > table > tbody")

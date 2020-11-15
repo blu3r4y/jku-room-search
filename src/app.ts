@@ -21,8 +21,8 @@ import { Jku } from "./jku";
 /* globals */
 
 // webpack will declare this global variables for us
-declare var DATA_URL: string;
-declare var COMMIT_HASH: string;
+declare let DATA_URL: string;
+declare let COMMIT_HASH: string;
 
 /* gui elements */
 

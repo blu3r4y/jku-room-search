@@ -53,7 +53,7 @@ class Interval {
   public right: Interval | null = null;
 
   /** interval, which has been cut completely */
-  public empty: boolean = false;
+  public empty = false;
 
   constructor(a: number, b: number) {
     this.a = a;

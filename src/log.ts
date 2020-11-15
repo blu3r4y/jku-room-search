@@ -1,6 +1,9 @@
 import colors from "ansicolors";
 
 export class Logger {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
   /**
    * Pretty-print log (and error) messages with category and status code
    *
@@ -15,8 +18,8 @@ export class Logger {
     category?: string,
     status?: string,
     progress?: number,
-    error: boolean = false
-  ) {
+    error = false
+  ): void {
     if (category == null && status == null && progress == null) {
       // pure unmodified logging
       console.log(text);
@@ -58,7 +61,7 @@ export class Logger {
    * @param category he category to which this message belongs (optional)
    * @param status Custom status code or text (optional, default is 'ERR')
    */
-  public static err(text: any, category?: string, status?: string) {
+  public static err(text: any, category?: string, status?: string): void {
     Logger.info(text, category, status, undefined, true);
   }
 }

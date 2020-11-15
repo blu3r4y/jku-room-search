@@ -118,7 +118,7 @@ export class RoomSearchFrontend {
    * @param startTimes A set of raster start times
    * @param endTimes A set of raster end times
    */
-  public init(startTimes: LocalTime[], endTimes: LocalTime[]) {
+  public init(startTimes: LocalTime[], endTimes: LocalTime[]): void {
     this.startTimes = startTimes;
     this.endTimes = endTimes;
 
@@ -129,7 +129,7 @@ export class RoomSearchFrontend {
   /**
    * Hides the cover that waited until the whole page got loaded
    */
-  public hideCover() {
+  public hideCover(): void {
     this.jqCover.fadeOut("fast");
   }
 
@@ -165,7 +165,7 @@ export class RoomSearchFrontend {
     text: string | null = null,
     result: IResult | null = null,
     color: ColorStatus = ColorStatus.NoResult
-  ) {
+  ): void {
     this.renderTeaser(text, color);
     this.renderTable(result);
   }
@@ -175,9 +175,9 @@ export class RoomSearchFrontend {
    *
    * @param version Version, represented by a `LocalDateTime`
    */
-  public renderVersion(version: LocalDateTime) {
+  public renderVersion(version: LocalDateTime): void {
     const duration = Duration.between(version, LocalDateTime.now());
-    let readableDuration: string = "just now";
+    let readableDuration = "just now";
     if (duration.toDays() >= 7) {
       readableDuration = `${Math.floor(duration.toDays() / 7)} weeks ago`;
     } else if (duration.toDays() > 0) {
@@ -197,7 +197,7 @@ export class RoomSearchFrontend {
    * @param enabled Disable or enable the button
    * @param spinning Show a spinning animation
    */
-  public renderButton(enabled: boolean, spinning: boolean | null = null) {
+  public renderButton(enabled: boolean, spinning: boolean | null = null): void {
     if (spinning == null) {
       spinning = !enabled;
     }

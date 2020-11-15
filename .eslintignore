@@ -7,3 +7,7 @@ node_modules
 # ignore editors
 .vscode
 .idea
+
+# configuration files
+webpack.config.js
+.eslintrc.js
