@@ -19,13 +19,13 @@ import { DateUtils } from "./utils";
 /* globals*/
 
 // webpack will declare this global variables for us
-declare var SCRAPER_BASE_URL_KUSSS: string;
-declare var SCRAPER_BASE_URL_JKU: string;
-declare var SCRAPER_USER_AGENT: string;
-declare var SCRAPER_DATA_PATH: string;
-declare var SCRAPER_MAX_RETRIES: number;
-declare var SCRAPER_REQUEST_TIMEOUT: number;
-declare var SCRAPER_REQUEST_DELAY: number;
+declare var BASE_URL_KUSSS: string;
+declare var BASE_URL_JKU: string;
+declare var USER_AGENT: string;
+declare var DATA_PATH: string;
+declare var MAX_RETRIES: number;
+declare var REQUEST_TIMEOUT_MS: number;
+declare var REQUEST_DELAY_MS: number;
 
 const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";
 const SEARCH_RESULTS =
@@ -139,15 +139,15 @@ class JkuRoomScraper {
 
     // set request headers
     this.requestOptions = {
-      headers: { "User-Agent": SCRAPER_USER_AGENT },
-      timeout: SCRAPER_REQUEST_TIMEOUT,
-      retry: { limit: SCRAPER_MAX_RETRIES },
+      headers: { "User-Agent": USER_AGENT },
+      timeout: REQUEST_TIMEOUT_MS,
+      retry: { limit: MAX_RETRIES },
     };
 
     // prepare request rate-limit
     this.requestLimiter = new Bottleneck({
       maxConcurrent: 1,
-      minTime: SCRAPER_REQUEST_DELAY,
+      minTime: REQUEST_DELAY_MS,
     });
 
     // date formatters
@@ -475,7 +475,7 @@ class JkuRoomScraper {
   }
 
   private async scrapeBuildings(): Promise<IBuilding[]> {
-    const url = SCRAPER_BASE_URL_JKU + BUILDINGS_PAGE;
+    const url = BASE_URL_JKU + BUILDINGS_PAGE;
     const ch: cheerio.Root = await this.request(url);
 
     // the <article> elements in all div.stripe_element
@@ -522,8 +522,7 @@ class JkuRoomScraper {
 
   private async scrapeJkuRooms(building: IBuilding): Promise<IRoom[]> {
     const url =
-      SCRAPER_BASE_URL_JKU +
-      BUILDING_DETAILS.replace("{{building}}", building.url);
+      BASE_URL_JKU + BUILDING_DETAILS.replace("{{building}}", building.url);
     const ch: cheerio.Root = await this.request(url);
 
     const values = ch(
@@ -572,7 +571,7 @@ class JkuRoomScraper {
   }
 
   private async scrapeKusssRooms(): Promise<IRoom[]> {
-    const url = SCRAPER_BASE_URL_KUSSS + SEARCH_PAGE;
+    const url = BASE_URL_KUSSS + SEARCH_PAGE;
     const ch: cheerio.Root = await this.request(url);
 
     const values = ch("select#room > option") // the <option> children of <select id="room">
@@ -602,7 +601,7 @@ class JkuRoomScraper {
 
   private async scrapeCourses(room: IRoom): Promise<ICourse[]> {
     const url =
-      SCRAPER_BASE_URL_KUSSS +
+      BASE_URL_KUSSS +
       SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.kusssId!));
     const ch: cheerio.Root = await this.request(url);
 
@@ -643,7 +642,7 @@ class JkuRoomScraper {
 
   private async scrapeBookings(course: ICourse): Promise<IBooking[]> {
     const url =
-      SCRAPER_BASE_URL_KUSSS +
+      BASE_URL_KUSSS +
       COURSE_DETAILS.replace(
         "{{courseclassid}}",
         encodeURIComponent(course.courseclassid)
@@ -728,12 +727,12 @@ const jrc = new JkuRoomScraper();
 jrc
   .scrape()
   .then((data: IRoomData) => {
-    writeFile(SCRAPER_DATA_PATH, JSON.stringify(data), "utf-8", (error) => {
+    writeFile(DATA_PATH, JSON.stringify(data), "utf-8", (error) => {
       if (error) {
-        Logger.err(`could not store result in '${SCRAPER_DATA_PATH}'`, "main");
+        Logger.err(`could not store result in '${DATA_PATH}'`, "main");
         Logger.err(error);
       } else {
-        Logger.info(`stored result in '${SCRAPER_DATA_PATH}'`, "main");
+        Logger.info(`stored result in '${DATA_PATH}'`, "main");
       }
     });
   })

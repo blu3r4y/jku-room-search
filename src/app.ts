@@ -21,8 +21,8 @@ import { Jku } from "./jku";
 /* globals */
 
 // webpack will declare this global variables for us
-declare var __webpack_hash__: string;
-declare var APP_DATA_URL: string;
+declare var DATA_URL: string;
+declare var COMMIT_HASH: string;
 
 /* gui elements */
 
@@ -146,10 +146,10 @@ form.on("submit", submitHandler);
 
 // cache the result by the current build id and the current day
 const ajaxUrl =
-  APP_DATA_URL +
-  "?v=" +
-  __webpack_hash__ +
-  "_" +
+  DATA_URL +
+  "?hash=" +
+  COMMIT_HASH +
+  "&cache=" +
   LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
 function dataLoadSuccessHandler(data: IRoomData) {

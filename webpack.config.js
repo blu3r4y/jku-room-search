@@ -1,37 +1,33 @@
-const path = require("path");
 const webpack = require("webpack");
 
-// extract a separate css file to avoid FOUC
-const CssPlugin = require("mini-css-extract-plugin");
-
-// help copying static assets
-const CopyPlugin = require("copy-webpack-plugin");
-
-// inject some variables into the index.html
-const HtmlPlugin = require("html-webpack-plugin");
-
-// minimizer for js
-const JsMinimizerPlugin = require("terser-webpack-plugin");
+// extract css file to avoid FOUC
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 // minimizer for css
-const CssMinimizerPlugin = require("optimize-css-assets-webpack-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
-// inject the git commit hash into links
-var GitRevisionPlugin = require("git-revision-webpack-plugin");
+// minimizer for js
+const TerserPlugin = require("terser-webpack-plugin");
+
+// inject variables into the index.html
+const HtmlPlugin = require("html-webpack-plugin");
+
+// copy statis assets
+const CopyPlugin = require("copy-webpack-plugin");
+
+// query git metadata
+const ChildProcess = require("child_process");
+function git(command) {
+  return ChildProcess.execSync(`git ${command}`, { encoding: "utf8" }).trim();
+}
 
 const appConfig = {
-  target: "web",
-  mode: "production",
-  devtool: "source-map",
-  devServer: {
-    contentBase: "./dist",
-  },
+  target: ["web", "es5"],
   entry: {
     app: "./src/app.ts",
   },
   output: {
-    filename: "./js/[name].[git-revision-hash].js",
-    path: path.resolve(__dirname, "dist"),
+    filename: "./js/[name].[contenthash].js",
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
@@ -39,75 +35,43 @@ const appConfig = {
   module: {
     rules: [
       {
-        // load css stylesheets, extract source maps and extract them separately
-        test: /\.css$/,
-        use: [
-          {
-            loader: CssPlugin.loader,
-          },
-          "css-loader?sourceMap",
-        ],
-      },
-      {
-        // load and compile type script sources
         test: /\.tsx?$/,
         use: "ts-loader",
         exclude: /node_modules/,
       },
       {
-        // lint typescript files
-        test: /\.ts$/,
-        enforce: "pre",
-        use: "tslint-loader",
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
     ],
   },
   optimization: {
-    minimizer: [
-      // minimize javascript and build source map
-      new JsMinimizerPlugin({
-        sourceMap: true,
-      }),
-      // minimize css and build (and link) source map
-      new CssMinimizerPlugin({
-        cssProcessorOptions: {
-          map: {
-            inline: false,
-            annotation: true,
-          },
-        },
-      }),
-    ],
+    minimizer: [new TerserPlugin(), new CssMinimizerPlugin()],
+  },
+  devtool: "source-map",
+  devServer: {
+    contentBase: "./dist",
   },
   plugins: [
-    // add the global data url
     new webpack.DefinePlugin({
-      APP_DATA_URL: JSON.stringify("./data/rooms.json"),
+      DATA_URL: JSON.stringify("./data/rooms.json"),
+      COMMIT_HASH: JSON.stringify(git("rev-parse HEAD")),
     }),
-    // expose the build hash as an environment variable
-    new webpack.ExtendedAPIPlugin(),
-    // expose git commit hash for outputs
-    new GitRevisionPlugin(),
-    // add jquery, if we observe that its being used
+    new MiniCssExtractPlugin({
+      filename: "./css/[name].[contenthash].css",
+    }),
+    new HtmlPlugin({
+      template: "./src/app.ejs",
+    }),
+    new CopyPlugin({
+      patterns: [{ from: "./src/public/" }],
+    }),
     new webpack.ProvidePlugin({
       $: "jquery",
       jQuery: "jquery",
     }),
-    // extract css files to a separate file
-    new CssPlugin({
-      filename: "./css/[name].[git-revision-hash].css",
-    }),
-    // copy static assets
-    new CopyPlugin({
-      patterns: [{ from: "./src/public/" }],
-    }),
-    // inject variables into html files
-    new HtmlPlugin({
-      template: "./src/app.ejs",
-    }),
   ],
   performance: {
-    // only warn if assets are larger than 1 MiB
     maxEntrypointSize: 1024000,
     maxAssetSize: 1024000,
     hints: "warning",
@@ -116,13 +80,11 @@ const appConfig = {
 
 const scraperConfig = {
   target: "node",
-  mode: "production",
   entry: {
     scraper: "./src/scraper.ts",
   },
   output: {
     filename: "./js/[name].js",
-    path: path.resolve(__dirname, "dist"),
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
@@ -130,31 +92,23 @@ const scraperConfig = {
   module: {
     rules: [
       {
-        // load and compile type script sources
         test: /\.tsx?$/,
         use: "ts-loader",
         exclude: /node_modules/,
       },
-      {
-        // lint typescript files
-        test: /\.ts$/,
-        enforce: "pre",
-        use: "tslint-loader",
-      },
     ],
   },
   plugins: [
-    // add the global scrape url and user agent
     new webpack.DefinePlugin({
-      SCRAPER_BASE_URL_KUSSS: JSON.stringify("https://www.kusss.jku.at"),
-      SCRAPER_BASE_URL_JKU: JSON.stringify("https://www.jku.at"),
-      SCRAPER_USER_AGENT: JSON.stringify(
+      BASE_URL_KUSSS: JSON.stringify("https://www.kusss.jku.at"),
+      BASE_URL_JKU: JSON.stringify("https://www.jku.at"),
+      USER_AGENT: JSON.stringify(
         "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"
       ),
-      SCRAPER_DATA_PATH: JSON.stringify("rooms.json"),
-      SCRAPER_MAX_RETRIES: JSON.stringify(5),
-      SCRAPER_REQUEST_TIMEOUT: JSON.stringify(5 * 1000), // in milliseconds
-      SCRAPER_REQUEST_DELAY: JSON.stringify(500), // in milliseconds
+      DATA_PATH: JSON.stringify("rooms.json"),
+      MAX_RETRIES: JSON.stringify(5),
+      REQUEST_TIMEOUT_MS: JSON.stringify(5 * 1000),
+      REQUEST_DELAY_MS: JSON.stringify(500),
     }),
   ],
 };

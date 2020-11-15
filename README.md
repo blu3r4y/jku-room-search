@@ -17,7 +17,7 @@ Install [Node.JS](https://nodejs.org/) and [Yarn](https://classic.yarnpkg.com/) 
     yarn install
     npm run build
 
-During development, start a local webserver and trigger builds automatically with
+During development, start a local webserver and trigger development builds automatically with
 
     npm run serve
 
