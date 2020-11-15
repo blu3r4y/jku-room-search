@@ -12,9 +12,9 @@ Go to [jkuroomsearch.app](https://jkuroomsearch.app)
 
 ## Build this App
 
-Install Node.JS and simply enter
+Install [Node.JS](https://nodejs.org/) and [Yarn](https://classic.yarnpkg.com/) and simply enter
 
-    npm install
+    yarn install
     npm run build
 
 During development, start a local webserver and trigger builds automatically with
