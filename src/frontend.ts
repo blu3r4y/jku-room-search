@@ -71,7 +71,6 @@ export class RoomSearchFrontend {
   private jqResults: JQuery<HTMLElement>;
   private jqTeaserText: JQuery<HTMLElement>;
   private jqTeaserBlock: JQuery<HTMLElement>;
-  private jqResultsInfo: JQuery<HTMLElement>;
   private jqButton: HTMLInputElement;
   private jqSpinner: JQuery<HTMLElement>;
   private jqButtonText: JQuery<HTMLElement>;
@@ -89,7 +88,6 @@ export class RoomSearchFrontend {
     results: JQuery<HTMLElement>,
     teaserText: JQuery<HTMLElement>,
     teaserBlock: JQuery<HTMLElement>,
-    resultsInfo: JQuery<HTMLElement>,
     button: JQuery<HTMLElement>,
     spinner: JQuery<HTMLElement>,
     buttonText: JQuery<HTMLElement>,
@@ -102,7 +100,6 @@ export class RoomSearchFrontend {
     this.jqResults = results;
     this.jqTeaserText = teaserText;
     this.jqTeaserBlock = teaserBlock;
-    this.jqResultsInfo = resultsInfo;
     this.jqButton = button[0] as HTMLInputElement;
     this.jqSpinner = spinner;
     this.jqButtonText = buttonText;
@@ -130,7 +127,8 @@ export class RoomSearchFrontend {
    * Hides the cover that waited until the whole page got loaded
    */
   public hideCover(): void {
-    this.jqCover.fadeOut("fast");
+    this.jqCover.addClass("animate-fade-cover");
+    setTimeout(() => this.jqCover.hide(), 200);
   }
 
   /**
@@ -263,12 +261,9 @@ export class RoomSearchFrontend {
   }
 
   private renderTable(result: IResult | null) {
-    this.jqResults.fadeTo(150, 0.33);
-    this.jqResultsInfo.hide();
-
     if (!result || (result as IResult).length === 0) {
       this.jqResults.hide();
-      return;
+      this.jqResults.css("opacity", "0");
     } else {
       const d = document;
       const fragment = d.createDocumentFragment();
@@ -305,13 +300,24 @@ export class RoomSearchFrontend {
         }
       }
 
+      if (this.jqResults.is(":visible")) {
+        // flash the table to indicate an update
+        this.jqResults.addClass("animate-fade-flash");
+        setTimeout(() => this.jqResults.removeClass(), 400);
+      } else {
+        // animate initial show
+        this.jqResults.show();
+        this.jqResults.addClass("animate-fade-in");
+        setTimeout(() => {
+          this.jqResults.css("opacity", "1");
+          this.jqResults.removeClass();
+        }, 400);
+      }
+
       // update the table body
-      const body = this.jqResults.children("tbody");
+      const body = this.jqResults.children("table").children("tbody");
       body.empty();
       body.append(fragment);
-
-      this.jqResultsInfo.show();
-      this.jqResults.fadeTo(300, 1.0);
     }
   }
 

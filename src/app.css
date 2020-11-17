@@ -54,3 +54,43 @@ html {
 .datepicker--button {
   color: #007bff;
 }
+
+.animate-fade-cover {
+  animation: fade-cover 0.2s ease-in forwards;
+}
+
+@keyframes fade-cover {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-flash {
+  animation: fade-flash 0.4s ease-out forwards;
+}
+
+@keyframes fade-flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.33;
+  }
+}

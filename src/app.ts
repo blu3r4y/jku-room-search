@@ -35,7 +35,6 @@ const form = $("#form");
 const results = $("#results");
 const teaserText = $("#teaserText");
 const teaserBlock = $("#teaserBlock");
-const resultsInfo = $("#resultsInfo");
 
 const button = $("#button");
 const spinner = $("#spinner");
@@ -64,7 +63,6 @@ const frontend = new RoomSearchFrontend(
   results,
   teaserText,
   teaserBlock,
-  resultsInfo,
   button,
   spinner,
   buttonText,
@@ -104,7 +102,7 @@ function submitHandler(event: Event) {
           );
         }
 
-        scrollIntoView(resultsInfo[0], {
+        scrollIntoView(teaserBlock[0], {
           behavior: "smooth",
           scrollMode: "if-needed",
         });
