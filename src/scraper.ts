@@ -8,7 +8,10 @@ import {
   LocalDateTime,
   LocalTime,
 } from "@js-joda/core";
-import { Set } from "typescript-collections";
+
+// this is a dirty hack, but i have no idea how to get this running instead
+// see https://github.com/basarat/typescript-collections/issues/120
+import Set from "./../node_modules/typescript-collections/dist/lib/Set";
 
 import { IRoomData } from "./api";
 import { Jku } from "./jku";
