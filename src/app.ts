@@ -43,6 +43,8 @@ const versionText = $("#versionText");
 
 const cover = $("#cover");
 
+const anchor = $("#anchor");
+
 /* app logic */
 
 let api: RoomSearch | null = null;
@@ -102,7 +104,7 @@ function submitHandler(event: Event) {
           );
         }
 
-        scrollIntoView(teaserBlock[0], {
+        scrollIntoView(anchor[0], {
           behavior: "smooth",
           scrollMode: "if-needed",
         });
