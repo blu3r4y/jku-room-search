@@ -10,7 +10,8 @@
     "format": "npx prettier --write .",
     "watch": "webpack --mode=development --watch",
     "serve": "webpack serve --mode=development --port 8080 --open http://localhost:8080",
-    "scrape": "npm run build && node ./dist/js/scraper.js"
+    "scrape": "npm run build && node ./dist/js/scraper.js",
+    "scrape-quick": "npm run build && node ./dist/js/scraper.js --quick"
   },
   "repository": {
     "type": "git",

@@ -121,7 +121,19 @@ class JkuRoomScraper {
   private dateFormatter: DateTimeFormatter;
   private dateTimeFormatter: DateTimeFormatter;
 
+  /**
+   * If this is true, the scraper will not scrape the entire page,
+   * but end early. This is useful for doing a quick set of tests
+   * without scraping the entire index.
+   */
+  private quick: boolean = false;
+
   constructor() {
+    if (process.argv.slice(2).includes("--quick")) {
+      this.quick = true;
+      Logger.info("activated QUICK scraping mode");
+    }
+
     // booking interval which will be considered free
     this.fullInterval = [
       DateUtils.toMinutes(Jku.FIRST_COURSE_START),
@@ -209,6 +221,8 @@ class JkuRoomScraper {
           undefined,
           (i + 1) / buildings.length
         );
+
+        if (this.quick && i > 5) break;
       }
 
       /* ---------------------- */
@@ -310,6 +324,8 @@ class JkuRoomScraper {
           (i + 1) / Object.keys(rooms).length,
           courses.length === 0
         );
+
+        if (this.quick && i > 5) break;
       }
 
       this.statistics.numCourses = uniqueCourses.size();
@@ -338,6 +354,8 @@ class JkuRoomScraper {
           (i + 1) / uniqueCourses.size(),
           bookings.length === 0
         );
+
+        if (this.quick && i > 10) break;
       }
 
       /* -------------- */
