@@ -1,14 +1,15 @@
-import { LocalDate, LocalTime } from "@js-joda/core";
+import dayjs from "dayjs";
+import { Duration } from "dayjs/plugin/duration";
 
-import { DateUtils } from "./utils";
+import { TimeUtils } from "./utils";
 
 /**
  * API query for requesting free rooms
  */
 export declare interface IQuery {
-  day: LocalDate;
-  from: LocalTime;
-  to: LocalTime | null;
+  day: dayjs.Dayjs;
+  from: Duration;
+  to: Duration | null;
 }
 
 /**
@@ -21,7 +22,7 @@ export type IResult = IFreeRoom[];
  */
 export declare interface IFreeRoom {
   room: string;
-  available: [LocalTime, LocalTime][];
+  available: [Duration, Duration][];
 }
 
 /**
@@ -44,6 +45,9 @@ export declare interface IRoomData {
 export class RoomSearch {
   private data: IRoomData;
 
+  // TODO: use the same format in scraper and api
+  private apiDateFormat = "YYYY-MM-DD";
+
   constructor(data: IRoomData) {
     this.data = data;
   }
@@ -56,15 +60,15 @@ export class RoomSearch {
   public searchFreeRooms(query: IQuery): IResult | null {
     try {
       // check if we got any data on this day
-      if (!(query.day.toString() in this.data.available)) {
+      if (!(query.day.format(this.apiDateFormat) in this.data.available)) {
         return [];
       }
 
       const result: IResult = [];
-      const cursor = this.data.available[query.day.toString()];
+      const cursor = this.data.available[query.day.format(this.apiDateFormat)];
 
-      const from: number = DateUtils.toMinutes(query.from);
-      const to: number = query.to != null ? DateUtils.toMinutes(query.to) : -1;
+      const from: number = TimeUtils.toMinutes(query.from);
+      const to: number = query.to != null ? TimeUtils.toMinutes(query.to) : -1;
 
       // iterate over free rooms
       Object.keys(cursor).forEach((roomId: string) => {
@@ -84,8 +88,8 @@ export class RoomSearch {
         if (matches.length > 0) {
           result.push({
             available: matches.map((duration) => [
-              DateUtils.fromMinutes(duration[0]),
-              DateUtils.fromMinutes(duration[1]),
+              TimeUtils.fromMinutes(duration[0]),
+              TimeUtils.fromMinutes(duration[1]),
             ]),
             room: this.data.rooms[roomId].name,
           });

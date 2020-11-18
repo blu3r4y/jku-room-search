@@ -47,12 +47,12 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "@js-joda/core": "^3.2.0",
     "air-datepicker": "^2.2.3",
     "ansicolors": "^0.3.2",
     "bootstrap": "^4.5.2",
     "bottleneck": "^2.19.5",
     "cheerio": "^1.0.0-rc.3",
+    "dayjs": "^1.9.6",
     "got": "^11.7.0",
     "jquery": "^3.5.1",
     "scroll-into-view-if-needed": "^2.2.26",
