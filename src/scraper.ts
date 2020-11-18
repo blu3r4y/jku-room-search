@@ -126,7 +126,7 @@ class JkuRoomScraper {
    * but end early. This is useful for doing a quick set of tests
    * without scraping the entire index.
    */
-  private quick: boolean = false;
+  private quick = false;
 
   constructor() {
     if (process.argv.slice(2).includes("--quick")) {
@@ -570,11 +570,10 @@ class JkuRoomScraper {
       .reduce((acc, x) => acc.concat(x.get()), []);
 
     // build room objects
-    let rid = 0;
     const rooms: IRoom[] = values.map(
       (pair: { name: string; capacity: string }) => {
         return {
-          id: rid++,
+          id: -1,
           name: pair.name.trim().replace(/\s+/g, " "),
           kusssId: undefined,
           capacity: parseInt(pair.capacity, 10),
@@ -600,11 +599,12 @@ class JkuRoomScraper {
       });
 
     // build room objects
+    let rid = 0;
     const rooms: IRoom[] = values
       .get()
       .map((pair: { name: string; value: string }) => {
         return {
-          id: -1,
+          id: rid++,
           kusssId: pair.value,
           name: pair.name.trim().replace(/\s+/g, " "),
           capacity: undefined,
