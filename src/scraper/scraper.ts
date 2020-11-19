@@ -13,14 +13,13 @@ dayjs.extend(customParseFormat);
 
 // this is a dirty hack, but i have no idea how to get this running instead
 // see https://github.com/basarat/typescript-collections/issues/120
-import Set from "./../node_modules/typescript-collections/dist/lib/Set";
+import Set from "typescript-collections/dist/lib/Set";
 
-import { Jku } from "./jku";
+import { Jku } from "../common/jku";
 import { Logger } from "./log";
-import { IRoomData } from "./api";
-import { TimeUtils } from "./utils";
-import { IDate, ITime } from "./types";
-import { SplitTree } from "./split-tree";
+import { TimeUtils } from "../common/utils";
+import { IDate, ITime, IRoomData } from "../common/types";
+import { SplitTree } from "./splitTree";
 
 /* globals*/
 

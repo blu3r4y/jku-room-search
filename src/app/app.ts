@@ -2,16 +2,16 @@
 
 import "air-datepicker/dist/css/datepicker.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./app.css";
+import "../templates/app.css";
 
 /* packages */
 
 import dayjs from "dayjs";
 import scrollIntoView from "scroll-into-view-if-needed";
 
-import { Jku } from "./jku";
-import { ITime } from "./types";
-import { IResult, IRoomData, RoomSearch } from "./api";
+import { Jku } from "../common/jku";
+import { IApiResult, IRoomData, ITime } from "../common/types";
+import { RoomSearch } from "./api";
 import { ColorStatus, RoomSearchFrontend } from "./frontend";
 
 /* globals */
@@ -82,7 +82,7 @@ function submitHandler(event: Event) {
   if (query != null) {
     if (api != null) {
       // process user request
-      const result: IResult | null = api.searchFreeRooms(query);
+      const result: IApiResult | null = api.searchFreeRooms(query);
       console.log("result", result);
 
       if (result != null) {

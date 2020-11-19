@@ -6,9 +6,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
-import { TimeUtils } from "./utils";
-import { IDate, ITime } from "./types";
-import { IQuery, IResult } from "./api";
+import { TimeUtils } from "../common/utils";
+import { IApiQuery, IApiResult, IDate, ITime } from "../common/types";
 
 const language: AirDatepickerLanguageInstance = {
   clear: "Clear",
@@ -141,7 +140,7 @@ export class RoomSearchFrontend {
   /**
    * Retrieve the current form inputs
    */
-  public getQuery(): IQuery | null {
+  public getQuery(): IApiQuery | null {
     try {
       const day = this.getDate();
       const from = this.getFromTime();
@@ -168,7 +167,7 @@ export class RoomSearchFrontend {
    */
   public render(
     text: string | null = null,
-    result: IResult | null = null,
+    result: IApiResult | null = null,
     color: ColorStatus = ColorStatus.NoResult
   ): void {
     this.renderTeaser(text, color);
@@ -251,15 +250,15 @@ export class RoomSearchFrontend {
     }
   }
 
-  private renderTable(result: IResult | null) {
-    if (!result || (result as IResult).length === 0) {
+  private renderTable(result: IApiResult | null) {
+    if (!result || (result as IApiResult).length === 0) {
       this.jqResults.hide();
       this.jqResults.css("opacity", "0");
     } else {
       const d = document;
       const fragment = d.createDocumentFragment();
 
-      for (const room of result as IResult) {
+      for (const room of result as IApiResult) {
         for (const [index, [from, to]] of room.available.entries()) {
           const tr = d.createElement("tr");
 

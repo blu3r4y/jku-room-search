@@ -24,7 +24,7 @@ function git(command) {
 const appConfig = {
   target: ["web", "es5"],
   entry: {
-    app: "./src/app.ts",
+    app: "./src/app/app.ts",
   },
   output: {
     filename: "./js/[name].[contenthash].js",
@@ -61,7 +61,7 @@ const appConfig = {
       filename: "./css/[name].[contenthash].css",
     }),
     new HtmlPlugin({
-      template: "./src/app.ejs",
+      template: "./src/templates/app.ejs",
     }),
     new CopyPlugin({
       patterns: [{ from: "./src/public/" }],
@@ -81,7 +81,7 @@ const appConfig = {
 const scraperConfig = {
   target: "node",
   entry: {
-    scraper: "./src/scraper.ts",
+    scraper: "./src/scraper/scraper.ts",
   },
   output: {
     filename: "./js/[name].js",
