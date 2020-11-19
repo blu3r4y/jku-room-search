@@ -1,5 +1,4 @@
-import { Duration } from "dayjs/plugin/duration";
-
+import { ITime } from "./types";
 import { TimeUtils } from "./utils";
 
 export class Jku {
@@ -33,10 +32,10 @@ export class Jku {
   /**
    * Returns the well-known raster times of the JKU
    *
-   * @param start A start time `Duration` object
-   * @param stop A stop time `Duration` object
+   * @param start A start time `ITime` object
+   * @param stop A stop time `ITime` object
    */
-  public static getCourseTimes(start: Duration, stop: Duration): Duration[] {
+  public static getCourseTimes(start: ITime, stop: ITime): ITime[] {
     return Jku.mapToLocalTime(start, stop, Jku.iterateCourseTimes);
   }
 
@@ -46,15 +45,15 @@ export class Jku {
    * @param start A start time `LocalTime` object
    * @param stop A stop time `LocalTime` object
    */
-  public static getPauseTimes(start: Duration, stop: Duration): Duration[] {
+  public static getPauseTimes(start: ITime, stop: ITime): ITime[] {
     return Jku.mapToLocalTime(start, stop, Jku.iteratePauseTimes);
   }
 
   private static mapToLocalTime(
-    start: Duration,
-    stop: Duration,
+    start: ITime,
+    stop: ITime,
     iterator: (start: number, stop: number) => Generator<number>
-  ): Duration[] {
+  ): ITime[] {
     const minutes = Array.from(
       iterator(TimeUtils.toMinutes(start), TimeUtils.toMinutes(stop))
     );

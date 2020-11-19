@@ -1,14 +1,16 @@
 import dayjs from "dayjs";
-import duration, { Duration } from "dayjs/plugin/duration";
+import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
+
+import { ITime } from "./types";
 
 export class TimeUtils {
   /**
-   * Converts a time string to a `Duration` object
+   * Converts a time string to a `ITime` object
    *
    * @param str A time string, formatted like `"08:30"`
    */
-  public static fromString(text: string): Duration {
+  public static fromString(text: string): ITime {
     const parts = text.split(":");
     return dayjs.duration({
       hours: parseInt(parts[0]),
@@ -21,7 +23,7 @@ export class TimeUtils {
    *
    * @param time A `Time` object
    */
-  public static toString(time: Duration): string {
+  public static toString(time: ITime): string {
     // change this ugly hack once https://github.com/iamkun/dayjs/pull/1202 got merged
     const hours = ("00" + time.hours().toString()).substr(-2, 2);
     const mins = ("00" + time.minutes().toString()).substr(-2, 2);
@@ -34,17 +36,17 @@ export class TimeUtils {
    *
    * @param minutes The amount of minutes from the start of the day
    */
-  public static fromMinutes(minutes: number): Duration {
+  public static fromMinutes(minutes: number): ITime {
     return dayjs.duration(minutes, "minutes");
   }
 
   /**
-   * Converts the `Duration` object to a minute-based representation,
-   * e.g. converts `Duration("08:30")` to `510` since `8 x 60 + 30 = 510`
+   * Converts the `ITime` object to a minute-based representation,
+   * e.g. converts `ITime("08:30")` to `510` since `8 x 60 + 30 = 510`
    *
-   * @param time A `Duration` object
+   * @param time A `ITime` object
    */
-  public static toMinutes(time: Duration): number {
+  public static toMinutes(time: ITime): number {
     return time.as("minutes");
   }
 
@@ -55,7 +57,7 @@ export class TimeUtils {
    * @param a The time that shall be before b
    * @param b The time that shall be after a
    */
-  public static isBefore(a: Duration, b: Duration): boolean {
+  public static isBefore(a: ITime, b: ITime): boolean {
     return a.asMilliseconds() < b.asMilliseconds();
   }
 
@@ -66,7 +68,7 @@ export class TimeUtils {
    * @param a The time that shall be after b
    * @param b The time that shall be before a
    */
-  public static isAfter(a: Duration, b: Duration): boolean {
+  public static isAfter(a: ITime, b: ITime): boolean {
     return a.asMilliseconds() > b.asMilliseconds();
   }
 }

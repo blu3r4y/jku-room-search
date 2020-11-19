@@ -1,15 +1,13 @@
-import dayjs from "dayjs";
-import { Duration } from "dayjs/plugin/duration";
-
 import { TimeUtils } from "./utils";
+import { IDate, ITime } from "./types";
 
 /**
  * API query for requesting free rooms
  */
 export declare interface IQuery {
-  day: dayjs.Dayjs;
-  from: Duration;
-  to: Duration | null;
+  day: IDate;
+  from: ITime;
+  to: ITime | null;
 }
 
 /**
@@ -22,7 +20,7 @@ export type IResult = IFreeRoom[];
  */
 export declare interface IFreeRoom {
   room: string;
-  available: [Duration, Duration][];
+  available: [ITime, ITime][];
 }
 
 /**

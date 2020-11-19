@@ -7,13 +7,12 @@ import "./app.css";
 /* packages */
 
 import dayjs from "dayjs";
-import { Duration } from "dayjs/plugin/duration";
-
 import scrollIntoView from "scroll-into-view-if-needed";
 
+import { Jku } from "./jku";
+import { ITime } from "./types";
 import { IResult, IRoomData, RoomSearch } from "./api";
 import { ColorStatus, RoomSearchFrontend } from "./frontend";
-import { Jku } from "./jku";
 
 /* globals */
 
@@ -45,11 +44,11 @@ const cover = $("#cover");
 
 let api: RoomSearch | null = null;
 
-const startTimes: Duration[] = Jku.getCourseTimes(
+const startTimes: ITime[] = Jku.getCourseTimes(
   Jku.FIRST_COURSE_START,
   Jku.LAST_COURSE_START
 );
-const endTimes: Duration[] = Jku.getCourseTimes(
+const endTimes: ITime[] = Jku.getCourseTimes(
   Jku.FIRST_COURSE_END,
   Jku.LAST_COURSE_END
 );

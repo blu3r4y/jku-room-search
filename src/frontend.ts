@@ -1,12 +1,14 @@
 import "air-datepicker";
-import { IQuery, IResult } from "./api";
-import { TimeUtils } from "./utils";
 
 import dayjs from "dayjs";
-import duration, { Duration } from "dayjs/plugin/duration";
+import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
+
+import { TimeUtils } from "./utils";
+import { IDate, ITime } from "./types";
+import { IQuery, IResult } from "./api";
 
 const language: AirDatepickerLanguageInstance = {
   clear: "Clear",
@@ -84,8 +86,8 @@ export class RoomSearchFrontend {
   private jqCover: JQuery<HTMLElement>;
 
   private currentColorStatus: ColorStatus;
-  private startTimes?: Duration[] = undefined;
-  private endTimes?: Duration[] = undefined;
+  private startTimes?: ITime[] = undefined;
+  private endTimes?: ITime[] = undefined;
 
   constructor(
     datepicker: JQuery<HTMLElement>,
@@ -123,7 +125,7 @@ export class RoomSearchFrontend {
    * @param startTimes A set of raster start times
    * @param endTimes A set of raster end times
    */
-  public init(startTimes: Duration[], endTimes: Duration[]): void {
+  public init(startTimes: ITime[], endTimes: ITime[]): void {
     this.startTimes = startTimes;
     this.endTimes = endTimes;
 
@@ -180,7 +182,7 @@ export class RoomSearchFrontend {
    *
    * @param version Version, represented by a `LocalDateTime`
    */
-  public renderVersion(version: dayjs.Dayjs): void {
+  public renderVersion(version: IDate): void {
     this.jqVersionText.html(`Index updated ${version.from(dayjs())}`);
   }
 
@@ -210,7 +212,7 @@ export class RoomSearchFrontend {
     }
   }
 
-  private getDate(): dayjs.Dayjs | null {
+  private getDate(): IDate | null {
     if (!this.datepicker || this.datepicker.selectedDates.length === 0) {
       return null;
     }
@@ -219,7 +221,7 @@ export class RoomSearchFrontend {
     return dayjs(nativeDate);
   }
 
-  private getFromTime(): Duration | null {
+  private getFromTime(): ITime | null {
     const minutes = parseInt(
       this.jqFromTime.children("option:selected").val() as string,
       10
@@ -227,7 +229,7 @@ export class RoomSearchFrontend {
     return minutes >= 0 ? TimeUtils.fromMinutes(minutes) : null;
   }
 
-  private getToTime(): Duration | null {
+  private getToTime(): ITime | null {
     const minutes = parseInt(
       this.jqToTime.children("option:selected").val() as string,
       10

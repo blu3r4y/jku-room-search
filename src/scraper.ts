@@ -1,10 +1,10 @@
-import Bottleneck from "bottleneck";
-import cheerio from "cheerio";
-import got, { OptionsOfTextResponseBody } from "got";
 import { writeFile } from "fs";
+import cheerio from "cheerio";
+import Bottleneck from "bottleneck";
+import got, { OptionsOfTextResponseBody } from "got";
 
 import dayjs from "dayjs";
-import duration, { Duration } from "dayjs/plugin/duration";
+import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(duration);
@@ -15,11 +15,12 @@ dayjs.extend(customParseFormat);
 // see https://github.com/basarat/typescript-collections/issues/120
 import Set from "./../node_modules/typescript-collections/dist/lib/Set";
 
-import { IRoomData } from "./api";
 import { Jku } from "./jku";
 import { Logger } from "./log";
-import { SplitTree } from "./split-tree";
+import { IRoomData } from "./api";
 import { TimeUtils } from "./utils";
+import { IDate, ITime } from "./types";
+import { SplitTree } from "./split-tree";
 
 /* globals*/
 
@@ -81,9 +82,9 @@ declare interface ICourse {
  * (one course usually has multiple bookings)
  */
 declare interface IBooking {
-  date: dayjs.Dayjs;
-  from: Duration;
-  to: Duration;
+  date: IDate;
+  from: ITime;
+  to: ITime;
   roomName: string;
 }
 
@@ -398,11 +399,11 @@ class JkuRoomScraper {
     const roomKeys = Object.keys(data.rooms);
 
     // compute and zip the break times
-    const breakStartTimes: Duration[] = Jku.getPauseTimes(
+    const breakStartTimes: ITime[] = Jku.getPauseTimes(
       Jku.FIRST_PAUSE_START,
       Jku.LAST_PAUSE_START
     );
-    const breakEndTimes: Duration[] = Jku.getPauseTimes(
+    const breakEndTimes: ITime[] = Jku.getPauseTimes(
       Jku.FIRST_PAUSE_END,
       Jku.LAST_PAUSE_END
     );
