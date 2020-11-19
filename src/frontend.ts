@@ -1,7 +1,14 @@
 import "air-datepicker";
-import { Duration, LocalDate, LocalDateTime, LocalTime } from "@js-joda/core";
+
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
+
+import { TimeUtils } from "./utils";
+import { IDate, ITime } from "./types";
 import { IQuery, IResult } from "./api";
-import { DateUtils } from "./utils";
 
 const language: AirDatepickerLanguageInstance = {
   clear: "Clear",
@@ -78,8 +85,8 @@ export class RoomSearchFrontend {
   private jqCover: JQuery<HTMLElement>;
 
   private currentColorStatus: ColorStatus;
-  private startTimes?: LocalTime[] = undefined;
-  private endTimes?: LocalTime[] = undefined;
+  private startTimes?: ITime[] = undefined;
+  private endTimes?: ITime[] = undefined;
 
   constructor(
     datepicker: JQuery<HTMLElement>,
@@ -115,7 +122,7 @@ export class RoomSearchFrontend {
    * @param startTimes A set of raster start times
    * @param endTimes A set of raster end times
    */
-  public init(startTimes: LocalTime[], endTimes: LocalTime[]): void {
+  public init(startTimes: ITime[], endTimes: ITime[]): void {
     this.startTimes = startTimes;
     this.endTimes = endTimes;
 
@@ -141,7 +148,7 @@ export class RoomSearchFrontend {
       const to = this.getToTime();
 
       // sanity checks (toMinutes is allowed to be NULL)
-      if (!day || !from || (to && from.isAfter(to))) {
+      if (!day || !from || (to && TimeUtils.isAfter(from, to))) {
         return null;
       } else {
         return { day, from, to };
@@ -173,20 +180,8 @@ export class RoomSearchFrontend {
    *
    * @param version Version, represented by a `LocalDateTime`
    */
-  public renderVersion(version: LocalDateTime): void {
-    const duration = Duration.between(version, LocalDateTime.now());
-    let readableDuration = "just now";
-    if (duration.toDays() >= 7) {
-      readableDuration = `${Math.floor(duration.toDays() / 7)} weeks ago`;
-    } else if (duration.toDays() > 0) {
-      readableDuration = `${duration.toDays()} days ago`;
-    } else if (duration.toHours() > 0) {
-      readableDuration = `${duration.toHours()} hours ago`;
-    } else if (duration.toMinutes() > 0) {
-      readableDuration = `${duration.toMinutes()} minutes ago`;
-    }
-
-    this.jqVersionText.html(`Index updated ${readableDuration}`);
+  public renderVersion(version: IDate): void {
+    this.jqVersionText.html(`Index updated ${version.from(dayjs())}`);
   }
 
   /**
@@ -215,33 +210,29 @@ export class RoomSearchFrontend {
     }
   }
 
-  private getDate(): LocalDate | null {
+  private getDate(): IDate | null {
     if (!this.datepicker || this.datepicker.selectedDates.length === 0) {
       return null;
     }
 
     const nativeDate: Date = this.datepicker.selectedDates[0];
-    return LocalDate.of(
-      nativeDate.getFullYear(),
-      nativeDate.getMonth() + 1,
-      nativeDate.getDate()
-    );
+    return dayjs(nativeDate);
   }
 
-  private getFromTime(): LocalTime | null {
+  private getFromTime(): ITime | null {
     const minutes = parseInt(
       this.jqFromTime.children("option:selected").val() as string,
       10
     );
-    return minutes >= 0 ? DateUtils.fromMinutes(minutes) : null;
+    return minutes >= 0 ? TimeUtils.fromMinutes(minutes) : null;
   }
 
-  private getToTime(): LocalTime | null {
+  private getToTime(): ITime | null {
     const minutes = parseInt(
       this.jqToTime.children("option:selected").val() as string,
       10
     );
-    return minutes >= 0 ? DateUtils.fromMinutes(minutes) : null;
+    return minutes >= 0 ? TimeUtils.fromMinutes(minutes) : null;
   }
 
   private renderTeaser(text: string | null, color: ColorStatus) {
@@ -288,12 +279,12 @@ export class RoomSearchFrontend {
 
           // from time
           const tdFrom = d.createElement("td");
-          tdFrom.innerHTML = DateUtils.toString(from);
+          tdFrom.innerHTML = TimeUtils.toString(from);
           tr.appendChild(tdFrom);
 
           // to time
           const tdTo = d.createElement("td");
-          tdTo.innerHTML = DateUtils.toString(to);
+          tdTo.innerHTML = TimeUtils.toString(to);
           tr.appendChild(tdTo);
 
           fragment.appendChild(tr);
@@ -351,11 +342,11 @@ export class RoomSearchFrontend {
         return;
       }
 
-      if (!from.isBefore(to)) {
+      if (!TimeUtils.isBefore(from, to)) {
         // find the closest to time that is greater than the new from time
-        const rollover = obj.endTimes.find((e) => e.isAfter(from));
+        const rollover = obj.endTimes.find((e) => TimeUtils.isAfter(e, from));
         if (rollover) {
-          obj.jqToTime.val(DateUtils.toMinutes(rollover));
+          obj.jqToTime.val(TimeUtils.toMinutes(rollover));
         }
       }
     }
@@ -369,14 +360,14 @@ export class RoomSearchFrontend {
         return;
       }
 
-      if (!from.isBefore(to)) {
+      if (!TimeUtils.isBefore(from, to)) {
         // find the closest from time that is smaller than the new to time
         const rollunder = obj.startTimes
           .slice()
           .reverse()
-          .find((e) => e.isBefore(to));
+          .find((e) => TimeUtils.isBefore(e, to));
         if (rollunder) {
-          obj.jqFromTime.val(DateUtils.toMinutes(rollunder));
+          obj.jqFromTime.val(TimeUtils.toMinutes(rollunder));
         }
       }
     }
@@ -385,8 +376,8 @@ export class RoomSearchFrontend {
     this.startTimes.forEach((item) => {
       this.jqFromTime.append(
         $("<option></option>")
-          .val(DateUtils.toMinutes(item))
-          .html(DateUtils.toString(item))
+          .val(TimeUtils.toMinutes(item))
+          .html(TimeUtils.toString(item))
       );
     });
 
@@ -394,19 +385,22 @@ export class RoomSearchFrontend {
     this.endTimes.forEach((item) => {
       this.jqToTime.append(
         $("<option></option>")
-          .val(DateUtils.toMinutes(item))
-          .html(DateUtils.toString(item))
+          .val(TimeUtils.toMinutes(item))
+          .html(TimeUtils.toString(item))
       );
     });
 
     // pre-select the closest start time in the past (or one up to 15 minutes in the future)
-    const now = LocalTime.now();
+    const now = dayjs.duration({
+      hours: dayjs().hour(),
+      minutes: dayjs().minute(),
+    });
     const setpoint = this.startTimes
       .slice()
       .reverse()
-      .find((e) => now.isAfter(e.minusMinutes(15)));
+      .find((e) => TimeUtils.isAfter(now, e.subtract(15, "minutes")));
     if (setpoint) {
-      this.jqFromTime.val(DateUtils.toMinutes(setpoint));
+      this.jqFromTime.val(TimeUtils.toMinutes(setpoint));
     }
 
     // bind change listeners

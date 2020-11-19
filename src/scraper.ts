@@ -1,23 +1,26 @@
-import Bottleneck from "bottleneck";
-import cheerio from "cheerio";
-import got, { OptionsOfTextResponseBody } from "got";
 import { writeFile } from "fs";
-import {
-  DateTimeFormatter,
-  LocalDate,
-  LocalDateTime,
-  LocalTime,
-} from "@js-joda/core";
+import cheerio from "cheerio";
+import Bottleneck from "bottleneck";
+import got, { OptionsOfTextResponseBody } from "got";
+
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+import relativeTime from "dayjs/plugin/relativeTime";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
+dayjs.extend(customParseFormat);
 
 // this is a dirty hack, but i have no idea how to get this running instead
 // see https://github.com/basarat/typescript-collections/issues/120
 import Set from "./../node_modules/typescript-collections/dist/lib/Set";
 
-import { IRoomData } from "./api";
 import { Jku } from "./jku";
 import { Logger } from "./log";
+import { IRoomData } from "./api";
+import { TimeUtils } from "./utils";
+import { IDate, ITime } from "./types";
 import { SplitTree } from "./split-tree";
-import { DateUtils } from "./utils";
 
 /* globals*/
 
@@ -79,9 +82,9 @@ declare interface ICourse {
  * (one course usually has multiple bookings)
  */
 declare interface IBooking {
-  date: LocalDate;
-  from: LocalTime;
-  to: LocalTime;
+  date: IDate;
+  from: ITime;
+  to: ITime;
   roomName: string;
 }
 
@@ -118,8 +121,7 @@ class JkuRoomScraper {
   /**
    * Date formatters for the entries in rooms.json
    */
-  private dateFormatter: DateTimeFormatter;
-  private dateTimeFormatter: DateTimeFormatter;
+  private apiDateFormat = "YYYY-MM-DD";
 
   /**
    * If this is true, the scraper will not scrape the entire page,
@@ -136,8 +138,8 @@ class JkuRoomScraper {
 
     // booking interval which will be considered free
     this.fullInterval = [
-      DateUtils.toMinutes(Jku.FIRST_COURSE_START),
-      DateUtils.toMinutes(Jku.LAST_COURSE_END),
+      TimeUtils.toMinutes(Jku.FIRST_COURSE_START),
+      TimeUtils.toMinutes(Jku.LAST_COURSE_END),
     ];
 
     // zero statistics
@@ -164,12 +166,6 @@ class JkuRoomScraper {
       maxConcurrent: 1,
       minTime: REQUEST_DELAY_MS,
     });
-
-    // date formatters
-    this.dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    this.dateTimeFormatter = DateTimeFormatter.ofPattern(
-      "yyyy-MM-dd'T'HH:mm:ss"
-    );
   }
 
   public async scrape(): Promise<IRoomData> {
@@ -182,7 +178,7 @@ class JkuRoomScraper {
         range: { start: "", end: "" },
         rooms: {},
         buildings: {},
-        version: LocalDateTime.now().format(this.dateTimeFormatter),
+        version: dayjs().format(),
       };
 
       // a map for rooms, identified by their canonical name
@@ -363,8 +359,8 @@ class JkuRoomScraper {
 
       // query how many days we scraped in total
       const days = Object.keys(data.available)
-        .map((e) => LocalDate.parse(e, this.dateFormatter))
-        .sort();
+        .map((e) => dayjs(e, this.apiDateFormat))
+        .sort((a, b) => (a.isAfter(b) ? 1 : -1));
 
       this.statistics.numDays = days.length;
       if (days.length === 0) {
@@ -372,12 +368,8 @@ class JkuRoomScraper {
       }
 
       // query the earlierst and latest day that we scraped
-      data.range.start = days[0]
-        .atTime(LocalTime.MIN)
-        .format(this.dateTimeFormatter);
-      data.range.end = days[days.length - 1]
-        .atTime(LocalTime.MAX)
-        .format(this.dateTimeFormatter);
+      data.range.start = days[0].startOf("day").format();
+      data.range.end = days[days.length - 1].endOf("day").format();
 
       this.statistics.rangeStart = data.range.start;
       this.statistics.rangeEnd = data.range.end;
@@ -402,28 +394,28 @@ class JkuRoomScraper {
   }
 
   private reverseIndex(data: IRoomData) {
-    const start = LocalDate.parse(data.range.start, this.dateTimeFormatter);
-    const end = LocalDate.parse(data.range.end, this.dateTimeFormatter);
+    const start = dayjs(data.range.start);
+    const end = dayjs(data.range.end);
     const roomKeys = Object.keys(data.rooms);
 
     // compute and zip the break times
-    const breakStartTimes: LocalTime[] = Jku.getPauseTimes(
+    const breakStartTimes: ITime[] = Jku.getPauseTimes(
       Jku.FIRST_PAUSE_START,
       Jku.LAST_PAUSE_START
     );
-    const breakEndTimes: LocalTime[] = Jku.getPauseTimes(
+    const breakEndTimes: ITime[] = Jku.getPauseTimes(
       Jku.FIRST_PAUSE_END,
       Jku.LAST_PAUSE_END
     );
     const breakTimes = breakStartTimes.map((e, i) => [
-      DateUtils.toMinutes(e),
-      DateUtils.toMinutes(breakEndTimes[i]),
+      TimeUtils.toMinutes(e),
+      TimeUtils.toMinutes(breakEndTimes[i]),
     ]);
 
     // traverse all days
     let curr = start;
     while (curr <= end) {
-      const dayKey = curr.format(this.dateFormatter);
+      const dayKey = curr.format(this.apiDateFormat);
 
       // traverse all rooms
       for (const roomKey of roomKeys) {
@@ -447,12 +439,12 @@ class JkuRoomScraper {
         intervals.push(...reversed);
       }
 
-      curr = curr.plusDays(1);
+      curr = curr.add(1, "day");
     }
   }
 
   private addBooking(data: IRoomData, booking: IBooking) {
-    const dayKey = booking.date.format(this.dateFormatter);
+    const dayKey = booking.date.format(this.apiDateFormat);
 
     // lookup the room id
     const canonicalName = this.getCanonicalRoomName(booking.roomName);
@@ -466,8 +458,8 @@ class JkuRoomScraper {
 
     // book this room
     const bookVal: [number, number] = [
-      DateUtils.toMinutes(booking.from),
-      DateUtils.toMinutes(booking.to),
+      TimeUtils.toMinutes(booking.from),
+      TimeUtils.toMinutes(booking.to),
     ];
     this.getBookingsList(data, dayKey, roomKey).push(bookVal);
   }
@@ -686,16 +678,16 @@ class JkuRoomScraper {
       });
 
     // build bookings objects
-    const formatter = DateTimeFormatter.ofPattern("dd.MM.yy");
+    const bookingFormat = "DD.MM.YY";
     const bookings: IBooking[] = values
       .get()
       .map((tuple: { date: string; time: string; room: string }) => {
         const times = tuple.time.split(" – ");
         return {
-          date: LocalDate.parse(tuple.date, formatter),
-          from: LocalTime.parse(times[0].trim()),
+          date: dayjs(tuple.date, bookingFormat),
+          from: TimeUtils.fromString(times[0].trim()),
           roomName: tuple.room,
-          to: LocalTime.parse(times[1].trim()),
+          to: TimeUtils.fromString(times[1].trim()),
         };
       });
 

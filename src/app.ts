@@ -6,17 +6,13 @@ import "./app.css";
 
 /* packages */
 
-import {
-  DateTimeFormatter,
-  LocalDate,
-  LocalDateTime,
-  LocalTime,
-} from "@js-joda/core";
+import dayjs from "dayjs";
 import scrollIntoView from "scroll-into-view-if-needed";
 
+import { Jku } from "./jku";
+import { ITime } from "./types";
 import { IResult, IRoomData, RoomSearch } from "./api";
 import { ColorStatus, RoomSearchFrontend } from "./frontend";
-import { Jku } from "./jku";
 
 /* globals */
 
@@ -49,11 +45,11 @@ const anchor = $("#anchor");
 
 let api: RoomSearch | null = null;
 
-const startTimes: LocalTime[] = Jku.getCourseTimes(
+const startTimes: ITime[] = Jku.getCourseTimes(
   Jku.FIRST_COURSE_START,
   Jku.LAST_COURSE_START
 );
-const endTimes: LocalTime[] = Jku.getCourseTimes(
+const endTimes: ITime[] = Jku.getCourseTimes(
   Jku.FIRST_COURSE_END,
   Jku.LAST_COURSE_END
 );
@@ -146,17 +142,13 @@ form.on("submit", submitHandler);
 
 // cache the result by the current build id and the current day
 const ajaxUrl =
-  DATA_URL +
-  "?hash=" +
-  COMMIT_HASH +
-  "&cache=" +
-  LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+  DATA_URL + "?hash=" + COMMIT_HASH + "&cache=" + dayjs().format("YYYYMMDD");
 
 function dataLoadSuccessHandler(data: IRoomData) {
   console.log("data", data);
   api = new RoomSearch(data);
 
-  frontend.renderVersion(LocalDateTime.parse(data.version));
+  frontend.renderVersion(dayjs(data.version));
   frontend.renderButton(true);
 }
 

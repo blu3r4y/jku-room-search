@@ -1,38 +1,41 @@
-import { LocalTime } from "@js-joda/core";
-
-import { DateUtils } from "./utils";
+import { ITime } from "./types";
+import { TimeUtils } from "./utils";
 
 export class Jku {
   private static readonly COURSE_DURATION: number = 45;
   private static readonly PAUSE_DURATION: number = 15;
 
-  public static readonly FIRST_COURSE_START = DateUtils.fromString("08:30");
-  public static readonly FIRST_COURSE_END = Jku.FIRST_COURSE_START.plusMinutes(
-    Jku.COURSE_DURATION
+  public static readonly FIRST_COURSE_START = TimeUtils.fromString("08:30");
+  public static readonly FIRST_COURSE_END = Jku.FIRST_COURSE_START.add(
+    Jku.COURSE_DURATION,
+    "minutes"
   );
 
-  public static readonly LAST_COURSE_START = DateUtils.fromString("21:30");
-  public static readonly LAST_COURSE_END = Jku.LAST_COURSE_START.plusMinutes(
-    Jku.COURSE_DURATION
+  public static readonly LAST_COURSE_START = TimeUtils.fromString("21:30");
+  public static readonly LAST_COURSE_END = Jku.LAST_COURSE_START.add(
+    Jku.COURSE_DURATION,
+    "minutes"
   );
 
-  public static readonly FIRST_PAUSE_START = DateUtils.fromString("10:00");
-  public static readonly FIRST_PAUSE_END = Jku.FIRST_PAUSE_START.plusMinutes(
-    Jku.PAUSE_DURATION
+  public static readonly FIRST_PAUSE_START = TimeUtils.fromString("10:00");
+  public static readonly FIRST_PAUSE_END = Jku.FIRST_PAUSE_START.add(
+    Jku.PAUSE_DURATION,
+    "minutes"
   );
 
-  public static readonly LAST_PAUSE_START = DateUtils.fromString("20:30");
-  public static readonly LAST_PAUSE_END = Jku.LAST_PAUSE_START.plusMinutes(
-    Jku.PAUSE_DURATION
+  public static readonly LAST_PAUSE_START = TimeUtils.fromString("20:30");
+  public static readonly LAST_PAUSE_END = Jku.LAST_PAUSE_START.add(
+    Jku.PAUSE_DURATION,
+    "minutes"
   );
 
   /**
    * Returns the well-known raster times of the JKU
    *
-   * @param start A start time `LocalTime` object
-   * @param stop A stop time `LocalTime` object
+   * @param start A start time `ITime` object
+   * @param stop A stop time `ITime` object
    */
-  public static getCourseTimes(start: LocalTime, stop: LocalTime): LocalTime[] {
+  public static getCourseTimes(start: ITime, stop: ITime): ITime[] {
     return Jku.mapToLocalTime(start, stop, Jku.iterateCourseTimes);
   }
 
@@ -42,19 +45,19 @@ export class Jku {
    * @param start A start time `LocalTime` object
    * @param stop A stop time `LocalTime` object
    */
-  public static getPauseTimes(start: LocalTime, stop: LocalTime): LocalTime[] {
+  public static getPauseTimes(start: ITime, stop: ITime): ITime[] {
     return Jku.mapToLocalTime(start, stop, Jku.iteratePauseTimes);
   }
 
   private static mapToLocalTime(
-    start: LocalTime,
-    stop: LocalTime,
+    start: ITime,
+    stop: ITime,
     iterator: (start: number, stop: number) => Generator<number>
-  ): LocalTime[] {
+  ): ITime[] {
     const minutes = Array.from(
-      iterator(DateUtils.toMinutes(start), DateUtils.toMinutes(stop))
+      iterator(TimeUtils.toMinutes(start), TimeUtils.toMinutes(stop))
     );
-    const times = minutes.map(DateUtils.fromMinutes);
+    const times = minutes.map(TimeUtils.fromMinutes);
     return times;
   }
 
