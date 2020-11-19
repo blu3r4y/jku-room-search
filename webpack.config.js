@@ -1,7 +1,12 @@
+const path = require("path");
+const glob = require("glob");
 const webpack = require("webpack");
 
 // extract css file to avoid FOUC
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+// purge unused css
+const PurgeCssPlugin = require("purgecss-webpack-plugin");
 
 // minimizer for css
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
@@ -59,6 +64,12 @@ const appConfig = {
     }),
     new MiniCssExtractPlugin({
       filename: "./css/[name].[contenthash].css",
+    }),
+    new PurgeCssPlugin({
+      paths: glob.sync(`${path.join(__dirname, "src")}/**/*`, { nodir: true }),
+      safelist: {
+        greedy: [/^datepicker/],
+      },
     }),
     new HtmlPlugin({
       template: "./src/templates/app.ejs",
