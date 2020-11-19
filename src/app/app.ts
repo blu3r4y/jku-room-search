@@ -19,6 +19,11 @@ import { ColorStatus, RoomSearchFrontend } from "./frontend";
 // webpack will declare this global variables for us
 declare let DATA_URL: string;
 declare let COMMIT_HASH: string;
+declare let DEBUG_MODE: boolean;
+
+if (DEBUG_MODE) {
+  console.log("debug mode enabled");
+}
 
 /* gui elements */
 
@@ -77,13 +82,19 @@ function submitHandler(event: Event) {
 
   // user request
   const query = frontend.getQuery();
-  console.log("query", query);
+
+  if (DEBUG_MODE) {
+    console.log("query", query);
+  }
 
   if (query != null) {
     if (api != null) {
       // process user request
       const result: IApiResult | null = api.searchFreeRooms(query);
-      console.log("result", result);
+
+      if (DEBUG_MODE) {
+        console.log("result", result);
+      }
 
       if (result != null) {
         if (result.length > 0) {
@@ -145,7 +156,10 @@ const ajaxUrl =
   DATA_URL + "?hash=" + COMMIT_HASH + "&cache=" + dayjs().format("YYYYMMDD");
 
 function dataLoadSuccessHandler(data: IRoomData) {
-  console.log("data", data);
+  if (DEBUG_MODE) {
+    console.log("data", data);
+  }
+
   api = new RoomSearch(data);
 
   frontend.renderVersion(dayjs(data.version));

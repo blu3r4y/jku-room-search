@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Search for free rooms on the campus of the Johannes Kepler University Linz",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --mode=production",
     "check": "npx eslint . --ext .js,.jsx,.ts,.tsx && npx prettier --check .",
     "fix": "npm run format && npm run lint",
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
