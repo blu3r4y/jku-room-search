@@ -1,48 +1,34 @@
-import dayjs from "dayjs";
+import { Dayjs } from "dayjs";
 import { Duration } from "dayjs/plugin/duration";
 
 /**
- * Represents a date, but will also always hold some time, because it is backed by IDate
+ * Calendar date, but will also always hold some time, because it is backed by `dayjs.Dayjs`
  */
-export type IDate = dayjs.Dayjs;
+export type Day = Dayjs;
 
 /**
- * Represents a time of day, but is backed by a dayjs.ITime
+ * Time of day, but is backed by a `dayjs.Duration`
  */
-export type ITime = Duration;
+export type Time = Duration;
 
 /**
- * API query for requesting free rooms
+ * Query for requesting free rooms
  */
-export declare interface IApiQuery {
-  day: IDate;
-  from: ITime;
-  to: ITime | null;
+export declare interface ApiQuery {
+  day: Day;
+  from: Time;
+  to: Time | null;
 }
 
 /**
- * API result object with free rooms
+ * Array of free rooms
  */
-export type IApiResult = IFreeRoom[];
+export type ApiResponse = FreeRoom[];
 
 /**
- * A single free room entry
+ * Single free room entry
  */
-export declare interface IFreeRoom {
+export declare interface FreeRoom {
   room: string;
-  available: [ITime, ITime][];
-}
-
-/**
- * The structure of the room data index
- */
-export declare interface IRoomData {
-  version: string;
-  range: { start: string; end: string };
-  // { room identifier -> (room name, building identifier) }
-  rooms: { [id: string]: { name: string; building: number } };
-  // { building identifier -> building name }
-  buildings: { [id: string]: string };
-  // { day identifier -> {room identifier -> [ (free from, free until) ]} }
-  available: { [id: string]: { [id: string]: [number, number][] } };
+  available: [Time, Time][];
 }

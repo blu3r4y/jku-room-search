@@ -1,3 +1,4 @@
+//TODO: refactor
 import colors from "ansicolors";
 
 export class Logger {
@@ -20,6 +21,7 @@ export class Logger {
     progress?: number,
     error = false
   ): void {
+    if (text == null) return;
     if (category == null && status == null && progress == null) {
       // pure unmodified logging
       console.log(text);

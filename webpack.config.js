@@ -61,7 +61,7 @@ const appConfig = (env, options) => {
     },
     plugins: [
       new webpack.DefinePlugin({
-        DATA_URL: JSON.stringify("./data/rooms.json"),
+        INDEX_URL: JSON.stringify("./data/index.json"),
         COMMIT_HASH: JSON.stringify(git("rev-parse HEAD")),
         DEBUG_MODE: JSON.stringify(options.mode !== "production"),
       }),
@@ -118,12 +118,12 @@ const scraperConfig = (env, options) => {
     },
     plugins: [
       new webpack.DefinePlugin({
-        BASE_URL_KUSSS: JSON.stringify("https://www.kusss.jku.at"),
-        BASE_URL_JKU: JSON.stringify("https://www.jku.at"),
+        KUSSS_URL: JSON.stringify("https://www.kusss.jku.at"),
+        JKU_URL: JSON.stringify("https://www.jku.at"),
         USER_AGENT: JSON.stringify(
           "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"
         ),
-        DATA_PATH: JSON.stringify("rooms.json"),
+        OUTPUT_PATH: JSON.stringify("index.json"),
         MAX_RETRIES: JSON.stringify(5),
         REQUEST_TIMEOUT_MS: JSON.stringify(5 * 1000),
         REQUEST_DELAY_MS: JSON.stringify(500),

@@ -1,183 +1,163 @@
+import dayjs from "dayjs";
+import scrollIntoView from "scroll-into-view-if-needed";
+
+import { Jku } from "../common/jku";
+import { IndexDto } from "../common/dto";
+import { SearchApi } from "./searchApi";
+import { ApiResponse } from "../common/types";
+import {
+  TeaserState as TSt,
+  ButtonState as BSt,
+  Frontend,
+} from "./frontend/frontend";
+
 /* stylesheets */
 
 import "air-datepicker/dist/css/datepicker.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../templates/app.css";
 
-/* packages */
-
-import dayjs from "dayjs";
-import scrollIntoView from "scroll-into-view-if-needed";
-
-import { Jku } from "../common/jku";
-import { IApiResult, IRoomData, ITime } from "../common/types";
-import { RoomSearch } from "./api";
-import { ColorStatus, RoomSearchFrontend } from "./frontend";
-
 /* globals */
 
-// webpack will declare this global variables for us
-declare let DATA_URL: string;
+/** The full url to the index.json (injected by webpack) */
+declare let INDEX_URL: string;
+/** The commit hash of this build (injected by webpack) */
 declare let COMMIT_HASH: string;
+/** True if this is a development build (injected by webpack) */
 declare let DEBUG_MODE: boolean;
 
-if (DEBUG_MODE) {
-  console.log("debug mode enabled");
-}
+class App {
+  private searchApi?: SearchApi = undefined;
+  private readonly frontend: Frontend;
 
-/* gui elements */
-
-const datepicker = $("#datepicker");
-const fromTime = $("#fromTime");
-const toTime = $("#toTime");
-
-const form = $("#form");
-
-const results = $("#results");
-const teaserText = $("#teaserText");
-const teaserBlock = $("#teaserBlock");
-
-const button = $("#button");
-const spinner = $("#spinner");
-const buttonText = $("#buttonText");
-const versionText = $("#versionText");
-
-const cover = $("#cover");
-
-const anchor = $("#anchor");
-
-/* app logic */
-
-let api: RoomSearch | null = null;
-
-const startTimes: ITime[] = Jku.getCourseTimes(
-  Jku.FIRST_COURSE_START,
-  Jku.LAST_COURSE_START
-);
-const endTimes: ITime[] = Jku.getCourseTimes(
-  Jku.FIRST_COURSE_END,
-  Jku.LAST_COURSE_END
-);
-
-const frontend = new RoomSearchFrontend(
-  datepicker,
-  fromTime,
-  toTime,
-  results,
-  teaserText,
-  teaserBlock,
-  button,
-  spinner,
-  buttonText,
-  versionText,
-  cover
-);
-
-frontend.init(startTimes, endTimes);
-frontend.render();
-frontend.renderButton(false, false);
-
-function submitHandler(event: Event) {
-  frontend.renderButton(false);
-
-  // user request
-  const query = frontend.getQuery();
-
-  if (DEBUG_MODE) {
-    console.log("query", query);
+  constructor() {
+    this.frontend = new Frontend({
+      datepicker: $("#datepicker"),
+      fromTime: $("#fromTime"),
+      toTime: $("#toTime"),
+      results: $("#results"),
+      teaserText: $("#teaserText"),
+      teaserBlock: $("#teaserBlock"),
+      spinner: $("#spinner"),
+      buttonText: $("#buttonText"),
+      versionText: $("#versionText"),
+      cover: $("#cover"),
+      button: $("#button")[0] as HTMLInputElement,
+      anchor: $("#anchor")[0],
+    });
   }
 
-  if (query != null) {
-    if (api != null) {
-      // process user request
-      const result: IApiResult | null = api.searchFreeRooms(query);
+  /**
+   * Main app entry point
+   */
+  public init() {
+    if (DEBUG_MODE) console.log("debug mode enabled");
 
-      if (DEBUG_MODE) {
-        console.log("result", result);
-      }
+    // prepare the cache-busting query
+    const today = dayjs().format("YYYYMMDD");
+    const ajaxUrl = INDEX_URL + `?v=${COMMIT_HASH}-${today}`;
 
-      if (result != null) {
-        if (result.length > 0) {
-          frontend.render(
-            "😊 We found some free rooms",
-            result,
-            ColorStatus.Success
-          );
-        } else {
-          frontend.render(
-            "😟 Sorry, no free rooms found",
-            null,
-            ColorStatus.NoResult
-          );
-        }
+    this.frontend.init(Jku.getCourseStartTimes(), Jku.getCourseEndTimes());
+    this.initSeachApi(ajaxUrl);
 
-        scrollIntoView(anchor[0], {
-          behavior: "smooth",
-          scrollMode: "if-needed",
-        });
-      } else {
-        console.error("The search algorithm could not process the query.");
-        frontend.render(
-          "😟 Sorry, something broke <tt>[ERR_SEARCH_ROOMS]</tt>",
-          null,
-          ColorStatus.Error
-        );
-      }
-    } else {
-      console.error("Room data wasn't loaded properly.");
-      frontend.render(
-        "😟 Sorry, something broke <tt>[ERR_NO_DATA]</tt>",
-        null,
-        ColorStatus.Error
+    // register form submission handler
+    $("#form").on("submit", App.getSearchEventHandler(this));
+
+    // only show page content when loading finished
+    $(window).on("load", () => this.frontend.hideCover());
+  }
+
+  /**
+   * Load the latest index and initialize the global `SEARCH_API` object
+   *
+   * @param indexUrl The URL that points to index.json
+   */
+  private initSeachApi(indexUrl: string) {
+    const xhr: JQuery.jqXHR = $.getJSON(indexUrl);
+
+    xhr.done((index: IndexDto) => {
+      if (DEBUG_MODE) console.log("data", index);
+
+      this.searchApi = new SearchApi(index);
+
+      this.frontend.renderVersion(dayjs(index.version));
+      this.frontend.renderButton(BSt.Enabled);
+    });
+
+    xhr.fail(() => {
+      console.error(`the XHR request 'GET ${indexUrl}' failed.`);
+      this.frontend.render(
+        "😟 Sorry, something broke <tt>[err::xhrRequest]</tt>",
+        TSt.Error
       );
-    }
-  } else {
-    console.error(
-      "The frontend input could not be parsed into a valid user query."
-    );
-    frontend.render(
-      "😟 Sorry, something broke <tt>[ERR_PARSE_INPUT]</tt>",
-      null,
-      ColorStatus.Error
-    );
+    });
   }
 
-  // disable the spinner shortly
-  setTimeout(() => frontend.renderButton(true), 150);
-  event.preventDefault();
-}
+  /**
+   * Handle pressing the search button by initiating an API query
+   *
+   * @param event The DOM event object
+   */
+  private static getSearchEventHandler(app: App) {
+    return (event: Event) => {
+      app.frontend.renderButton(BSt.Spinning);
 
-form.on("submit", submitHandler);
+      // get user query
+      const query = app.frontend.getQuery();
+      if (DEBUG_MODE) console.log("query", query);
 
-/* room data loading */
+      if (query == null) {
+        console.error(
+          "the frontend input could not be parsed into a valid user query"
+        );
+        app.frontend.render(
+          "😟 Sorry, something broke <tt>[err::parseQuery]</tt>",
+          TSt.Error
+        );
+        return;
+      }
 
-// cache the result by the current build id and the current day
-const ajaxUrl =
-  DATA_URL + "?hash=" + COMMIT_HASH + "&cache=" + dayjs().format("YYYYMMDD");
+      if (app.searchApi == null) {
+        console.error("room data wasn't loaded properly");
+        app.frontend.render(
+          "😟 Sorry, something broke <tt>[err::initApi]</tt>",
+          TSt.Error
+        );
+        return;
+      }
 
-function dataLoadSuccessHandler(data: IRoomData) {
-  if (DEBUG_MODE) {
-    console.log("data", data);
+      // perform user query
+      const result: ApiResponse | null = app.searchApi.searchFreeRooms(query);
+      if (DEBUG_MODE) console.log("result", result);
+
+      if (result == null) {
+        console.error("the search algorithm could not process the query");
+        app.frontend.render(
+          "😟 Sorry, something broke <tt>[err::searchApi]</tt>",
+          TSt.Error
+        );
+        return;
+      }
+
+      // show result status
+      if (result.length > 0) {
+        app.frontend.render("😊 We found some free rooms", TSt.Success, result);
+      } else {
+        app.frontend.render("😟 Sorry, no free rooms found", TSt.NoResult);
+      }
+
+      // scroll to the results
+      scrollIntoView(app.frontend.getAnchor(), {
+        behavior: "smooth",
+        scrollMode: "if-needed",
+      });
+
+      // briefly show the spinner before re-enabling the button
+      setTimeout(() => app.frontend.renderButton(BSt.Enabled), 150);
+      event.preventDefault();
+    };
   }
-
-  api = new RoomSearch(data);
-
-  frontend.renderVersion(dayjs(data.version));
-  frontend.renderButton(true);
 }
 
-function dataLoadFailHandler() {
-  console.error(`The XHR request 'GET ${ajaxUrl}' failed.`);
-  frontend.render(
-    "😟 Sorry, something broke <tt>[ERR_LOAD_DATA]</tt>",
-    null,
-    ColorStatus.Error
-  );
-}
-
-const xhr: JQuery.jqXHR = $.getJSON(ajaxUrl);
-xhr.done(dataLoadSuccessHandler);
-xhr.fail(dataLoadFailHandler);
-
-/* show page content when loading finished */
-$(window).on("load", () => frontend.hideCover());
+const app = new App();
+app.init();

@@ -1,4 +1,4 @@
-import { ITime } from "./types";
+import { Time } from "./types";
 import { TimeUtils } from "./utils";
 
 export class Jku {
@@ -30,34 +30,68 @@ export class Jku {
   );
 
   /**
-   * Returns the well-known raster times of the JKU
-   *
-   * @param start A start time `ITime` object
-   * @param stop A stop time `ITime` object
+   * The interval between which courses can be booked (as `Time` objects)
    */
-  public static getCourseTimes(start: ITime, stop: ITime): ITime[] {
-    return Jku.mapToLocalTime(start, stop, Jku.iterateCourseTimes);
+  public static getBookingInterval(): [Time, Time] {
+    return [Jku.FIRST_COURSE_START, Jku.LAST_COURSE_END];
   }
 
   /**
-   * Returns the well-known break times of the JKU
-   *
-   * @param start A start time `LocalTime` object
-   * @param stop A stop time `LocalTime` object
+   * The interval between which courses can be booked (in minutes)
    */
-  public static getPauseTimes(start: ITime, stop: ITime): ITime[] {
-    return Jku.mapToLocalTime(start, stop, Jku.iteratePauseTimes);
+  public static getBookingIntervalInMinutes(): [number, number] {
+    return [
+      TimeUtils.toMinutes(Jku.FIRST_COURSE_START),
+      TimeUtils.toMinutes(Jku.LAST_COURSE_END),
+    ];
   }
 
-  private static mapToLocalTime(
-    start: ITime,
-    stop: ITime,
+  public static getCourseStartTimes(): Time[] {
+    return Jku.getCourseTimes(Jku.FIRST_COURSE_START, Jku.LAST_COURSE_START);
+  }
+
+  public static getCourseEndTimes(): Time[] {
+    return Jku.getCourseTimes(Jku.FIRST_COURSE_END, Jku.LAST_COURSE_END);
+  }
+
+  public static getPauseStartTimes(): Time[] {
+    return Jku.getPauseTimes(Jku.FIRST_PAUSE_START, Jku.LAST_PAUSE_START);
+  }
+
+  public static getPauseEndTimes(): Time[] {
+    return Jku.getPauseTimes(Jku.FIRST_PAUSE_END, Jku.LAST_PAUSE_END);
+  }
+
+  /**
+   * Returns the well-known raster times of the JKU
+   *
+   * @param start The inclusive start time
+   * @param stop The inclusive stop time
+   */
+  private static getCourseTimes(start: Time, stop: Time): Time[] {
+    return Jku.iterateAndMapToTime(start, stop, Jku.iterateCourseTimes);
+  }
+
+  /**
+   * Returns the well-known pause times of the JKU
+   *
+   * @param start The inclusive start time
+   * @param stop The inclusive stop time
+   */
+  private static getPauseTimes(start: Time, stop: Time): Time[] {
+    return Jku.iterateAndMapToTime(start, stop, Jku.iteratePauseTimes);
+  }
+
+  private static iterateAndMapToTime(
+    start: Time,
+    stop: Time,
     iterator: (start: number, stop: number) => Generator<number>
-  ): ITime[] {
-    const minutes = Array.from(
-      iterator(TimeUtils.toMinutes(start), TimeUtils.toMinutes(stop))
+  ): Time[] {
+    const minutes = iterator(
+      TimeUtils.toMinutes(start),
+      TimeUtils.toMinutes(stop)
     );
-    const times = minutes.map(TimeUtils.fromMinutes);
+    const times = Array.from(minutes).map(TimeUtils.fromMinutes);
     return times;
   }
 

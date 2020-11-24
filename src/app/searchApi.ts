@@ -1,17 +1,12 @@
 import { TimeUtils } from "../common/utils";
-import { IApiQuery, IApiResult, IRoomData } from "../common/types";
+import { ApiQuery, ApiResponse } from "../common/types";
+import { IndexDto, TimeSpanDto, DAY_KEY_FORMAT } from "../common/dto";
 
-/**
- * Endpoint for performing queries on free rooms
- */
-export class RoomSearch {
-  private data: IRoomData;
+export class SearchApi {
+  private readonly index: IndexDto;
 
-  // TODO: use the same format in scraper and api
-  private apiDateFormat = "YYYY-MM-DD";
-
-  constructor(data: IRoomData) {
-    this.data = data;
+  constructor(index: IndexDto) {
+    this.index = index;
   }
 
   /**
@@ -19,25 +14,28 @@ export class RoomSearch {
    *
    * @param query The user query object
    */
-  public searchFreeRooms(query: IApiQuery): IApiResult | null {
+  public searchFreeRooms(query: ApiQuery): ApiResponse | null {
     try {
-      // check if we got any data on this day
-      if (!(query.day.format(this.apiDateFormat) in this.data.available)) {
-        return [];
-      }
-
-      const result: IApiResult = [];
-      const cursor = this.data.available[query.day.format(this.apiDateFormat)];
-
+      // get primitives
+      const day: string = query.day.format(DAY_KEY_FORMAT);
       const from: number = TimeUtils.toMinutes(query.from);
       const to: number = query.to != null ? TimeUtils.toMinutes(query.to) : -1;
 
+      // check if we got any data for the requested day
+      if (!(day in this.index.available)) return [];
+
+      const result: ApiResponse = [];
+      const cursor = this.index.available[day];
+
+      //TODO: missing entries shall mean that stuff is always available
+
       // iterate over free rooms
       Object.keys(cursor).forEach((roomId: string) => {
-        let matches: number[][] = [];
+        let matches: TimeSpanDto[] = [];
 
         if (query.to == null) {
           matches = cursor[roomId].filter(
+            // TODO: we should be able to remove the second expression here, right?
             (duration) => from >= duration[0] && from < duration[1]
           );
         } else {
@@ -53,7 +51,7 @@ export class RoomSearch {
               TimeUtils.fromMinutes(duration[0]),
               TimeUtils.fromMinutes(duration[1]),
             ]),
-            room: this.data.rooms[roomId].name,
+            room: this.index.rooms[roomId].name,
           });
         }
       });
