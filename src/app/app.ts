@@ -2,8 +2,8 @@ import dayjs from "dayjs";
 import scrollIntoView from "scroll-into-view-if-needed";
 
 import { Jku } from "../common/jku";
-import { IndexDto } from "../common/dto";
 import { SearchApi } from "./searchApi";
+import { IndexDto } from "../common/dto";
 import { ApiResponse } from "../common/types";
 import {
   TeaserState as TSt,
@@ -11,26 +11,15 @@ import {
   Frontend,
 } from "./frontend/frontend";
 
-/* stylesheets */
-
-import "air-datepicker/dist/css/datepicker.min.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "../templates/app.css";
-
-/* globals */
-
-/** The full url to the index.json (injected by webpack) */
-declare let INDEX_URL: string;
-/** The commit hash of this build (injected by webpack) */
-declare let COMMIT_HASH: string;
-/** True if this is a development build (injected by webpack) */
-declare let DEBUG_MODE: boolean;
-
-class App {
-  private searchApi?: SearchApi = undefined;
+export class App {
+  private searchApi?: SearchApi;
   private readonly frontend: Frontend;
+  private readonly indexUrl: string;
+  private readonly debugMode: boolean;
 
-  constructor() {
+  constructor(indexUrl: string, debugMode = false) {
+    this.indexUrl = indexUrl;
+    this.debugMode = debugMode;
     this.frontend = new Frontend({
       datepicker: $("#datepicker"),
       fromTime: $("#fromTime"),
@@ -50,15 +39,11 @@ class App {
   /**
    * Main app entry point
    */
-  public init() {
-    if (DEBUG_MODE) console.log("debug mode enabled");
-
-    // prepare the cache-busting query
-    const today = dayjs().format("YYYYMMDD");
-    const ajaxUrl = INDEX_URL + `?v=${COMMIT_HASH}-${today}`;
+  public init(): void {
+    if (this.debugMode) console.log("debug mode enabled");
 
     this.frontend.init(Jku.getCourseStartTimes(), Jku.getCourseEndTimes());
-    this.initSeachApi(ajaxUrl);
+    this.initSeachApi(this.indexUrl);
 
     // register form submission handler
     $("#form").on("submit", App.getSearchEventHandler(this));
@@ -76,7 +61,7 @@ class App {
     const xhr: JQuery.jqXHR = $.getJSON(indexUrl);
 
     xhr.done((index: IndexDto) => {
-      if (DEBUG_MODE) console.log("data", index);
+      if (this.debugMode) console.log("data", index);
 
       this.searchApi = new SearchApi(index);
 
@@ -104,7 +89,7 @@ class App {
 
       // get user query
       const query = app.frontend.getQuery();
-      if (DEBUG_MODE) console.log("query", query);
+      if (app.debugMode) console.log("query", query);
 
       if (query == null) {
         console.error(
@@ -128,7 +113,7 @@ class App {
 
       // perform user query
       const result: ApiResponse | null = app.searchApi.searchFreeRooms(query);
-      if (DEBUG_MODE) console.log("result", result);
+      if (app.debugMode) console.log("result", result);
 
       if (result == null) {
         console.error("the search algorithm could not process the query");
@@ -158,6 +143,3 @@ class App {
     };
   }
 }
-
-const app = new App();
-app.init();

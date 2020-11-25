@@ -31,7 +31,7 @@ const appConfig = (env, options) => {
   return {
     target: ["web", "es5"],
     entry: {
-      app: "./src/app/app.ts",
+      app: "./src/app/main.ts",
     },
     output: {
       filename: "./js/[name].[contenthash].js",
@@ -99,7 +99,7 @@ const scraperConfig = (env, options) => {
   return {
     target: "node",
     entry: {
-      scraper: "./src/scraper/scraper.ts",
+      scraper: "./src/scraper/main.ts",
     },
     output: {
       filename: "./js/[name].js",

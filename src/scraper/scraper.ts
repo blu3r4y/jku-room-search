@@ -1,5 +1,4 @@
 import cheerio from "cheerio";
-import { writeFile } from "fs";
 import Bottleneck from "bottleneck";
 import got, { OptionsOfTextResponseBody } from "got";
 
@@ -39,25 +38,6 @@ import {
 } from "../common/dto";
 import { RoomScrape, CourseScrape, ScrapeStatistics } from "./types";
 
-/* globals */
-
-/** The full base URL to the kusss instance */
-declare let KUSSS_URL: string;
-/** The full base URL to the jku homepage */
-declare let JKU_URL: string;
-/** The user agent string to use in all requests */
-declare let USER_AGENT: string;
-/** Path to the output index.json file */
-declare let OUTPUT_PATH: string;
-/** How often shall individual requests be retried before raising an error */
-declare let MAX_RETRIES: number;
-/** How long shall be waited for a response of each request */
-declare let REQUEST_TIMEOUT_MS: number;
-/** How much time should we wait before retrying a request again */
-declare let REQUEST_DELAY_MS: number;
-
-/* scraper logic */
-
 /** Intermediate type that is used for building the availability dto structure */
 declare type AvailableDict = FactoryDictionary<
   string,
@@ -80,20 +60,28 @@ export class Scraper {
    * but end early. This is useful for doing a quick set of tests
    * without scraping the entire index.
    */
-  constructor(quickMode: boolean, jkuUrl: string, kusssUrl: string) {
+  constructor(
+    jkuUrl: string,
+    kusssUrl: string,
+    quickMode = false,
+    userAgent = "jku-room-search-bot",
+    requestTimeout = 5000,
+    maxRetries = 5,
+    requestDelay = 500
+  ) {
     this.quickMode = quickMode;
     this.jkuUrl = jkuUrl;
     this.kusssUrl = kusssUrl;
 
     // initialize request configuration and statistics object
     this.requestOptions = {
-      headers: { "User-Agent": USER_AGENT },
-      timeout: REQUEST_TIMEOUT_MS,
-      retry: { limit: MAX_RETRIES },
+      headers: { "User-Agent": userAgent },
+      timeout: requestTimeout,
+      retry: { limit: maxRetries },
     };
     this.requestLimiter = new Bottleneck({
       maxConcurrent: 1,
-      minTime: REQUEST_DELAY_MS,
+      minTime: requestDelay,
     });
     this.statistics = {
       scrapedBookings: 0,
@@ -403,30 +391,5 @@ export class Scraper {
     });
 
     return dto;
-  }
-}
-
-Logger.info("initializing scraper", "main");
-
-// with quick mode enabled, we will only parse some parts
-const quickMode = process.argv.slice(2).includes("--quick");
-if (quickMode) Logger.info("activated QUICK scraping mode");
-
-const scraper = new Scraper(quickMode, JKU_URL, KUSSS_URL);
-
-scraper
-  .scrape()
-  .then(storeIndex)
-  .catch(() => process.exit(-1));
-
-function storeIndex(index: IndexDto): void {
-  writeFile(OUTPUT_PATH, JSON.stringify(index), "utf-8", callback);
-  function callback(error: Error | null): void {
-    if (error) {
-      Logger.err(`could not store result in ${OUTPUT_PATH}`, "main");
-      Logger.err(error);
-    } else {
-      Logger.info(`stored result in ${OUTPUT_PATH}`, "main");
-    }
   }
 }
