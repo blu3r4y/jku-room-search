@@ -1,6 +1,6 @@
+import { Log } from "../log";
 import { ScraperComponent } from "./base";
 import { RoomScrape, CourseScrape, SEARCH_RESULTS } from "../types";
-import { Logger } from "../log";
 
 export class CourseScraper extends ScraperComponent<CourseScrape[]> {
   public async scrape(
@@ -51,12 +51,11 @@ export class CourseScraper extends ScraperComponent<CourseScrape[]> {
       });
 
     this.scraper.statistics.scrapedCourses += courses.length;
-    Logger.info(
+    Log.scrape(
+      "course",
       `scraped ${courses.length} course numbers for room '${room.name}'`,
-      "courses",
-      undefined,
-      progress,
-      courses.length === 0
+      courses.length,
+      progress
     );
 
     return courses;

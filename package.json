@@ -52,6 +52,7 @@
     "ansicolors": "^0.3.2",
     "bootstrap": "^4.5.2",
     "bottleneck": "^2.19.5",
+    "chalk": "^4.1.0",
     "cheerio": "^1.0.0-rc.3",
     "dayjs": "^1.9.6",
     "got": "^11.7.0",

@@ -15,18 +15,16 @@ dayjs.extend(customParseFormat);
 import Set from "typescript-collections/dist/lib/Set";
 import FactoryDictionary from "typescript-collections/dist/lib/FactoryDictionary";
 
-import { CourseScraper } from "./components/courses";
-import { BookingScraper } from "./components/bookings";
-import { BuildingScraper } from "./components/buildings";
-import {
-  KusssRoomsScraper as KusssRoomScraper,
-  JkuRoomsScraper as JkuRoomScraper,
-} from "./components/rooms";
-import { Logger } from "./log";
+import { Log } from "./log";
 import { Jku } from "../common/jku";
 import { Time } from "../common/types";
 import { SplitTree } from "./splitTree";
 import { TimeUtils } from "../common/utils";
+import { CourseScraper } from "./components/courses";
+import { BookingScraper } from "./components/bookings";
+import { BuildingScraper } from "./components/buildings";
+import { RoomScrape, CourseScrape, ScrapeStatistics } from "./types";
+import { KusssRoomScraper, JkuRoomScraper } from "./components/rooms";
 import {
   IndexDto,
   DAY_KEY_FORMAT,
@@ -36,7 +34,6 @@ import {
   AvailableRoomsDto,
   RangeDto,
 } from "../common/dto";
-import { RoomScrape, CourseScrape, ScrapeStatistics } from "./types";
 
 /** Intermediate type that is used for building the availability dto structure */
 declare type AvailableDict = FactoryDictionary<
@@ -135,6 +132,8 @@ export class Scraper {
         buildingToId[b.name] = id;
       });
 
+      Log.sectionmark();
+
       /* scrape rooms inside buildings */
 
       const jRooms: { [canonical: string]: RoomScrape } = {};
@@ -150,6 +149,9 @@ export class Scraper {
         // return early in quick-mode
         if (this.quickMode && i > 5) break;
       }
+
+      this.logJkuRoomMetrics(jRooms);
+      Log.sectionmark();
 
       /* scrape rooms searchable from kusss */
 
@@ -180,7 +182,8 @@ export class Scraper {
         roomToId[cnclName] = id;
       }
 
-      this.logRoomMetadataHealth(result.rooms);
+      this.logMergedRoomMetrics(result.rooms);
+      Log.sectionmark();
 
       /* scrape kusss courses */
 
@@ -200,7 +203,8 @@ export class Scraper {
         i++;
       }
 
-      this.logCourseMetadataHealth(uniqueCourses.size());
+      this.logCourseMetrics(uniqueCourses.size());
+      Log.sectionmark();
 
       /* scrape bookings of these courses from kusss */
 
@@ -234,6 +238,9 @@ export class Scraper {
         if (this.quickMode && i > 10) break;
       }
 
+      this.logBookingMetrics();
+      Log.sectionmark();
+
       /* sort and count the days */
 
       const days = available
@@ -257,14 +264,14 @@ export class Scraper {
 
       result.available = Scraper.buildAvailableDto(available);
 
-      Logger.info("scrapping successful", "scrape");
+      Log.info("scrapping successful");
       return result;
     } catch (error) {
-      Logger.err("scraping failed", "scrape");
-      Logger.err(error);
+      Log.err("scraping failed");
+      Log.obj(error);
       return Promise.reject(null);
     } finally {
-      Logger.info(this.statistics);
+      Log.obj(this.statistics);
     }
   }
 
@@ -321,13 +328,7 @@ export class Scraper {
 
       this.statistics.requests++;
 
-      Logger.info(
-        `GET ${url}`,
-        "request",
-        response.statusCode.toString(),
-        undefined,
-        response.statusCode !== 200
-      );
+      Log.req(response.statusCode, url);
 
       // parse and return on success
       if (response.statusCode === 200) {
@@ -338,13 +339,23 @@ export class Scraper {
         );
       }
     } catch (error) {
-      Logger.err(`GET ${url}`, "request");
-      Logger.err(error);
+      Log.err(`GET ${url}`);
+      Log.obj(error);
       return Promise.reject(null);
     }
   }
 
-  private logRoomMetadataHealth(rooms: RoomsDto): void {
+  private logJkuRoomMetrics(rooms: { [canonical: string]: RoomScrape }): void {
+    const numRooms = Object.keys(rooms).length;
+    Log.milestone(
+      "room",
+      `scraped ${numRooms} rooms from the JKU homepage`,
+      numRooms
+    );
+    Log.obj(Object.values(rooms).map((r) => r.name));
+  }
+
+  private logMergedRoomMetrics(rooms: RoomsDto): void {
     const missing = Object.values(rooms).filter(
       (r) => r.building === -1 || r.capacity === -1
     );
@@ -352,27 +363,32 @@ export class Scraper {
     this.statistics.incompleteRooms = missing.length;
 
     if (missing.length > 0) {
-      Logger.err(
-        `there are ${missing.length} rooms without building or capacity information`,
-        "rooms"
+      Log.err(
+        `there are ${missing.length} rooms without building or capacity information`
       );
 
       const affectedRooms = missing.map((r) => r.name);
-      Logger.info(affectedRooms, "rooms");
+      Log.obj(affectedRooms);
     }
   }
 
-  private logCourseMetadataHealth(numUniqueCourses: number): void {
+  private logCourseMetrics(numUniqueCourses: number): void {
     // correct final statistics by only counting unique numbers
     const numDuplicates = this.statistics.scrapedCourses - numUniqueCourses;
     this.statistics.scrapedCourses = numUniqueCourses;
 
-    Logger.info(
+    Log.milestone(
+      "COURSE",
       `scraped ${numUniqueCourses} course numbers (removed ${numDuplicates} duplicates)`,
-      "scrape",
-      undefined,
-      undefined,
-      numUniqueCourses === 0
+      numUniqueCourses
+    );
+  }
+
+  private logBookingMetrics(): void {
+    Log.milestone(
+      "booking",
+      `scraped ${this.statistics.scrapedBookings} room bookings for ${this.statistics.scrapedCourses} courses`,
+      this.statistics.scrapedBookings
     );
   }
 

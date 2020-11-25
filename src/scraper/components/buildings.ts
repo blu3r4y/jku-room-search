@@ -1,4 +1,4 @@
-import { Logger } from "../log";
+import { Log } from "../log";
 import { ScraperComponent } from "./base";
 import { BuildingScrape, BUILDINGS_PAGE } from "../types";
 
@@ -43,17 +43,12 @@ export class BuildingScraper extends ScraperComponent<BuildingScrape[]> {
       .map((x) => x as BuildingScrape);
 
     this.scraper.statistics.scrapedBuildings += buildings.length;
-    Logger.info(
+    Log.milestone(
+      "building",
       `scraped ${buildings.length} building names`,
-      "buildings",
-      undefined,
-      undefined,
-      buildings.length === 0
+      buildings.length
     );
-    Logger.info(
-      buildings.map((building: BuildingScrape) => building.name),
-      "buildings"
-    );
+    Log.obj(buildings.map((building: BuildingScrape) => building.name));
 
     return buildings;
   }

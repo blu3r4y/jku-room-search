@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
 
+import { Log } from "../log";
 import { ScraperComponent } from "./base";
 import { TimeUtils } from "../../common/utils";
 import { CourseScrape, BookingScrape, COURSE_DETAILS } from "../types";
-import { Logger } from "../log";
 
 export class BookingScraper extends ScraperComponent<BookingScrape[]> {
   public async scrape(
@@ -51,12 +51,11 @@ export class BookingScraper extends ScraperComponent<BookingScrape[]> {
       });
 
     this.scraper.statistics.scrapedBookings += bookings.length;
-    Logger.info(
+    Log.scrape(
+      "booking",
       `scraped ${bookings.length} room bookings for course '${course.showdetails}'`,
-      "bookings",
-      undefined,
-      progress,
-      bookings.length === 0
+      bookings.length,
+      progress
     );
 
     return bookings;

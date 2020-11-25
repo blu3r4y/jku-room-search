@@ -1,3 +1,4 @@
+import { Log } from "../log";
 import { ScraperComponent } from "./base";
 import {
   RoomScrape,
@@ -5,9 +6,8 @@ import {
   BUILDING_DETAILS,
   SEARCH_PAGE,
 } from "../types";
-import { Logger } from "../log";
 
-export class KusssRoomsScraper extends ScraperComponent<RoomScrape[]> {
+export class KusssRoomScraper extends ScraperComponent<RoomScrape[]> {
   public async scrape(): Promise<RoomScrape[]> {
     const url = this.scraper.kusssUrl + SEARCH_PAGE;
     const ch: cheerio.Root = await this.scraper.request(url);
@@ -35,23 +35,18 @@ export class KusssRoomsScraper extends ScraperComponent<RoomScrape[]> {
       });
 
     this.scraper.statistics.scrapedKusssRooms += rooms.length;
-    Logger.info(
+    Log.milestone(
+      "room",
       `scraped ${rooms.length} bookable room names from KUSSS`,
-      "rooms",
-      undefined,
-      undefined,
-      rooms.length === 0
+      rooms.length
     );
-    Logger.info(
-      rooms.map((r) => r.name),
-      "rooms"
-    );
+    Log.obj(rooms.map((r) => r.name));
 
     return rooms;
   }
 }
 
-export class JkuRoomsScraper extends ScraperComponent<RoomScrape[]> {
+export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
   public async scrape(
     building: BuildingScrape,
     progress: number | undefined = undefined
@@ -101,10 +96,10 @@ export class JkuRoomsScraper extends ScraperComponent<RoomScrape[]> {
     );
 
     this.scraper.statistics.scrapedJkuRooms += rooms.length;
-    Logger.info(
+    Log.scrape(
+      "room",
       `found ${rooms.length} room entries for building '${building.name}'`,
-      "buildings",
-      undefined,
+      rooms.length,
       progress
     );
 

@@ -1,6 +1,6 @@
 import { writeFile } from "fs";
 
-import { Logger } from "./log";
+import { Log } from "./log";
 import { Scraper } from "./scraper";
 import { IndexDto } from "../common/dto";
 
@@ -19,11 +19,13 @@ declare let REQUEST_TIMEOUT_MS: number;
 /** How much time should we wait before retrying a request again */
 declare let REQUEST_DELAY_MS: number;
 
-Logger.info("initializing scraper", "main");
+Log.info("initializing scraper");
 
 // with quick mode enabled, we will only parse some parts
 const quickMode = process.argv.slice(2).includes("--quick");
-if (quickMode) Logger.info("activated QUICK scraping mode");
+if (quickMode) Log.warn("quick scraping mode is enabled, will skip requests");
+
+Log.sectionmark();
 
 const scraper = new Scraper(
   JKU_URL,
@@ -44,10 +46,10 @@ function storeIndex(index: IndexDto, path: string): void {
   writeFile(path, JSON.stringify(index), "utf-8", callback);
   function callback(error: Error | null): void {
     if (error) {
-      Logger.err(`could not store result in ${path}`, "main");
-      Logger.err(error);
+      Log.err(`could not store result in ${path}`);
+      Log.obj(error);
     } else {
-      Logger.info(`stored result in ${path}`, "main");
+      Log.info(`stored result in ${path}`);
     }
   }
 }
