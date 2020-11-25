@@ -53,15 +53,17 @@ export declare interface BookingScrape {
  * A statistics object used during scraping
  */
 export declare interface ScrapeStatistics {
-  requests: number;
-  scrapedBuildings: number;
-  scrapedKusssRooms: number;
-  scrapedJkuRooms: number;
-  scrapedCourses: number;
-  scrapedBookings: number;
-  incompleteRooms: number;
-  ignoredBookings: number;
-  days: number;
+  nRequests: number;
+  nScrapedBuildings: number;
+  nScrapedKusssRooms: number;
+  nScrapedJkuRooms: number;
+  nScrapedCourses: number;
+  nScrapedBookings: number;
+  nIncompleteRooms: number;
+  nIgnoredBookings: number;
+  nUnknownRooms: number;
+  unknownRooms: string[];
+  nDays: number;
   range?: RangeDto;
 }
 

@@ -50,7 +50,7 @@ export class CourseScraper extends ScraperComponent<CourseScrape[]> {
         }
       });
 
-    this.scraper.statistics.scrapedCourses += courses.length;
+    this.scraper.statistics.nScrapedCourses += courses.length;
     Log.scrape(
       "course",
       `scraped ${courses.length} course numbers for room '${room.name}'`,

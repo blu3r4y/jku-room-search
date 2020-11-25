@@ -28,6 +28,7 @@ import {
   CourseScrape,
   ScrapeStatistics,
   BuildingToRoomsMap as BuildingToRooms,
+  BookingScrape,
 } from "./types";
 import { KusssRoomScraper, JkuRoomScraper } from "./components/rooms";
 import {
@@ -85,7 +86,7 @@ export class Scraper {
     this.quickMode = quickMode;
     this.jkuUrl = jkuUrl;
     this.kusssUrl = kusssUrl;
-    this.ignoreRooms = ignoreRooms;
+    this.ignoreRooms = ignoreRooms.map(Scraper.getCncnlName);
     this.extraBuildingMeta = extraBuildingMeta;
 
     // initialize request configuration and statistics object
@@ -99,15 +100,17 @@ export class Scraper {
       minTime: requestDelay,
     });
     this.statistics = {
-      scrapedBookings: 0,
-      ignoredBookings: 0,
-      scrapedCourses: 0,
-      days: 0,
-      requests: 0,
-      scrapedKusssRooms: 0,
-      scrapedJkuRooms: 0,
-      incompleteRooms: 0,
-      scrapedBuildings: 0,
+      nScrapedBookings: 0,
+      nIgnoredBookings: 0,
+      nScrapedCourses: 0,
+      nDays: 0,
+      nRequests: 0,
+      nScrapedKusssRooms: 0,
+      nScrapedJkuRooms: 0,
+      nIncompleteRooms: 0,
+      nScrapedBuildings: 0,
+      nUnknownRooms: 0,
+      unknownRooms: [],
       range: undefined,
     };
   }
@@ -226,19 +229,28 @@ export class Scraper {
 
       /* scrape bookings of these courses from kusss */
 
-      const ignoredRooms = new Set<string>();
-
       for (const [i, course] of uniqueCourses.toArray().entries()) {
         const p = (i + 1) / uniqueCourses.size();
-        const bookings = await bookingScraper.scrape(course, p);
+        const bookings = await bookingScraper.scrape(course);
+
+        // all the rooms which we had to ignore
+        const ignoredRooms = new Set<string>();
+        // rooms that are really new and not part of the ignore list already
+        const unknownRooms = new Set<string>();
 
         bookings.forEach((booking) => {
           const cnclName = Scraper.getCncnlName(booking.room);
 
           // ignore this entire booking if we can't resolve the room
           if (!(cnclName in kRooms)) {
-            ignoredRooms.add(cnclName);
-            this.statistics.ignoredBookings += 1;
+            this.statistics.nIgnoredBookings += 1;
+            ignoredRooms.add(booking.room);
+
+            if (!this.ignoreRoom(booking.room)) {
+              this.statistics.nUnknownRooms += 1;
+              unknownRooms.add(booking.room);
+            }
+
             return;
           }
 
@@ -251,6 +263,14 @@ export class Scraper {
 
           available.getValue(day).getValue(room).push(timespan);
         });
+
+        this.logIgnoredBookingMetrics(
+          bookings,
+          course,
+          p,
+          ignoredRooms,
+          unknownRooms
+        );
 
         // return early in quick-mode
         if (this.quickMode && i > 10) break;
@@ -271,7 +291,7 @@ export class Scraper {
       result.range.start = days[0].startOf("day").format();
       result.range.end = days[days.length - 1].endOf("day").format();
 
-      this.statistics.days = days.length;
+      this.statistics.nDays = days.length;
       this.statistics.range = result.range;
 
       /* reverse index */
@@ -344,7 +364,7 @@ export class Scraper {
         got.get(url, this.requestOptions)
       );
 
-      this.statistics.requests++;
+      this.statistics.nRequests++;
 
       Log.req(response.statusCode, url);
 
@@ -378,7 +398,7 @@ export class Scraper {
       (r) => r.building === -1 || r.capacity === -1
     );
 
-    this.statistics.incompleteRooms = missing.length;
+    this.statistics.nIncompleteRooms = missing.length;
 
     if (missing.length > 0) {
       Log.err(
@@ -392,8 +412,8 @@ export class Scraper {
 
   private logCourseMetrics(numUniqueCourses: number): void {
     // correct final statistics by only counting unique numbers
-    const numDuplicates = this.statistics.scrapedCourses - numUniqueCourses;
-    this.statistics.scrapedCourses = numUniqueCourses;
+    const numDuplicates = this.statistics.nScrapedCourses - numUniqueCourses;
+    this.statistics.nScrapedCourses = numUniqueCourses;
 
     Log.milestone(
       "COURSE",
@@ -402,11 +422,65 @@ export class Scraper {
     );
   }
 
+  private logIgnoredBookingMetrics(
+    bookings: BookingScrape[],
+    course: CourseScrape,
+    progress: number,
+    ignoredRooms: Set<string>,
+    unknownRooms: Set<string>
+  ): void {
+    const nIgnored = ignoredRooms.size();
+    const nUnknown = unknownRooms.size();
+    const nTotalSkipped = nIgnored + nUnknown;
+
+    // update global statistics
+    unknownRooms.forEach((r) => {
+      if (!this.statistics.unknownRooms.includes(r))
+        this.statistics.unknownRooms.push(r);
+    });
+
+    // optionally take note on ignored bookings
+    let ignoreText = "";
+    if (ignoredRooms.size() > 0) {
+      let allOrNumber = nIgnored.toString();
+      if (nIgnored == nTotalSkipped) allOrNumber = "all";
+      ignoreText = ` (ignored ${nTotalSkipped} bookings, of which ${allOrNumber} held ignored rooms)`;
+    }
+
+    Log.scrape(
+      "booking",
+      `scraped ${bookings.length} room bookings for course '${course.showdetails}'${ignoreText}`,
+      bookings.length,
+      progress
+    );
+
+    // warn if we additionally ignored something that wasn't on the ignore list
+    if (unknownRooms.size() > 0) {
+      const unknowns = `'${unknownRooms.toArray().join("', '")}'`;
+      Log.warn(
+        `additionally ignored ${unknownRooms.size()} unknown rooms: ${unknowns}`
+      );
+    }
+  }
+
   private logBookingMetrics(): void {
     Log.milestone(
       "booking",
-      `scraped ${this.statistics.scrapedBookings} room bookings for ${this.statistics.scrapedCourses} courses`,
-      this.statistics.scrapedBookings
+      `scraped ${this.statistics.nScrapedBookings} room bookings for ${this.statistics.nScrapedCourses} courses`,
+      this.statistics.nScrapedBookings
+    );
+  }
+
+  private ignoreRoom(name: string): boolean {
+    const query = Scraper.getCncnlName(name);
+
+    // ignore rooms that are just empty
+    // or just contain one or more dashes
+    // or contain any pattern from the ignore list
+    return (
+      query.match(/^\s*$/) != null ||
+      query.match(/^-+$/) != null ||
+      this.ignoreRooms.some((pattern) => query.includes(pattern))
     );
   }
 

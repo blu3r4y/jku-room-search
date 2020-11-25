@@ -1,15 +1,11 @@
 import dayjs from "dayjs";
 
-import { Log } from "../log";
 import { ScraperComponent } from "./base";
 import { TimeUtils } from "../../common/utils";
 import { CourseScrape, BookingScrape, COURSE_DETAILS } from "../types";
 
 export class BookingScraper extends ScraperComponent<BookingScrape[]> {
-  public async scrape(
-    course: CourseScrape,
-    progress: number | undefined = undefined
-  ): Promise<BookingScrape[]> {
+  public async scrape(course: CourseScrape): Promise<BookingScrape[]> {
     let courseDetails = COURSE_DETAILS;
     courseDetails = courseDetails
       .replace("{{courseclassid}}", encodeURIComponent(course.courseclassid))
@@ -50,13 +46,7 @@ export class BookingScraper extends ScraperComponent<BookingScrape[]> {
         };
       });
 
-    this.scraper.statistics.scrapedBookings += bookings.length;
-    Log.scrape(
-      "booking",
-      `scraped ${bookings.length} room bookings for course '${course.showdetails}'`,
-      bookings.length,
-      progress
-    );
+    this.scraper.statistics.nScrapedBookings += bookings.length;
 
     return bookings;
   }

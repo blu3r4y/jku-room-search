@@ -42,7 +42,7 @@ export class BuildingScraper extends ScraperComponent<BuildingScrape[]> {
       .filter((x) => x)
       .map((x) => x as BuildingScrape);
 
-    this.scraper.statistics.scrapedBuildings += buildings.length;
+    this.scraper.statistics.nScrapedBuildings += buildings.length;
     Log.milestone(
       "building",
       `scraped ${buildings.length} building names`,

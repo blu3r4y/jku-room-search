@@ -34,7 +34,7 @@ export class KusssRoomScraper extends ScraperComponent<RoomScrape[]> {
         };
       });
 
-    this.scraper.statistics.scrapedKusssRooms += rooms.length;
+    this.scraper.statistics.nScrapedKusssRooms += rooms.length;
     Log.milestone(
       "room",
       `scraped ${rooms.length} bookable room names from KUSSS`,
@@ -95,7 +95,7 @@ export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
       }
     );
 
-    this.scraper.statistics.scrapedJkuRooms += rooms.length;
+    this.scraper.statistics.nScrapedJkuRooms += rooms.length;
     Log.scrape(
       "room",
       `found ${rooms.length} room entries for building '${building.name}'`,
