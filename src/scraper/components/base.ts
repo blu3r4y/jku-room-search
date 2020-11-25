@@ -16,5 +16,5 @@ export abstract class ScraperComponent<T> {
    * @param data Necessary scraper-specifc input values
    * @param progress A percent value that shall be used during logging
    */
-  public abstract async scrape(data: any, progress?: number): Promise<T>;
+  public abstract scrape(data: any, progress?: number): Promise<T>;
 }
