@@ -23,7 +23,12 @@ import { TimeUtils } from "../common/utils";
 import { CourseScraper } from "./components/courses";
 import { BookingScraper } from "./components/bookings";
 import { BuildingScraper } from "./components/buildings";
-import { RoomScrape, CourseScrape, ScrapeStatistics } from "./types";
+import {
+  RoomScrape,
+  CourseScrape,
+  ScrapeStatistics,
+  BuildingToRoomsMap as BuildingToRooms,
+} from "./types";
 import { KusssRoomScraper, JkuRoomScraper } from "./components/rooms";
 import {
   IndexDto,
@@ -35,11 +40,18 @@ import {
   RangeDto,
 } from "../common/dto";
 
-/** Intermediate type that is used for building the availability dto structure */
+/**
+ * Intermediate type that is used for building the availability dto structure
+ */
 declare type AvailableDict = FactoryDictionary<
   string,
   FactoryDictionary<string, TimeSpanDto[]>
 >;
+
+/**
+ * Intermediate type that wraps `RoomScrape` objects by their canonical room name
+ */
+declare type RoomScrapeDict = { [canonical: string]: RoomScrape };
 
 export class Scraper {
   public readonly jkuUrl: string;
@@ -47,6 +59,8 @@ export class Scraper {
   public statistics: ScrapeStatistics;
 
   private readonly quickMode: boolean;
+  private readonly ignoreRooms: string[];
+  private readonly extraBuildingMeta: BuildingToRooms;
   private readonly requestLimiter: Bottleneck;
   private readonly requestOptions: OptionsOfTextResponseBody;
 
@@ -64,11 +78,15 @@ export class Scraper {
     userAgent = "jku-room-search-bot",
     requestTimeout = 5000,
     maxRetries = 5,
-    requestDelay = 500
+    requestDelay = 500,
+    ignoreRooms: string[] = [],
+    extraBuildingMeta: BuildingToRooms = {}
   ) {
     this.quickMode = quickMode;
     this.jkuUrl = jkuUrl;
     this.kusssUrl = kusssUrl;
+    this.ignoreRooms = ignoreRooms;
+    this.extraBuildingMeta = extraBuildingMeta;
 
     // initialize request configuration and statistics object
     this.requestOptions = {
@@ -136,7 +154,7 @@ export class Scraper {
 
       /* scrape rooms inside buildings */
 
-      const jRooms: { [canonical: string]: RoomScrape } = {};
+      const jRooms: RoomScrapeDict = {};
       for (const [i, building] of buildings.entries()) {
         const p = (i + 1) / buildings.length;
         const scrapes = await jkuRoomScraper.scrape(building, p);
@@ -155,7 +173,7 @@ export class Scraper {
 
       /* scrape rooms searchable from kusss */
 
-      const kRooms: { [canonical: string]: RoomScrape } = {};
+      const kRooms: RoomScrapeDict = {};
       const kRoomScrapes = await kusssRoomScraper.scrape();
       kRoomScrapes.forEach((r) => (kRooms[Scraper.getCncnlName(r.name)] = r));
 
@@ -345,7 +363,7 @@ export class Scraper {
     }
   }
 
-  private logJkuRoomMetrics(rooms: { [canonical: string]: RoomScrape }): void {
+  private logJkuRoomMetrics(rooms: RoomScrapeDict): void {
     const numRooms = Object.keys(rooms).length;
     Log.milestone(
       "room",

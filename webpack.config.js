@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 const glob = require("glob");
 const webpack = require("webpack");
@@ -127,6 +128,16 @@ const scraperConfig = (env, options) => {
         MAX_RETRIES: JSON.stringify(5),
         REQUEST_TIMEOUT_MS: JSON.stringify(5 * 1000),
         REQUEST_DELAY_MS: JSON.stringify(500),
+        IGNORE_ROOMS: JSON.stringify(
+          JSON.parse(fs.readFileSync("./src/scraper/resources/ignore.json"))[
+            "rooms"
+          ]
+        ),
+        EXTRA_BUILDING_METADATA: JSON.stringify(
+          JSON.parse(fs.readFileSync("./src/scraper/resources/buildings.json"))[
+            "buildings"
+          ]
+        ),
       }),
     ],
   };

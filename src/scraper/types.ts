@@ -14,7 +14,7 @@ export declare interface BuildingScrape {
 /**
  * A scraped room entity
  */
-export declare interface RoomScrape {
+export declare type RoomScrape = {
   /** The room name */
   name: string;
   /** The maximum capacity of the room */
@@ -23,7 +23,7 @@ export declare interface RoomScrape {
   buildingId?: number;
   /** The <option> identifier used at the KUSSS homepage */
   kusssId?: string;
-}
+};
 
 /**
  * A scraped course entity
@@ -63,6 +63,15 @@ export declare interface ScrapeStatistics {
   ignoredBookings: number;
   days: number;
   range?: RangeDto;
+}
+
+/**
+ * Provides a mapping from building names to rooms,
+ * so that rooms that might not be found on the homepage
+ * can be mapped with this additional data structure
+ */
+export declare interface BuildingToRoomsMap {
+  [building: string]: string[];
 }
 
 export const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";

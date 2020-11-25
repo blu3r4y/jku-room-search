@@ -1,0 +1,7 @@
+{
+  "buildings": {
+    "Evangelical Student Dormitory (ESH)": ["ESH 1", "ESH 2", "ESH 3"],
+    "Johannes Kepler Dormitory (JKH)": ["KEP 1", "KEP 3"],
+    "Franz Jägerstätter Dormitory (KHG)": ["KHG I"]
+  }
+}
