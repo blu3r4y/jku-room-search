@@ -55,6 +55,8 @@ export declare interface BookingScrape {
 export declare interface ScrapeStatistics {
   nRequests: number;
   nScrapedBuildings: number;
+  nExtraBuildings: number;
+  nExtraRooms: number;
   nScrapedKusssRooms: number;
   nScrapedJkuRooms: number;
   nScrapedCourses: number;
@@ -74,6 +76,13 @@ export declare interface ScrapeStatistics {
  */
 export declare interface BuildingToRoomsMap {
   [building: string]: string[];
+}
+
+/**
+ * Provides additional capacity data for rooms that are lacking that
+ */
+export declare interface RoomToCapacityMap {
+  [room: string]: number;
 }
 
 export const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";

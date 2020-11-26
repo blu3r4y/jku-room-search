@@ -29,6 +29,7 @@ import {
   ScrapeStatistics,
   BuildingToRoomsMap as BuildingToRooms,
   BookingScrape,
+  RoomToCapacityMap,
 } from "./types";
 import { KusssRoomScraper, JkuRoomScraper } from "./components/rooms";
 import {
@@ -62,6 +63,7 @@ export class Scraper {
   private readonly quickMode: boolean;
   private readonly ignoreRooms: string[];
   private readonly extraBuildingMeta: BuildingToRooms;
+  private readonly extraCapacityMeta: RoomToCapacityMap;
   private readonly requestLimiter: Bottleneck;
   private readonly requestOptions: OptionsOfTextResponseBody;
 
@@ -81,13 +83,15 @@ export class Scraper {
     maxRetries = 5,
     requestDelay = 500,
     ignoreRooms: string[] = [],
-    extraBuildingMeta: BuildingToRooms = {}
+    extraBuildingMeta: BuildingToRooms = {},
+    extraCapacityMeta: RoomToCapacityMap = {}
   ) {
     this.quickMode = quickMode;
     this.jkuUrl = jkuUrl;
     this.kusssUrl = kusssUrl;
     this.ignoreRooms = ignoreRooms.map(Scraper.getCncnlName);
     this.extraBuildingMeta = extraBuildingMeta;
+    this.extraCapacityMeta = extraCapacityMeta;
 
     // initialize request configuration and statistics object
     this.requestOptions = {
@@ -103,6 +107,8 @@ export class Scraper {
       nScrapedBookings: 0,
       nIgnoredBookings: 0,
       nScrapedCourses: 0,
+      nExtraBuildings: 0,
+      nExtraRooms: 0,
       nDays: 0,
       nRequests: 0,
       nScrapedKusssRooms: 0,
@@ -171,6 +177,30 @@ export class Scraper {
         if (this.quickMode && i > 5) break;
       }
 
+      /* add extra building and room metadata if necessary */
+
+      for (const building in this.extraBuildingMeta) {
+        // add additional buildings that might not already exist
+        if (!(building in buildingToId)) {
+          this.statistics.nExtraBuildings += 1;
+
+          const id = bid++;
+          result.buildings[id] = { name: building };
+          buildingToId[building] = id;
+        }
+
+        // add additional room metadata
+        for (const room of this.extraBuildingMeta[building]) {
+          this.statistics.nExtraRooms += 1;
+          jRooms[Scraper.getCncnlName(room)] = {
+            name: room,
+            buildingId: buildingToId[building],
+            capacity: this.extraCapacityMeta[room] ?? -1,
+          };
+        }
+      }
+
+      this.logExtraBuildingMetrics();
       this.logJkuRoomMetrics(jRooms);
       Log.sectionmark();
 
@@ -387,10 +417,24 @@ export class Scraper {
     const numRooms = Object.keys(rooms).length;
     Log.milestone(
       "room",
-      `scraped ${numRooms} rooms from the JKU homepage`,
+      `scraped ${numRooms} rooms from the JKU homepage or extraneous resource files`,
       numRooms
     );
     Log.obj(Object.values(rooms).map((r) => r.name));
+  }
+
+  private logExtraBuildingMetrics(): void {
+    if (
+      this.statistics.nExtraBuildings > 0 ||
+      this.statistics.nExtraRooms > 0
+    ) {
+      Log.scrape(
+        "room",
+        `appended ${this.statistics.nExtraBuildings} extra buildings and ${this.statistics.nExtraRooms} room mappings`,
+        1
+      );
+      Log.obj(this.extraBuildingMeta);
+    }
   }
 
   private logMergedRoomMetrics(rooms: RoomsDto): void {

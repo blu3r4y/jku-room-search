@@ -96,6 +96,11 @@ const appConfig = (env, options) => {
   };
 };
 
+// a file with some hand-coded extra resources necessary for scraping
+const extraResources = JSON.parse(
+  fs.readFileSync("./src/scraper/resources/extra.json")
+);
+
 const scraperConfig = (env, options) => {
   return {
     target: "node",
@@ -131,16 +136,9 @@ const scraperConfig = (env, options) => {
           options.mode !== "production"
             ? JSON.stringify(500)
             : JSON.stringify(1),
-        IGNORE_ROOMS: JSON.stringify(
-          JSON.parse(fs.readFileSync("./src/scraper/resources/ignore.json"))[
-            "rooms"
-          ]
-        ),
-        EXTRA_BUILDING_METADATA: JSON.stringify(
-          JSON.parse(fs.readFileSync("./src/scraper/resources/buildings.json"))[
-            "buildings"
-          ]
-        ),
+        IGNORE_ROOMS: JSON.stringify(extraResources["ignore"]),
+        EXTRA_BUILDING_METADATA: JSON.stringify(extraResources["buildings"]),
+        EXTRA_CAPACITY_METADATA: JSON.stringify(extraResources["capacities"]),
       }),
     ],
   };

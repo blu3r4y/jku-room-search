@@ -3,7 +3,7 @@ import { writeFile } from "fs";
 import { Log } from "./log";
 import { Scraper } from "./scraper";
 import { IndexDto } from "../common/dto";
-import { BuildingToRoomsMap } from "./types";
+import { BuildingToRoomsMap, RoomToCapacityMap } from "./types";
 
 /** The full base URL to the kusss instance */
 declare let KUSSS_URL: string;
@@ -23,6 +23,8 @@ declare let REQUEST_DELAY_MS: number;
 declare let IGNORE_ROOMS: string[];
 /** Provides manual metadata for room and building mappings */
 declare let EXTRA_BUILDING_METADATA: BuildingToRoomsMap;
+/** Provides manual metadata for room and building mappings */
+declare let EXTRA_CAPACITY_METADATA: RoomToCapacityMap;
 
 Log.info("initializing scraper");
 
@@ -41,7 +43,8 @@ const scraper = new Scraper(
   MAX_RETRIES,
   REQUEST_DELAY_MS,
   IGNORE_ROOMS,
-  EXTRA_BUILDING_METADATA
+  EXTRA_BUILDING_METADATA,
+  EXTRA_CAPACITY_METADATA
 );
 
 scraper
