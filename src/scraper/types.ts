@@ -66,6 +66,7 @@ export declare interface ScrapeStatistics {
   nUnknownRooms: number;
   unknownRooms: string[];
   nDays: number;
+  nFreeDays: number;
   range?: RangeDto;
 }
 

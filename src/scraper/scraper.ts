@@ -110,6 +110,7 @@ export class Scraper {
       nExtraBuildings: 0,
       nExtraRooms: 0,
       nDays: 0,
+      nFreeDays: 0,
       nRequests: 0,
       nScrapedKusssRooms: 0,
       nScrapedJkuRooms: 0,
@@ -365,7 +366,8 @@ export class Scraper {
       const day = curr.format(DAY_KEY_FORMAT);
       const availRooms = available.getValue(day);
 
-      // TODO: replace this with availRooms.keys() to only consider rooms with bookings
+      let numCompletelyFreeRooms = 0;
+
       for (const room of Object.keys(rooms)) {
         const intervals: TimeSpanDto[] = availRooms.getValue(room);
 
@@ -376,7 +378,29 @@ export class Scraper {
           (iv) => !breakTimes.some((br) => br[0] === iv[0] && br[1] === iv[1])
         );
 
+        // sanity check that there are no zero-length intervals
+        for (const interval of reversed) {
+          if (interval[0] === interval[1])
+            throw Error(
+              `found a zero-length interval for ${day} and room ${room}: ${reversed}`
+            );
+        }
+
+        // take special note if a room is free for the entire day
+        if (
+          reversed.length == 1 &&
+          reversed[0][0] == fullInterval[0] &&
+          reversed[0][1] == fullInterval[1]
+        )
+          numCompletelyFreeRooms += 1;
+
         availRooms.setValue(room, reversed);
+      }
+
+      // if all rooms on this day are free, store a special empty dict value
+      if (numCompletelyFreeRooms == Object.keys(rooms).length) {
+        availRooms.clear();
+        this.statistics.nFreeDays += 1;
       }
 
       curr = curr.add(1, "day");
