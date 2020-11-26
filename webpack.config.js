@@ -127,7 +127,10 @@ const scraperConfig = (env, options) => {
         OUTPUT_PATH: JSON.stringify("index.json"),
         MAX_RETRIES: JSON.stringify(5),
         REQUEST_TIMEOUT_MS: JSON.stringify(5 * 1000),
-        REQUEST_DELAY_MS: JSON.stringify(500),
+        REQUEST_DELAY_MS:
+          options.mode !== "production"
+            ? JSON.stringify(500)
+            : JSON.stringify(1),
         IGNORE_ROOMS: JSON.stringify(
           JSON.parse(fs.readFileSync("./src/scraper/resources/ignore.json"))[
             "rooms"
