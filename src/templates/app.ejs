@@ -38,6 +38,15 @@
       href="images/favicon-16x16.png"
     />
     <link rel="manifest" href="site.webmanifest" />
+
+    <script type="text/javascript">
+      window.addEventListener("load", function () {
+        ua = navigator.userAgent;
+        if (ua.indexOf("MSIE ") > -1 || ua.indexOf("Trident/") > -1) {
+          document.getElementById("iesupport").style.display = "block";
+        }
+      });
+    </script>
   </head>
 
   <body>
