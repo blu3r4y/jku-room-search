@@ -30,7 +30,7 @@ function git(command) {
 
 const appConfig = (env, options) => {
   return {
-    target: ["web", "es5"],
+    target: ["web", "es6"],
     entry: {
       app: "./src/app/main.ts",
     },

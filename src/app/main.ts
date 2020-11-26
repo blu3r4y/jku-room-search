@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { App } from "./app";
+import { checkBrowser } from "./browsercheck";
 
 // bundle stylesheets with webpack
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -15,9 +16,11 @@ declare let COMMIT_HASH: string;
 /** True if this is a development build (injected by webpack) */
 declare let DEBUG_MODE: boolean;
 
-// prepare the cache-busting index url
-const today = dayjs().format("YYYYMMDD");
-const indexUrl = INDEX_URL + `?v=${COMMIT_HASH}-${today}`;
+if (checkBrowser()) {
+  // prepare the cache-busting index url
+  const today = dayjs().format("YYYYMMDD");
+  const indexUrl = INDEX_URL + `?v=${COMMIT_HASH}-${today}`;
 
-const app = new App(indexUrl, DEBUG_MODE);
-app.init();
+  const app = new App(indexUrl, DEBUG_MODE);
+  app.init();
+}

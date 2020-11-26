@@ -10,7 +10,7 @@ dayjs.extend(duration);
 dayjs.extend(relativeTime);
 dayjs.extend(customParseFormat);
 
-// this is a dirty hack, but i have no idea how to get this running instead
+// TODO: this is a dirty hack, but i have no idea how to get this running instead
 // see https://github.com/basarat/typescript-collections/issues/120
 import Set from "typescript-collections/dist/lib/Set";
 import FactoryDictionary from "typescript-collections/dist/lib/FactoryDictionary";
