@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
+    "target": "es6",
+    "lib": ["es6", "dom"],
+    "moduleResolution": "node",
     "strict": true,
-    "downlevelIteration": true,
-    "esModuleInterop": true,
     "sourceMap": true,
-    "outDir": "./dist"
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*"]
 }

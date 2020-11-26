@@ -31,7 +31,7 @@ Once installed, simply enter
 
     npm run scrape
 
-On success, you find a `rooms.json` file in the root directory that should go to `/data/rooms.json` on the webserver.
+On success, you find a `index.json` file in the root directory that should go to `/data/index.json` on the webserver.
 
 ## Contributing
 
