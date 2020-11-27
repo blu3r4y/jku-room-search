@@ -29,6 +29,14 @@ export type ApiResponse = FreeRoom[];
  * Single free room entry
  */
 export declare interface FreeRoom {
+  /** The full room name that is free */
   room: string;
+  /** The capacity of this room, if available */
+  capacity: number | null;
+  /** The full building name of this room, if available */
+  building: string | null;
+  /** The interval that matches the query exactly */
+  match: [Time, Time];
+  /** Availability data of this room for the rest of the day */
   available: [Time, Time][];
 }

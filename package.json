@@ -25,7 +25,6 @@
   "homepage": "https://github.com/blu3r4y/jku-room-search#readme",
   "devDependencies": {
     "@types/air-datepicker": "github:blu3r4y/air-datepicker.d.ts",
-    "@types/ansicolors": "^0.0.33",
     "@types/bootstrap": "^4.5.0",
     "@types/cheerio": "^0.22.21",
     "@types/got": "^9.6.11",
@@ -49,7 +48,6 @@
   },
   "dependencies": {
     "air-datepicker": "^2.2.3",
-    "ansicolors": "^0.3.2",
     "bootstrap": "^4.5.2",
     "bottleneck": "^2.19.5",
     "chalk": "^4.1.0",

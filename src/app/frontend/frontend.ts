@@ -192,35 +192,29 @@ export class Frontend {
     const fragment = doc.createDocumentFragment();
 
     for (const room of result as ApiResponse) {
-      for (const [index, [from, to]] of room.available.entries()) {
-        const tr = doc.createElement("tr");
+      const from = room.match[0];
+      const to = room.match[1];
 
-        // add room name only on first row
-        if (index === 0) {
-          const th = doc.createElement("th");
-          th.innerHTML = room.room;
-          th.scope = "row";
+      const tr = doc.createElement("tr");
 
-          // set the row span property
-          if (room.available.length > 1) {
-            th.rowSpan = room.available.length;
-          }
+      // add room name
+      const th = doc.createElement("th");
+      th.innerHTML = room.room;
+      th.scope = "row";
 
-          tr.appendChild(th);
-        }
+      tr.appendChild(th);
 
-        // from time
-        const tdFrom = doc.createElement("td");
-        tdFrom.innerHTML = TimeUtils.toString(from);
-        tr.appendChild(tdFrom);
+      // from time
+      const tdFrom = doc.createElement("td");
+      tdFrom.innerHTML = TimeUtils.toString(from);
+      tr.appendChild(tdFrom);
 
-        // to time
-        const tdTo = doc.createElement("td");
-        tdTo.innerHTML = TimeUtils.toString(to);
-        tr.appendChild(tdTo);
+      // to time
+      const tdTo = doc.createElement("td");
+      tdTo.innerHTML = TimeUtils.toString(to);
+      tr.appendChild(tdTo);
 
-        fragment.appendChild(tr);
-      }
+      fragment.appendChild(tr);
     }
 
     this.animateTable();

@@ -128,7 +128,10 @@ export class App {
       if (result.length > 0) {
         app.frontend.render("😊 We found some free rooms", TSt.Success, result);
       } else {
-        app.frontend.render("😟 Sorry, no free rooms found", TSt.NoResult);
+        app.frontend.render(
+          "😟 Sorry, we don't have data for this day",
+          TSt.NoResult
+        );
       }
 
       // scroll to the results
