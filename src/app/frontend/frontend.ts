@@ -1,5 +1,13 @@
 import "air-datepicker";
 
+import {
+  library,
+  findIconDefinition,
+  icon,
+} from "@fortawesome/fontawesome-svg-core";
+import { faUser } from "@fortawesome/free-regular-svg-icons";
+library.add(faUser);
+
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -199,18 +207,37 @@ export class Frontend {
 
       // add room name
       const th = doc.createElement("th");
+      th.title = "Room name";
       th.innerHTML = room.room;
       th.scope = "row";
-
       tr.appendChild(th);
+
+      // capacity info
+      const tdCapacity = doc.createElement("td");
+      tdCapacity.title = "Room capacity";
+      if (room.capacity != null) {
+        const span = doc.createElement("span");
+        span.innerHTML = room.capacity.toString();
+        span.className = "capacity small text-muted";
+
+        // append the seat icon svg
+        const user = findIconDefinition({ prefix: "far", iconName: "user" });
+        const ico = icon(user);
+        Array.from(ico.node).map((n) => tdCapacity.appendChild(n));
+
+        tdCapacity.appendChild(span);
+      }
+      tr.appendChild(tdCapacity);
 
       // from time
       const tdFrom = doc.createElement("td");
+      tdFrom.title = "Free from";
       tdFrom.innerHTML = TimeUtils.toString(from);
       tr.appendChild(tdFrom);
 
       // to time
       const tdTo = doc.createElement("td");
+      tdTo.title = "Free until";
       tdTo.innerHTML = TimeUtils.toString(to);
       tr.appendChild(tdTo);
 

@@ -12,6 +12,16 @@ html {
   z-index: 9999;
 }
 
+.capacity {
+  margin-left: 0.5rem;
+}
+
+@media (max-width: 1000px) {
+  .desktop-break {
+    display: none;
+  }
+}
+
 .subtitle-logo {
   padding-right: 0.15rem;
   padding-bottom: 0.15rem;
