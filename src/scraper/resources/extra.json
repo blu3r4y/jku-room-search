@@ -4,7 +4,14 @@
     "Johannes Kepler Dormitory (JKH)": ["KEP 1", "KEP 3"],
     "Franz Jägerstätter Dormitory (KHG)": ["KHG I"]
   },
-  "capacities": {},
+  "capacities": {
+    "ESH 1": 72,
+    "ESH 2": 40,
+    "ESH 3": 15,
+    "KEP 1": 60,
+    "KEP 3": 44,
+    "KHG I": 60
+  },
   "ignore": [
     "deadline",
     "digital",
