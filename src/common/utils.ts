@@ -24,10 +24,7 @@ export class TimeUtils {
    * @param time A `Time` object
    */
   public static toString(time: Time): string {
-    // TODO: Use .format() once https://github.com/iamkun/dayjs/pull/1202 got merged
-    const hours = ("00" + time.hours().toString()).substr(-2, 2);
-    const mins = ("00" + time.minutes().toString()).substr(-2, 2);
-    return `${hours}:${mins}`;
+    return time.format("HH:mm");
   }
 
   /**
