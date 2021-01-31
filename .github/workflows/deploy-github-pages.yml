@@ -1,0 +1,43 @@
+name: deploy-github-pages
+
+on:
+  push:
+  schedule:
+    # run at 3am in the morning every Monday
+    - cron: 0 3 * * 1
+
+jobs:
+  deploy-github-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup build environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14.x"
+      - name: Install dependencies
+        run: yarn install
+      - name: Check code style
+        run: npm run check
+      - name: Build app
+        run: npm run build
+      - name: Get cached index.json
+        if: ${{ github.event_name != 'schedule' }}
+        run: curl --fail https://jkuroomsearch.app/data/index.json -o index.json
+      - name: Scrape new index.json
+        if: ${{ github.event_name == 'schedule' }}
+        run: node ./dist/js/scraper.js
+      - name: Move index.json
+        run: |
+          mkdir ./dist/data
+          mv index.json ./dist/data
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          keep_history: false
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
