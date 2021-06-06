@@ -97,5 +97,3 @@ export const COURSE_DETAILS =
   "&abhart=all&courseclassid={{courseclassid}}";
 
 export const BUILDINGS_PAGE = "/en/campus/the-jku-campus/buildings/";
-export const BUILDING_DETAILS =
-  "/en/campus/the-jku-campus/buildings/{{building}}/";

@@ -1,11 +1,6 @@
 import { Log } from "../log";
 import { ScraperComponent } from "./base";
-import {
-  RoomScrape,
-  BuildingScrape,
-  BUILDING_DETAILS,
-  SEARCH_PAGE,
-} from "../types";
+import { RoomScrape, BuildingScrape, SEARCH_PAGE } from "../types";
 
 export class KusssRoomScraper extends ScraperComponent<RoomScrape[]> {
   public async scrape(): Promise<RoomScrape[]> {
@@ -51,9 +46,7 @@ export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
     building: BuildingScrape,
     progress: number | undefined = undefined
   ): Promise<RoomScrape[]> {
-    const url =
-      this.scraper.jkuUrl +
-      BUILDING_DETAILS.replace("{{building}}", building.url);
+    const url = this.scraper.jkuUrl + building.url;
     const ch: cheerio.Root = await this.scraper.request(url);
 
     // select all <table> elements in the body

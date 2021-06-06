@@ -24,8 +24,7 @@ export class BuildingScraper extends ScraperComponent<BuildingScrape[]> {
       .get()
       .map((t: { header: string; href: string }) => {
         // check for a link to '/buildings/' and not some other site
-        const match = t.href.match(/buildings\/(.*?)\//);
-        if (match == null) {
+        if (!t.href.includes("/buildings/")) {
           return null;
         }
 
@@ -35,7 +34,7 @@ export class BuildingScraper extends ScraperComponent<BuildingScrape[]> {
             .trim()
             .replace(/\s+/g, " ")
             .replace(/^\d+\s+/, ""),
-          url: match[1],
+          url: t.href.trim(),
         };
       })
       // filter out ignored buildings and map the remaining objects
