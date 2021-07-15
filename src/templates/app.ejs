@@ -53,7 +53,7 @@
     <div id="cover">
       <noscript>
         <div class="text-center mb-3 pt-2 pb-1 bg-danger text-white">
-          <h5 class="font-weight-light">🤖 Please enable JavaScript</h5>
+          <h5 class="fw-light">🤖 Please enable JavaScript</h5>
         </div>
       </noscript>
       <div
@@ -61,17 +61,15 @@
         class="text-center mb-3 pt-2 pb-1 bg-danger text-white"
         style="display: none"
       >
-        <h5 class="font-weight-light">
+        <h5 class="fw-light">
           🙄 Please use a browser other than Internet Explorer
         </h5>
       </div>
     </div>
 
     <div class="text-center mt-5">
-      <h2 class="font-weight-normal">
-        jkuroomsearch<span class="font-weight-light">.app</span>
-      </h2>
-      <h6 class="font-weight-normal">
+      <h2 class="fw-normal">jkuroomsearch<span class="fw-light">.app</span></h2>
+      <h6 class="fw-normal">
         <img src="images/favicon-32x32.png" class="subtitle-logo" /> SPACE FOR
         FREE ROOMS
       </h6>
@@ -79,30 +77,35 @@
 
     <div class="container py-3">
       <form id="form" action="#">
-        <div class="row d-flex justify-content-center">
-          <div class="col-auto-shrink m-3">
+        <div class="d-flex flex-row flex-wrap justify-content-center">
+          <div class="flex-column m-3">
             <div id="datepicker" class="datepicker-prerender"></div>
           </div>
 
-          <div class="col-md-3 m-3">
-            <div class="form-row form-group">
-              <label for="fromTime">I need a room from</label>
-              <select class="form-control" id="fromTime"></select>
-            </div>
-            <div class="form-row form-group">
-              <label for="toTime"
-                >and at least until
-                <small class="small text-muted pl-2">(optional)</small></label
+          <div
+            class="flex-column flex-md-grow-0 col-md-3 m-3"
+            style="flex-grow: 1"
+          >
+            <div class="mb-3">
+              <label for="fromTime" class="form-label"
+                >I need a room from</label
               >
-              <select class="form-control" id="toTime">
+              <select class="form-select" id="fromTime"></select>
+            </div>
+            <div class="mb-3">
+              <label for="toTime" class="form-label"
+                >and at least until
+                <small class="small text-muted ps-2">(optional)</small></label
+              >
+              <select class="form-select" id="toTime">
                 <option value="-1">doesn't matter</option>
               </select>
             </div>
-            <div class="form-row pt-4">
+            <div class="pt-4 d-grid gap-1">
               <button
                 id="button"
                 type="submit"
-                class="btn btn-primary btn-block"
+                class="btn btn-primary"
                 disabled
               >
                 <span
@@ -113,11 +116,8 @@
                 ></span>
                 <span id="buttonText">Search for free rooms</span>
               </button>
+              <small id="versionText" class="text-center text-muted"></small>
             </div>
-            <small
-              id="versionText"
-              class="form-text text-center text-muted"
-            ></small>
           </div>
         </div>
       </form>
@@ -131,23 +131,24 @@
             class="text-center mb-3 pt-2 pb-1 bg-secondary text-white"
             style="display: none"
           >
-            <h5 id="teaserText" class="font-weight-light"></h5>
+            <h5 id="teaserText" class="fw-light"></h5>
           </div>
 
           <div id="results" style="display: none; opacity: 0">
-            <small class="form-text text-center text-muted mb-3">
-              Please note that these results are based on room bookings from
-              <a href="http://kusss.jku.at">kusss.jku.at</a>.<br
-                class="desktop-break"
-              />
-              Extraordinary room bookings may still occur.
-            </small>
+            <div class="d-grid gap-3">
+              <small class="text-center text-muted mb-3">
+                Please note that these results are based on room bookings from
+                <a href="http://kusss.jku.at">kusss.jku.at</a>.<br
+                  class="desktop-break"
+                />&nbsp;Extraordinary room bookings may still occur.
+              </small>
 
-            <span id="anchor"></span>
+              <span id="anchor"></span>
 
-            <table class="table table-sm">
-              <tbody></tbody>
-            </table>
+              <table class="table table-sm">
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

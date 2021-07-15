@@ -22,7 +22,7 @@ import { ApiQuery, ApiResponse, Day, Time } from "../../common/types";
  * Represents the color of the teaser block
  */
 export enum TeaserState {
-  Success = "bg-info",
+  Success = "bg-primary",
   NoResult = "bg-secondary",
   Error = "bg-danger",
 }
@@ -247,7 +247,10 @@ export class Frontend {
     this.animateTable();
 
     // update the table body
-    const body = this.elements.results.children("table").children("tbody");
+    const body = this.elements.results
+      .children("div")
+      .children("table")
+      .children("tbody");
     body.empty();
     body.append(fragment);
   }

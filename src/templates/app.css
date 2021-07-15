@@ -16,7 +16,7 @@ html {
   margin-left: 0.5rem;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
   .desktop-break {
     display: none;
   }
