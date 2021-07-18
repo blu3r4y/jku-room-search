@@ -140,6 +140,7 @@ const scraperConfig = (env, options) => {
         EXTRA_BUILDING_METADATA: JSON.stringify(extraResources["buildings"]),
         EXTRA_CAPACITY_METADATA: JSON.stringify(extraResources["capacities"]),
       }),
+      new webpack.ContextReplacementPlugin(/keyv/),
     ],
   };
 };
