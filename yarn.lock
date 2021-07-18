@@ -30,6 +30,13 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
+"@blu3r4y/air-datepicker-types@2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@blu3r4y/air-datepicker-types/-/air-datepicker-types-2.0.2.tgz#fea261048a953dcd787b8cf6d4c7ad8811f4a356"
+  integrity sha512-xS3gqr97eDnFWfy4P2w5ke0m8yR7suFIuQdjME1P5FbD2yh21fTXHUZdyH3QUYElnUq4Mm80Fo58GlwtJcy2mg==
+  dependencies:
+    "@types/jquery" "*"
+
 "@discoveryjs/json-ext@^0.5.0":
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.3.tgz#90420f9f9c6d3987f176a19a7d8e764271a2f55d"
@@ -125,10 +132,6 @@
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.1.1.tgz#3348564048e7a2d7398c935d466c0414ebb6a669"
   integrity sha512-Z6DoceYb/1xSg5+e+ZlPZ9v0N16ZvZ+wYMraFue4HYrE4ttONKtsvruIRf6t9TBR0YvSOfi1hUU0fJfBLCDYow==
-
-"@types/air-datepicker@github:blu3r4y/air-datepicker.d.ts":
-  version "1.1.1"
-  resolved "https://codeload.github.com/blu3r4y/air-datepicker.d.ts/tar.gz/dd17ddce37988ac3c3060d0c4d49c21f9ea3372e"
 
 "@types/bootstrap@^5.0.17":
   version "5.0.17"

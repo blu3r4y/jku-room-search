@@ -1,4 +1,5 @@
 import "air-datepicker";
+import { AirDatepickerInstance } from "@blu3r4y/air-datepicker-types";
 
 import {
   library,
