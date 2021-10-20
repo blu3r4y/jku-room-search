@@ -15,8 +15,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
-import { TimeUtils } from "../../common/utils";
 import { DATEPICKER_LANGUAGE } from "./language";
+import { LogUtils, TimeUtils } from "../../common/utils";
 import { ApiQuery, ApiResponse, Day, Time } from "../../common/types";
 
 /**
@@ -149,7 +149,7 @@ export class Frontend {
       if (!day || !from || (to && TimeUtils.isAfter(from, to))) return null;
       return { day, from, to };
     } catch (e) {
-      console.error(e);
+      LogUtils.error("err::queryFail", (e as Error).message);
       return null;
     }
   }

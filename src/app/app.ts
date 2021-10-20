@@ -4,6 +4,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import { Jku } from "../common/jku";
 import { SearchApi } from "./searchApi";
 import { IndexDto } from "../common/dto";
+import { LogUtils } from "../common/utils";
 import { ApiResponse } from "../common/types";
 import {
   TeaserState as TSt,
@@ -70,7 +71,10 @@ export class App {
     });
 
     xhr.fail(() => {
-      console.error(`the XHR request 'GET ${indexUrl}' failed.`);
+      LogUtils.error(
+        "err::xhrRequest",
+        `the XHR request 'GET ${indexUrl}' failed.`
+      );
       this.frontend.render(
         "😟 Sorry, something broke <tt>[err::xhrRequest]</tt>",
         TSt.Error
@@ -87,12 +91,15 @@ export class App {
     return (event: Event) => {
       app.frontend.renderButton(BSt.Spinning);
 
+      const searchAction = window.dtrum?.enterAction("search", "click");
+
       // get user query
       const query = app.frontend.getQuery();
       if (app.debugMode) console.log("query", query);
 
       if (query == null) {
-        console.error(
+        LogUtils.error(
+          "err::parseQuery",
           "the frontend input could not be parsed into a valid user query"
         );
         app.frontend.render(
@@ -103,7 +110,7 @@ export class App {
       }
 
       if (app.searchApi == null) {
-        console.error("room data wasn't loaded properly");
+        LogUtils.error("err::initApi", "room data wasn't loaded properly");
         app.frontend.render(
           "😟 Sorry, something broke <tt>[err::initApi]</tt>",
           TSt.Error
@@ -116,7 +123,10 @@ export class App {
       if (app.debugMode) console.log("result", result);
 
       if (result == null) {
-        console.error("the search algorithm could not process the query");
+        LogUtils.error(
+          "err::searchApi",
+          "the search algorithm could not process the query"
+        );
         app.frontend.render(
           "😟 Sorry, something broke <tt>[err::searchApi]</tt>",
           TSt.Error
@@ -143,6 +153,10 @@ export class App {
       // briefly show the spinner before re-enabling the button
       setTimeout(() => app.frontend.renderButton(BSt.Enabled), 150);
       event.preventDefault();
+
+      if (searchAction) {
+        window.dtrum?.leaveAction(searchAction);
+      }
     };
   }
 }

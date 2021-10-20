@@ -7,7 +7,8 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "outDir": "./dist",
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["./node_modules/@types", "./node_modules/@dynatrace/"]
   },
   "include": ["src/**/*"]
 }

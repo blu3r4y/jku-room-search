@@ -25,6 +25,7 @@
   "homepage": "https://github.com/blu3r4y/jku-room-search#readme",
   "devDependencies": {
     "@blu3r4y/air-datepicker-types": "^2.0.2",
+    "@dynatrace/dtrum-api-types": "^1.225.8",
     "@types/bootstrap": "^5.0.17",
     "@types/cheerio": "^0.22.30",
     "@types/got": "^9.6.12",

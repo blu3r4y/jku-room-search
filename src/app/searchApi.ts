@@ -1,6 +1,6 @@
 import { Jku } from "../common/jku";
-import { TimeUtils } from "../common/utils";
 import { Duration } from "dayjs/plugin/duration";
+import { LogUtils, TimeUtils } from "../common/utils";
 import { IndexDto, TimeSpanDto, DAY_KEY_FORMAT } from "../common/dto";
 import { ApiQuery, ApiResponse, FreeRoom, Time } from "../common/types";
 
@@ -36,7 +36,10 @@ export class SearchApi {
         from > this.bookable[1] ||
         (atLeastUntil && (to < this.bookable[0] || to > this.bookable[1]))
       ) {
-        console.error("tried to query an unbookable interval");
+        LogUtils.error(
+          "err::unbookableInterval",
+          "tried to query an unbookable interval"
+        );
         return null;
       }
 
@@ -73,7 +76,7 @@ export class SearchApi {
 
       return result;
     } catch (e) {
-      console.error(e);
+      LogUtils.error("err::searchFail", (e as Error).message);
       return null;
     }
   }
