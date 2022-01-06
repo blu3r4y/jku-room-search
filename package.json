@@ -55,7 +55,7 @@
     "air-datepicker": "^2.2.3",
     "bootstrap": "^5.0.2",
     "bottleneck": "^2.19.5",
-    "chalk": "^4.1.1",
+    "chalk": "^5.0.0",
     "cheerio": "^1.0.0-rc.10",
     "dayjs": "^1.10.6",
     "got": "^11.8.2",
