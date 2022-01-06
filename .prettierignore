@@ -1,8 +1,13 @@
+# ignore scraper output
+index.json
+
 # ignore build directory
 dist
 
 # ignore dependencies
 node_modules
+.yarn
+.pnp.*
 
 # ignore editors
 .vscode

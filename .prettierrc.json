@@ -1,1 +1,4 @@
-{ "endOfLine": "auto" }
+{
+  "endOfLine": "auto",
+  "tabWidth": 2
+}

@@ -3,6 +3,8 @@ dist
 
 # ignore dependencies
 node_modules
+.yarn
+.pnp.*
 
 # ignore editors
 .vscode

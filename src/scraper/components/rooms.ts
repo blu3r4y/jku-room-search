@@ -21,11 +21,11 @@ export class KusssRoomScraper extends ScraperComponent<RoomScrape[]> {
 
     const rooms: RoomScrape[] = values
       .get()
-      .map((t: { name: string; value: string }) => {
+      .map((t: { name: string; value: string | string[] | undefined }) => {
         return {
           // replace whitespace from the name
           name: t.name.trim().replace(/\s+/g, " "),
-          kusssId: t.value,
+          kusssId: t.value as string,
         };
       });
 
@@ -76,7 +76,10 @@ export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
       )
       // flat map the map of table rows
       .get()
-      .reduce((acc, x) => acc.concat(x.get()), []);
+      .reduce(
+        (acc, x) => acc.concat(x.get()),
+        [] as { name: string; capacity: string }[]
+      );
 
     const rooms: RoomScrape[] = values.map(
       (t: { name: string; capacity: string }) => {

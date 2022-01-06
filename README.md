@@ -12,24 +12,24 @@ Go to [jkuroomsearch.app](https://jkuroomsearch.app)
 
 ## Build this App
 
-Install [Node.JS](https://nodejs.org/) and [Yarn](https://classic.yarnpkg.com/) and simply enter
+Install [Node.JS >= 16](https://nodejs.org/en/download/) and [Yarn >= 2](https://yarnpkg.com/getting-started/install) and simply enter
 
-    yarn install
-    npm run build
+    yarn
+    yarn build
 
 During development, start a local webserver and trigger development builds automatically with
 
-    npm run serve
+    yarn serve
 
 If you use your own local webserver, you can instead use
 
-    npm run watch
+    yarn watch
 
 ### Create the Index
 
 Once installed, simply enter
 
-    npm run scrape
+    yarn scrape
 
 On success, you find a `index.json` file in the root directory that should go to `/data/index.json` on the webserver.
 
@@ -37,13 +37,13 @@ On success, you find a `index.json` file in the root directory that should go to
 
 Before committing, format and lint the code with
 
-    npm run format
-    npm run lint
+    yarn format
+    yarn lint
 
 As a shortcut, you can run both with
 
-    npm run fix
+    yarn fix
 
 You can mimic the checks on the pipeline with
 
-    npm run check
+    yarn gate

@@ -1,3 +1,5 @@
+/// <reference types="@dynatrace/dtrum-api-types" />
+
 import dayjs from "dayjs";
 import scrollIntoView from "scroll-into-view-if-needed";
 

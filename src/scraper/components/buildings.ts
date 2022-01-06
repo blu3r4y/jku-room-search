@@ -22,11 +22,9 @@ export class BuildingScraper extends ScraperComponent<BuildingScrape[]> {
 
     const buildings: BuildingScrape[] = values
       .get()
-      .map((t: { header: string; href: string }) => {
+      .map((t: { header: string; href: string | undefined }) => {
         // check for a link to '/buildings/' and not some other site
-        if (!t.href.includes("/buildings/")) {
-          return null;
-        }
+        if (!t.href || !t.href.includes("/buildings/")) return null;
 
         return {
           // remove whitespace and leading numbers from the name
