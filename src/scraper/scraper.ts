@@ -96,7 +96,7 @@ export class Scraper {
     // initialize request configuration and statistics object
     this.requestOptions = {
       headers: { "User-Agent": userAgent },
-      timeout: requestTimeout,
+      timeout: { request: requestTimeout },
       retry: { limit: maxRetries },
     };
     this.requestLimiter = new Bottleneck({

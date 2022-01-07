@@ -58,7 +58,7 @@ const appConfig = (env, options) => {
     },
     devtool: "source-map",
     devServer: {
-      contentBase: "./dist",
+      static: "./dist",
     },
     plugins: [
       new webpack.DefinePlugin({
