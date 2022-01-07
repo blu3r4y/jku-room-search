@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const glob = require("glob");
+const fetch = require("node-fetch");
 const webpack = require("webpack");
 
 // extract css file to avoid FOUC
@@ -25,10 +26,22 @@ const CopyPlugin = require("copy-webpack-plugin");
 const ChildProcess = require("child_process");
 
 function git(command) {
+  // fetch current git commit hash
   return ChildProcess.execSync(`git ${command}`, { encoding: "utf8" }).trim();
 }
 
-const appConfig = (env, options) => {
+async function fetchMonitoringCode() {
+  // inline deferred monitoring code snippet
+  if (process.env.DYNATRACE_API_TOKEN) {
+    const url = `https://bjd63129.dev.dynatracelabs.com/api/v1/rum/syncCS/APPLICATION-54BCAC95EB286EE9?Api-Token=${process.env.DYNATRACE_API_TOKEN}`;
+    const respose = await fetch(url);
+    return respose.text();
+  } else {
+    return "<!-- could not fetch monitoring code -->";
+  }
+}
+
+const appConfig = async (env, options) => {
   return {
     target: ["web", "es6"],
     entry: {
@@ -79,6 +92,10 @@ const appConfig = (env, options) => {
       }),
       new HtmlPlugin({
         template: "./src/templates/app.ejs",
+        monitoringCode:
+          options.mode === "production"
+            ? await fetchMonitoringCode()
+            : "<!-- no monitoring code in development mode -->",
       }),
       new CopyPlugin({
         patterns: [{ from: "./src/public/" }],
@@ -97,7 +114,7 @@ const extraResources = JSON.parse(
   fs.readFileSync("./src/scraper/resources/extra.json")
 );
 
-const scraperConfig = (env, options) => {
+const scraperConfig = async (env, options) => {
   return {
     target: "node",
     entry: {
@@ -141,7 +158,7 @@ const scraperConfig = (env, options) => {
   };
 };
 
-module.exports = (env, options) => [
-  appConfig(env, options),
-  scraperConfig(env, options),
+module.exports = async (env, options) => [
+  await appConfig(env, options),
+  await scraperConfig(env, options),
 ];
