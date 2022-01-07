@@ -44,5 +44,6 @@ jobs:
           target_branch: gh-pages
           keep_history: false
           build_dir: dist
+          jekyll: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
