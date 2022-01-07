@@ -1,6 +1,6 @@
-import cheerio from "cheerio";
 import Bottleneck from "bottleneck";
 import got, { OptionsOfTextResponseBody } from "got";
+import * as cheerio from "cheerio";
 
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
@@ -412,7 +412,7 @@ export class Scraper {
    *
    * @param url The URL to load and parse with cheerio
    */
-  public async request(url: string): Promise<cheerio.Root> {
+  public async request(url: string): Promise<cheerio.CheerioAPI> {
     try {
       const response = await this.requestLimiter.schedule(() =>
         got.get(url, this.requestOptions)

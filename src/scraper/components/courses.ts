@@ -1,3 +1,5 @@
+import * as cheerio from "cheerio";
+
 import { Log } from "../log";
 import { ScraperComponent } from "./base";
 import { RoomScrape, CourseScrape, SEARCH_RESULTS } from "../types";
@@ -12,7 +14,7 @@ export class CourseScraper extends ScraperComponent<CourseScrape[]> {
     const url =
       this.scraper.kusssUrl +
       SEARCH_RESULTS.replace("{{room}}", encodeURIComponent(room.kusssId));
-    const ch: cheerio.Root = await this.scraper.request(url);
+    const ch: cheerio.CheerioAPI = await this.scraper.request(url);
 
     // select the <tbody> elements in the table
     const values = ch("div.contentcell > table > tbody")

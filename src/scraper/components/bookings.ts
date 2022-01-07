@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import * as cheerio from "cheerio";
 
 import { ScraperComponent } from "./base";
 import { TimeUtils } from "../../common/utils";
@@ -12,7 +13,7 @@ export class BookingScraper extends ScraperComponent<BookingScrape[]> {
       .replace("{{coursegroupid}}", encodeURIComponent(course.coursegroupid))
       .replace("{{showdetails}}", encodeURIComponent(course.showdetails));
     const url = this.scraper.kusssUrl + courseDetails;
-    const ch: cheerio.Root = await this.scraper.request(url);
+    const ch: cheerio.CheerioAPI = await this.scraper.request(url);
 
     // select the <tbody> which holds the date and times ...
     const values = ch("table.subinfo > tbody > tr table > tbody")

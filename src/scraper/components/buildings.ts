@@ -1,3 +1,5 @@
+import * as cheerio from "cheerio";
+
 import { Log } from "../log";
 import { ScraperComponent } from "./base";
 import { BuildingScrape, BUILDINGS_PAGE } from "../types";
@@ -5,7 +7,7 @@ import { BuildingScrape, BUILDINGS_PAGE } from "../types";
 export class BuildingScraper extends ScraperComponent<BuildingScrape[]> {
   public async scrape(): Promise<BuildingScrape[]> {
     const url = this.scraper.jkuUrl + BUILDINGS_PAGE;
-    const ch: cheerio.Root = await this.scraper.request(url);
+    const ch: cheerio.CheerioAPI = await this.scraper.request(url);
 
     // select the <article> elements inside <div class="stripe_element"> ...
     const values = ch("div.stripe_element > article").map((_, el) => {
