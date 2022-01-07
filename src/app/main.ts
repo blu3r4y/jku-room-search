@@ -3,7 +3,7 @@ import { App } from "./app";
 
 // bundle stylesheets with webpack
 import "bootstrap/dist/css/bootstrap.min.css";
-import "air-datepicker/dist/css/datepicker.min.css";
+import "air-datepicker/air-datepicker.css";
 
 // our style overrides must come last!
 import "../templates/app.css";

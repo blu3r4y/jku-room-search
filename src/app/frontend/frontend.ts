@@ -1,5 +1,4 @@
-import "air-datepicker";
-import { AirDatepickerInstance } from "@blu3r4y/air-datepicker-types";
+import AirDatepicker from "air-datepicker";
 
 import {
   library,
@@ -41,7 +40,7 @@ export enum ButtonState {
  * Represents the elements on the frontend
  */
 export interface FrontendElements {
-  datepicker: JQuery<HTMLElement>;
+  datepicker: HTMLElement;
   fromTime: JQuery<HTMLElement>;
   toTime: JQuery<HTMLElement>;
   results: JQuery<HTMLElement>;
@@ -58,7 +57,7 @@ export interface FrontendElements {
 export class Frontend {
   private readonly elements: FrontendElements;
   private currentTeaserState: TeaserState;
-  private datepicker?: AirDatepickerInstance = undefined;
+  private datepicker?: AirDatepicker = undefined;
 
   constructor(elements: FrontendElements) {
     this.elements = elements;
@@ -276,18 +275,14 @@ export class Frontend {
 
   private initDatePicker() {
     const today = new Date();
-    const instance = this.elements.datepicker
-      .datepicker({
-        language: DATEPICKER_LANGUAGE,
-        minDate: today,
-        todayButton: today,
-        toggleSelected: false,
-      })
-      .data("datepicker");
-
-    instance.selectDate(today);
-
-    this.datepicker = instance;
+    this.datepicker = new AirDatepicker(this.elements.datepicker, {
+      locale: DATEPICKER_LANGUAGE,
+      inline: true,
+      minDate: today,
+      buttons: "today",
+      toggleSelected: false,
+      selectedDates: [today],
+    });
   }
 
   private initTimePickers(startTimes: Time[], endTimes: Time[]) {

@@ -74,7 +74,7 @@ const appConfig = (env, options) => {
           nodir: true,
         }),
         safelist: {
-          greedy: [/^datepicker/],
+          greedy: [/^air-datepicker/],
         },
       }),
       new HtmlPlugin({

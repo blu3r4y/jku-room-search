@@ -24,7 +24,7 @@ export class App {
     this.indexUrl = indexUrl;
     this.debugMode = debugMode;
     this.frontend = new Frontend({
-      datepicker: $("#datepicker"),
+      datepicker: $("#datepicker")[0] as HTMLElement,
       fromTime: $("#fromTime"),
       toTime: $("#toTime"),
       results: $("#results"),

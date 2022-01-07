@@ -1,6 +1,6 @@
-import { AirDatepickerLanguageInstance } from "@blu3r4y/air-datepicker-types";
+import { AirDatepickerLocale } from "air-datepicker";
 
-export const DATEPICKER_LANGUAGE: AirDatepickerLanguageInstance = {
+export const DATEPICKER_LANGUAGE: AirDatepickerLocale = {
   clear: "Clear",
   dateFormat: "dd.mm.yyyy",
   days: [
