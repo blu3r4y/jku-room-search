@@ -16,18 +16,20 @@ html {
   margin-left: 0.5rem;
 }
 
-@media (max-width: 1200px) {
-  .desktop-break {
-    display: none;
-  }
-}
-
 .subtitle-logo {
   padding-right: 0.15rem;
   padding-bottom: 0.15rem;
   width: 18px;
   height: 18px;
 }
+
+@media (max-width: 1200px) {
+  .desktop-break {
+    display: none;
+  }
+}
+
+/* github logo */
 
 .github-corner:hover .octo-arm {
   animation: octocat-wave 560ms ease-in-out;
@@ -65,6 +67,8 @@ html {
   }
 }
 
+/* datepicker */
+
 .air-datepicker-prerender {
   min-width: 250px;
   min-height: 250px;
@@ -93,6 +97,8 @@ html {
 .air-datepicker-button {
   color: #007bff;
 }
+
+/* animations */
 
 .animate-fade-cover {
   animation: fade-cover 0.2s ease-in forwards;

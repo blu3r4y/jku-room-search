@@ -1,5 +1,6 @@
 /// <reference types="@dynatrace/dtrum-api-types" />
 
+import $ from "cash-dom";
 import dayjs from "dayjs";
 import scrollIntoView from "scroll-into-view-if-needed";
 
@@ -35,7 +36,7 @@ export class App {
       versionText: $("#versionText"),
       cover: $("#cover"),
       button: $("#button")[0] as HTMLInputElement,
-      anchor: $("#anchor")[0],
+      anchor: $("#anchor")[0] as HTMLElement,
     });
   }
 
@@ -61,18 +62,19 @@ export class App {
    * @param indexUrl The URL that points to index.json
    */
   private initSeachApi(indexUrl: string) {
-    const xhr: JQuery.jqXHR = $.getJSON(indexUrl);
+    const xhr = new XMLHttpRequest();
 
-    xhr.done((index: IndexDto) => {
+    xhr.onload = () => {
+      const index: IndexDto = JSON.parse(xhr.response);
       if (this.debugMode) console.log("data", index);
 
       this.searchApi = new SearchApi(index);
 
       this.frontend.renderVersion(dayjs(index.version));
       this.frontend.renderButton(BSt.Enabled);
-    });
+    };
 
-    xhr.fail(() => {
+    xhr.onerror = () => {
       LogUtils.error(
         "err::xhrRequest",
         `the XHR request 'GET ${indexUrl}' failed.`
@@ -81,7 +83,10 @@ export class App {
         "😟 Sorry, something broke <tt>[err::xhrRequest]</tt>",
         TSt.Error
       );
-    });
+    };
+
+    xhr.open("GET", indexUrl, true);
+    xhr.send();
   }
 
   /**

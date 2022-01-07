@@ -83,10 +83,6 @@ const appConfig = (env, options) => {
       new CopyPlugin({
         patterns: [{ from: "./src/public/" }],
       }),
-      new webpack.ProvidePlugin({
-        $: "jquery",
-        jQuery: "jquery",
-      }),
     ],
     performance: {
       maxEntrypointSize: 1024000,

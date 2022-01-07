@@ -366,15 +366,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@npm:^3.5.11":
-  version: 3.5.11
-  resolution: "@types/jquery@npm:3.5.11"
-  dependencies:
-    "@types/sizzle": "*"
-  checksum: bad7c4495ade39e712462af534169790115d07874bb1a8c43a597676bd4e4d62caaf961353836f1e9f67309cac3a224b8743da07bad4cb2ff853b93f1856014b
-  languageName: node
-  linkType: hard
-
 "@types/json-schema@npm:*, @types/json-schema@npm:^7.0.6":
   version: 7.0.6
   resolution: "@types/json-schema@npm:7.0.6"
@@ -1340,6 +1331,13 @@ __metadata:
   version: 1.0.30001296
   resolution: "caniuse-lite@npm:1.0.30001296"
   checksum: b3fd113ef0d75a282b4271636267680d155ad7faaefb56313f7883881b48828a75663c5c65b27fb7ae30877710e1a662c8c567a9054297d34b2292db33b72db0
+  languageName: node
+  linkType: hard
+
+"cash-dom@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "cash-dom@npm:8.1.0"
+  checksum: 8074654180abc72ccab1dfba5943eb90b8ef37ce764c873d8ef61139f5c420caf1fb4246f5d475925319105a4a97678d5998b26369ba127f9e55276c1cf99f57
   languageName: node
   linkType: hard
 
@@ -3681,12 +3679,12 @@ __metadata:
     "@types/bootstrap": ^5.1.8
     "@types/cheerio": ^0.22.30
     "@types/got": ^9.6.12
-    "@types/jquery": ^3.5.11
     "@typescript-eslint/eslint-plugin": ^5.9.0
     "@typescript-eslint/parser": ^5.9.0
     air-datepicker: ^3.1.0
     bootstrap: ^5.1.3
     bottleneck: ^2.19.5
+    cash-dom: ^8.1.0
     chalk: ^5.0.0
     cheerio: ^1.0.0-rc.10
     copy-webpack-plugin: ^9.1.0
@@ -3698,7 +3696,6 @@ __metadata:
     glob: ^7.2.0
     got: ^12.0.0
     html-webpack-plugin: ^5.5.0
-    jquery: 3.6.0
     mini-css-extract-plugin: ^2.4.6
     prettier: ^2.5.1
     purgecss-webpack-plugin: ^4.1.3
@@ -3712,13 +3709,6 @@ __metadata:
     webpack-dev-server: ^4.7.2
   languageName: unknown
   linkType: soft
-
-"jquery@npm:3.6.0":
-  version: 3.6.0
-  resolution: "jquery@npm:3.6.0"
-  checksum: 8fd5fef4aa48fd374ec716dd1c1df1af407814a228e15c1260ca140de3a697c2a77c30c54ff1d238b6a3ab4ddc445ddeef9adce6c6d28e4869d85eb9d3951c0e
-  languageName: node
-  linkType: hard
 
 "js-tokens@npm:^4.0.0":
   version: 4.0.0

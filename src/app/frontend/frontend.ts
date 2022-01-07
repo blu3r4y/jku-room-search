@@ -1,3 +1,4 @@
+import $, { Cash } from "cash-dom";
 import AirDatepicker from "air-datepicker";
 
 import {
@@ -41,15 +42,15 @@ export enum ButtonState {
  */
 export interface FrontendElements {
   datepicker: HTMLElement;
-  fromTime: JQuery<HTMLElement>;
-  toTime: JQuery<HTMLElement>;
-  results: JQuery<HTMLElement>;
-  teaserText: JQuery<HTMLElement>;
-  teaserBlock: JQuery<HTMLElement>;
-  spinner: JQuery<HTMLElement>;
-  buttonText: JQuery<HTMLElement>;
-  versionText: JQuery<HTMLElement>;
-  cover: JQuery<HTMLElement>;
+  fromTime: Cash;
+  toTime: Cash;
+  results: Cash;
+  teaserText: Cash;
+  teaserBlock: Cash;
+  spinner: Cash;
+  buttonText: Cash;
+  versionText: Cash;
+  cover: Cash;
   button: HTMLInputElement;
   anchor: HTMLElement;
 }
@@ -73,7 +74,6 @@ export class Frontend {
   public init(startTimes: Time[], endTimes: Time[]): void {
     this.initDatePicker();
     this.initTimePickers(startTimes, endTimes);
-
     this.render();
   }
 
@@ -128,7 +128,7 @@ export class Frontend {
         this.elements.button.disabled = false;
         break;
       case ButtonState.Spinning:
-        this.elements.spinner.show();
+        this.elements.spinner.css("display", "inline-block");
         this.elements.buttonText.hide();
         this.elements.button.disabled = true;
         break;
@@ -166,8 +166,8 @@ export class Frontend {
     return dayjs(this.datepicker.selectedDates[0]);
   }
 
-  private getTime(element: JQuery<HTMLElement>): Time | null {
-    const text = element.children("option:selected").val() as string;
+  private getTime(element: Cash): Time | null {
+    const text = element.val() as string;
     const minutes = parseInt(text, 10);
     return minutes >= 0 ? TimeUtils.fromMinutes(minutes) : null;
   }
@@ -258,7 +258,7 @@ export class Frontend {
   private animateTable() {
     const tab = this.elements.results;
 
-    if (tab.is(":visible")) {
+    if (tab.css("display") !== "none") {
       // briefly flash the existing table to indicate an update
       tab.addClass("animate-fade-flash");
       setTimeout(() => tab.removeClass("animate-fade-flash"), 400);
@@ -298,7 +298,8 @@ export class Frontend {
       if (!TimeUtils.isBefore(from, to)) {
         // find the closest to time that is greater than the new from time (roll-over)
         const newval = endTimes.find((e) => TimeUtils.isAfter(e, from));
-        if (newval) obj.elements.toTime.val(TimeUtils.toMinutes(newval));
+        if (newval)
+          obj.elements.toTime.val(TimeUtils.toMinutes(newval).toString());
       }
     }
 
@@ -312,7 +313,8 @@ export class Frontend {
       if (!TimeUtils.isBefore(from, to)) {
         // find the closest from time that is smaller than the new to time (roll-under)
         const newval = revStartTimes.find((e) => TimeUtils.isBefore(e, to));
-        if (newval) obj.elements.fromTime.val(TimeUtils.toMinutes(newval));
+        if (newval)
+          obj.elements.fromTime.val(TimeUtils.toMinutes(newval).toString());
       }
     }
 
@@ -320,7 +322,7 @@ export class Frontend {
     startTimes.forEach((item) => {
       this.elements.fromTime.append(
         $("<option></option>")
-          .val(TimeUtils.toMinutes(item))
+          .val(TimeUtils.toMinutes(item).toString())
           .html(TimeUtils.toString(item))
       );
     });
@@ -329,7 +331,7 @@ export class Frontend {
     endTimes.forEach((item) => {
       this.elements.toTime.append(
         $("<option></option>")
-          .val(TimeUtils.toMinutes(item))
+          .val(TimeUtils.toMinutes(item).toString())
           .html(TimeUtils.toString(item))
       );
     });
@@ -343,10 +345,13 @@ export class Frontend {
     const setpoint = revStartTimes.find((e) =>
       TimeUtils.isAfter(now, e.subtract(15, "minutes"))
     );
-    if (setpoint) this.elements.fromTime.val(TimeUtils.toMinutes(setpoint));
+
+    if (setpoint) {
+      this.elements.fromTime.val(TimeUtils.toMinutes(setpoint).toString());
+    }
 
     // bind the change listeners on the drop downs
-    this.elements.fromTime.change(() => fromTimeChanged(this));
-    this.elements.toTime.change(() => toTimeChanged(this));
+    this.elements.fromTime.on("change", () => fromTimeChanged(this));
+    this.elements.toTime.on("change", () => toTimeChanged(this));
   }
 }
