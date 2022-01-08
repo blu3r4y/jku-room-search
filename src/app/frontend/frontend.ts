@@ -279,7 +279,11 @@ export class Frontend {
       locale: DATEPICKER_LANGUAGE,
       inline: true,
       minDate: today,
-      buttons: "today",
+      buttons: {
+        content: "Today",
+        attrs: { type: "button" },
+        onClick: (dp) => dp.selectDate(today),
+      },
       toggleSelected: false,
       selectedDates: [today],
     });
