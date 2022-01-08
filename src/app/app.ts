@@ -44,7 +44,7 @@ export class App {
    * Main app entry point
    */
   public init(): void {
-    if (this.debugMode) console.log("debug mode enabled");
+    if (this.debugMode) console.log("🤖 debug mode enabled");
 
     this.frontend.init(Jku.getCourseStartTimes(), Jku.getCourseEndTimes());
     this.initSeachApi(this.indexUrl);
@@ -64,17 +64,7 @@ export class App {
   private initSeachApi(indexUrl: string) {
     const xhr = new XMLHttpRequest();
 
-    xhr.onload = () => {
-      const index: IndexDto = JSON.parse(xhr.response);
-      if (this.debugMode) console.log("data", index);
-
-      this.searchApi = new SearchApi(index);
-
-      this.frontend.renderVersion(dayjs(index.version));
-      this.frontend.renderButton(BSt.Enabled);
-    };
-
-    xhr.onerror = () => {
+    const handlXhrError = () => {
       LogUtils.error(
         "err::xhrRequest",
         `the XHR request 'GET ${indexUrl}' failed.`
@@ -83,6 +73,24 @@ export class App {
         "😟 Sorry, something broke <tt>[err::xhrRequest]</tt>",
         TSt.Error
       );
+    };
+
+    xhr.onerror = handlXhrError;
+    xhr.onload = () => {
+      try {
+        if (xhr.status !== 200 && xhr.onerror)
+          throw new Error(xhr.status.toString());
+
+        // try parsing the response
+        const index: IndexDto = JSON.parse(xhr.response);
+        if (this.debugMode) console.log("data", index);
+
+        this.searchApi = new SearchApi(index);
+        this.frontend.renderVersion(dayjs(index.version));
+        this.frontend.renderButton(BSt.Enabled);
+      } catch (e) {
+        handlXhrError();
+      }
     };
 
     xhr.open("GET", indexUrl, true);
