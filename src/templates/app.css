@@ -12,8 +12,14 @@ html {
   z-index: 9999;
 }
 
+div#results th {
+  width: 50%;
+}
+
 .capacity {
   margin-left: 0.5rem;
+  display: inline-block;
+  width: 1em;
 }
 
 .subtitle-logo {
