@@ -49,8 +49,18 @@ export class App {
     this.frontend.init(Jku.getCourseStartTimes(), Jku.getCourseEndTimes());
     this.initSeachApi(this.indexUrl);
 
-    // register form submission handler
-    $("#form").on("submit", App.getSearchEventHandler(this));
+    // register form submission handler (animate, scroll)
+    $("#form").on("submit", (event) => {
+      App.handleSearchEvent(this, true, true);
+      event.preventDefault();
+    });
+
+    // register time drop down submission handlers (animate, no scroll)
+    $("#fromTime").on("change", () => App.handleSearchEvent(this, true));
+    $("#toTime").on("change", () => App.handleSearchEvent(this, true));
+
+    // register date picker submission handler (animate, no scroll
+    this.frontend.datepickerOnSelect = () => App.handleSearchEvent(this, true);
 
     // only show page content when loading finished
     $(window).on("load", () => this.frontend.hideCover());
@@ -88,6 +98,9 @@ export class App {
         this.searchApi = new SearchApi(index);
         this.frontend.renderVersion(dayjs(index.version));
         this.frontend.renderButton(BSt.Enabled);
+
+        // do an initial search (no animate, no scroll)
+        App.handleSearchEvent(this);
       } catch (e) {
         handlXhrError();
       }
@@ -101,77 +114,85 @@ export class App {
    * Handle pressing the search button by initiating an API query
    *
    * @param event The DOM event object
+   * @param animate Whether to animate to show the spinner and animate tables
+   * @param scroll Whether to scroll to the anchor element
    */
-  private static getSearchEventHandler(app: App) {
-    return (event: Event) => {
-      app.frontend.renderButton(BSt.Spinning);
+  private static handleSearchEvent(app: App, animate = false, scroll = false) {
+    if (animate) app.frontend.renderButton(BSt.Spinning);
 
-      const searchAction = window.dtrum?.enterAction("search", "click");
+    const searchAction = window.dtrum?.enterAction("search", "click");
 
-      // get user query
-      const query = app.frontend.getQuery();
-      if (app.debugMode) console.log("query", query);
+    // get user query
+    const query = app.frontend.getQuery();
+    if (app.debugMode) console.log("query", query);
 
-      if (query == null) {
-        LogUtils.error(
-          "err::parseQuery",
-          "the frontend input could not be parsed into a valid user query"
-        );
-        app.frontend.render(
-          "😟 Sorry, something broke <tt>[err::parseQuery]</tt>",
-          TSt.Error
-        );
-        return;
-      }
+    if (query == null) {
+      LogUtils.error(
+        "err::parseQuery",
+        "the frontend input could not be parsed into a valid user query"
+      );
+      app.frontend.render(
+        "😟 Sorry, something broke <tt>[err::parseQuery]</tt>",
+        TSt.Error
+      );
+      return;
+    }
 
-      if (app.searchApi == null) {
-        LogUtils.error("err::initApi", "room data wasn't loaded properly");
-        app.frontend.render(
-          "😟 Sorry, something broke <tt>[err::initApi]</tt>",
-          TSt.Error
-        );
-        return;
-      }
+    if (app.searchApi == null) {
+      LogUtils.error("err::initApi", "room data wasn't loaded properly");
+      app.frontend.render(
+        "😟 Sorry, something broke <tt>[err::initApi]</tt>",
+        TSt.Error
+      );
+      return;
+    }
 
-      // perform user query
-      const result: ApiResponse | null = app.searchApi.searchFreeRooms(query);
-      if (app.debugMode) console.log("result", result);
+    // perform user query
+    const result: ApiResponse | null = app.searchApi.searchFreeRooms(query);
+    if (app.debugMode) console.log("result", result);
 
-      if (result == null) {
-        LogUtils.error(
-          "err::searchApi",
-          "the search algorithm could not process the query"
-        );
-        app.frontend.render(
-          "😟 Sorry, something broke <tt>[err::searchApi]</tt>",
-          TSt.Error
-        );
-        return;
-      }
+    if (result == null) {
+      LogUtils.error(
+        "err::searchApi",
+        "the search algorithm could not process the query"
+      );
+      app.frontend.render(
+        "😟 Sorry, something broke <tt>[err::searchApi]</tt>",
+        TSt.Error
+      );
+      return;
+    }
 
-      // show result status
-      if (result.length > 0) {
-        app.frontend.render("😊 We found some free rooms", TSt.Success, result);
-      } else {
-        app.frontend.render(
-          "😟 Sorry, we don't have data for this day",
-          TSt.NoResult
-        );
-      }
+    // show result status
+    if (result.length > 0) {
+      app.frontend.render(
+        "😊 We found some free rooms",
+        TSt.Success,
+        result,
+        animate
+      );
+    } else {
+      app.frontend.render(
+        "😟 Sorry, we don't have data for this day",
+        TSt.NoResult
+      );
+    }
 
-      // scroll to the results
+    // scroll to the results
+    if (scroll) {
       scrollIntoView(app.frontend.getAnchor(), {
         behavior: "smooth",
         scrollMode: "if-needed",
       });
+    }
 
-      // briefly show the spinner before re-enabling the button
+    if (searchAction) window.dtrum?.leaveAction(searchAction);
+
+    // briefly show the spinner before re-enabling the button
+    if (animate) {
       setTimeout(() => app.frontend.renderButton(BSt.Enabled), 150);
-      event.preventDefault();
-
-      if (searchAction) {
-        window.dtrum?.leaveAction(searchAction);
-      }
-    };
+    } else {
+      app.frontend.renderButton(BSt.Enabled);
+    }
   }
 }

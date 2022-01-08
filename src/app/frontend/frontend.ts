@@ -60,6 +60,14 @@ export class Frontend {
   private currentTeaserState: TeaserState;
   private datepicker?: AirDatepicker = undefined;
 
+  /**
+   * Pass-through to datepicker.onSelect event
+   * without any event parameters
+   */
+  public datepickerOnSelect: (date: Date | Date[]) => void = () => {
+    /* to be set */
+  };
+
   constructor(elements: FrontendElements) {
     this.elements = elements;
     this.currentTeaserState = TeaserState.NoResult;
@@ -91,14 +99,16 @@ export class Frontend {
    * @param text Text to be displayed in the teaser or `null` for nothing
    * @param color Color of the teaser text block
    * @param result Result object or `null` for nothing
+   * @param animate Whether to animate the result block rendering
    */
   public render(
     text: string | null = null,
     color: TeaserState = TeaserState.NoResult,
-    result: ApiResponse | null = null
+    result: ApiResponse | null = null,
+    animate = false
   ): void {
     this.renderTeaser(text, color);
-    this.renderTable(result);
+    this.renderTable(result, animate);
   }
 
   /**
@@ -189,7 +199,7 @@ export class Frontend {
     }
   }
 
-  private renderTable(result: ApiResponse | null) {
+  private renderTable(result: ApiResponse | null, animate = false) {
     if (!result || (result as ApiResponse).length === 0) {
       this.elements.results.hide();
       this.elements.results.css("opacity", "0");
@@ -244,7 +254,12 @@ export class Frontend {
       fragment.appendChild(tr);
     }
 
-    this.animateTable();
+    if (animate) {
+      this.animateTable();
+    } else {
+      this.elements.results.show();
+      this.elements.results.css("opacity", "1");
+    }
 
     // update the table body
     const body = this.elements.results
@@ -286,6 +301,7 @@ export class Frontend {
       },
       toggleSelected: false,
       selectedDates: [today],
+      onSelect: (event) => this.datepickerOnSelect(event.date),
     });
   }
 
