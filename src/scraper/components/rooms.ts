@@ -68,9 +68,11 @@ export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
             if (tds.length === 3) {
               // if this is a lecture hall (HS), abbreviate them
               const description = tds.eq(0).text();
-              const match = description.match(/(HS \d+)/);
+              const hsRegex = /(?:HS|Hörsaal|Lecture Hall) (\d+)/;
+              const match = description.match(hsRegex);
+
               return {
-                name: match == null ? tds.eq(1).text() : match[1],
+                name: match ? `HS ${match[1]}` : tds.eq(1).text(),
                 capacity: tds.eq(2).text(),
               };
             }
