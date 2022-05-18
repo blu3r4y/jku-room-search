@@ -3065,6 +3065,8 @@ __metadata:
     webpack: ^5.72.1
     webpack-cli: ^4.9.2
     webpack-dev-server: ^4.9.0
+  peerDependencies:
+    "@popperjs/core": ^2.11.5
   languageName: unknown
   linkType: soft
 
