@@ -1,0 +1,22 @@
+// https://aka.ms/devcontainer.json
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.236.0/containers/javascript-node
+
+{
+  "name": "node-js",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": { "VARIANT": "16-bullseye" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "arcanis.vscode-zipfs"
+      ]
+    }
+  },
+  "forwardPorts": [8080],
+  "postCreateCommand": "yarn && yarn build",
+  "remoteUser": "node"
+}
