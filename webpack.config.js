@@ -83,9 +83,10 @@ const appConfig = async (env, options) => {
         filename: "./css/[name].[contenthash].css",
       }),
       new PurgeCssPlugin({
-        paths: glob.sync(`${path.join(__dirname, "src")}/**/*`, {
-          nodir: true,
-        }),
+        paths: glob.sync(
+          `${path.join(__dirname, "src").replace(/\\/g, "/")}/**/*`,
+          { nodir: true }
+        ),
         safelist: {
           greedy: [/^air-datepicker/],
         },
