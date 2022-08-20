@@ -12,7 +12,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dynatrace/dtrum-api-types@npm:^1.237.2":
+"@dynatrace/dtrum-api-types@npm:^1.243.1":
   version: 1.243.1
   resolution: "@dynatrace/dtrum-api-types@npm:1.243.1"
   checksum: 0b7fd9e1ae1d747570856b5ccabee4e57cc9686e96e072c8adde9dea17464a6714094928445ee5b94b5d4816aa41838e3a13e817c3fd68e655b720fd2fde21c4
@@ -43,7 +43,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fortawesome/fontawesome-svg-core@npm:^6.1.1":
+"@fortawesome/fontawesome-svg-core@npm:^6.1.2":
   version: 6.1.2
   resolution: "@fortawesome/fontawesome-svg-core@npm:6.1.2"
   dependencies:
@@ -52,7 +52,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fortawesome/free-regular-svg-icons@npm:^6.1.1":
+"@fortawesome/free-regular-svg-icons@npm:^6.1.2":
   version: 6.1.2
   resolution: "@fortawesome/free-regular-svg-icons@npm:6.1.2"
   dependencies:
@@ -463,7 +463,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^5.25.0":
+"@typescript-eslint/eslint-plugin@npm:^5.33.1":
   version: 5.33.1
   resolution: "@typescript-eslint/eslint-plugin@npm:5.33.1"
   dependencies:
@@ -486,7 +486,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^5.25.0":
+"@typescript-eslint/parser@npm:^5.33.1":
   version: 5.33.1
   resolution: "@typescript-eslint/parser@npm:5.33.1"
   dependencies:
@@ -859,7 +859,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"air-datepicker@npm:^3.1.1":
+"air-datepicker@npm:^3.2.0":
   version: 3.2.0
   resolution: "air-datepicker@npm:3.2.0"
   checksum: 03e6cd30ee6c08c3185e43026e306754149cc0d41956a4bd35600167353a4ab98ecd5a83ee4d015dd32ccce70bc9f549b160af0d5d0d8075028eafcdc3f1abce
@@ -1064,7 +1064,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bootstrap@npm:^5.1.3":
+"bootstrap@npm:^5.2.0":
   version: 5.2.0
   resolution: "bootstrap@npm:5.2.0"
   peerDependencies:
@@ -1275,7 +1275,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cheerio@npm:^1.0.0-rc.10":
+"cheerio@npm:^1.0.0-rc.12":
   version: 1.0.0-rc.12
   resolution: "cheerio@npm:1.0.0-rc.12"
   dependencies:
@@ -1719,7 +1719,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.2":
+"dayjs@npm:^1.11.5":
   version: 1.11.5
   resolution: "dayjs@npm:1.11.5"
   checksum: e3bbaa7b4883b31be4bf75a181f1447fbb19800c29b332852125aab96baeff3ac232dcba8b88c4ea17d3b636c99dac5fb9d1af4bb6ae26615698bbc4a852dffb
@@ -2120,7 +2120,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.15.0":
+"eslint@npm:^8.22.0":
   version: 8.22.0
   resolution: "eslint@npm:8.22.0"
   dependencies:
@@ -2643,7 +2643,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"got@npm:^12.0.4":
+"got@npm:^12.3.1":
   version: 12.3.1
   resolution: "got@npm:12.3.1"
   dependencies:
@@ -3182,39 +3182,39 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "jku-room-search@workspace:."
   dependencies:
-    "@dynatrace/dtrum-api-types": ^1.237.2
-    "@fortawesome/fontawesome-svg-core": ^6.1.1
-    "@fortawesome/free-regular-svg-icons": ^6.1.1
-    "@typescript-eslint/eslint-plugin": ^5.25.0
-    "@typescript-eslint/parser": ^5.25.0
-    air-datepicker: ^3.1.1
-    bootstrap: ^5.1.3
+    "@dynatrace/dtrum-api-types": ^1.243.1
+    "@fortawesome/fontawesome-svg-core": ^6.1.2
+    "@fortawesome/free-regular-svg-icons": ^6.1.2
+    "@typescript-eslint/eslint-plugin": ^5.33.1
+    "@typescript-eslint/parser": ^5.33.1
+    air-datepicker: ^3.2.0
+    bootstrap: ^5.2.0
     bottleneck: ^2.19.5
     cash-dom: ^8.1.1
     chalk: ^5.0.1
-    cheerio: ^1.0.0-rc.10
+    cheerio: ^1.0.0-rc.12
     copy-webpack-plugin: ^11.0.0
     css-loader: ^6.7.1
     css-minimizer-webpack-plugin: ^4.0.0
-    dayjs: ^1.11.2
-    eslint: ^8.15.0
+    dayjs: ^1.11.5
+    eslint: ^8.22.0
     eslint-config-prettier: ^8.5.0
     glob: ^7.2.3
-    got: ^12.0.4
+    got: ^12.3.1
     html-webpack-plugin: ^5.5.0
-    mini-css-extract-plugin: ^2.6.0
+    mini-css-extract-plugin: ^2.6.1
     node-fetch: ^2.6.7
-    prettier: ^2.6.2
+    prettier: ^2.7.1
     purgecss-webpack-plugin: ^4.1.3
     scroll-into-view-if-needed: ^2.2.29
     source-map-loader: ^3.0.1
-    terser-webpack-plugin: ^5.3.1
-    ts-loader: ^9.3.0
-    typescript: ^4.6.4
+    terser-webpack-plugin: ^5.3.5
+    ts-loader: ^9.3.1
+    typescript: ^4.7.4
     typescript-collections: ^1.3.3
-    webpack: ^5.72.1
-    webpack-cli: ^4.9.2
-    webpack-dev-server: ^4.9.0
+    webpack: ^5.74.0
+    webpack-cli: ^4.10.0
+    webpack-dev-server: ^4.10.0
   peerDependencies:
     "@popperjs/core": ^2.11.5
   languageName: unknown
@@ -3523,7 +3523,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mini-css-extract-plugin@npm:^2.6.0":
+"mini-css-extract-plugin@npm:^2.6.1":
   version: 2.6.1
   resolution: "mini-css-extract-plugin@npm:2.6.1"
   dependencies:
@@ -4460,7 +4460,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.6.2":
+"prettier@npm:^2.7.1":
   version: 2.7.1
   resolution: "prettier@npm:2.7.1"
   bin:
@@ -5274,7 +5274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser-webpack-plugin@npm:^5.1.3, terser-webpack-plugin@npm:^5.3.1":
+"terser-webpack-plugin@npm:^5.1.3, terser-webpack-plugin@npm:^5.3.5":
   version: 5.3.5
   resolution: "terser-webpack-plugin@npm:5.3.5"
   dependencies:
@@ -5347,7 +5347,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-loader@npm:^9.3.0":
+"ts-loader@npm:^9.3.1":
   version: 9.3.1
   resolution: "ts-loader@npm:9.3.1"
   dependencies:
@@ -5420,7 +5420,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.6.4":
+"typescript@npm:^4.7.4":
   version: 4.7.4
   resolution: "typescript@npm:4.7.4"
   bin:
@@ -5430,7 +5430,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
+"typescript@patch:typescript@^4.7.4#~builtin<compat/typescript>":
   version: 4.7.4
   resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=f456af"
   bin:
@@ -5558,7 +5558,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-cli@npm:^4.9.2":
+"webpack-cli@npm:^4.10.0":
   version: 4.10.0
   resolution: "webpack-cli@npm:4.10.0"
   dependencies:
@@ -5606,7 +5606,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-dev-server@npm:^4.9.0":
+"webpack-dev-server@npm:^4.10.0":
   version: 4.10.0
   resolution: "webpack-dev-server@npm:4.10.0"
   dependencies:
@@ -5667,7 +5667,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.4.0, webpack@npm:^5.72.1":
+"webpack@npm:^5.4.0, webpack@npm:^5.74.0":
   version: 5.74.0
   resolution: "webpack@npm:5.74.0"
   dependencies:
