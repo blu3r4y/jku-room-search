@@ -120,7 +120,7 @@ export class App {
   private static handleSearchEvent(app: App, animate = false, scroll = false) {
     if (animate) app.frontend.renderButton(BSt.Spinning);
 
-    const searchAction = window.dtrum?.enterAction("search", "click");
+    const searchAction = window.dtrum?.enterAction("search");
 
     // get user query
     const query = app.frontend.getQuery();

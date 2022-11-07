@@ -33,7 +33,7 @@ function git(command) {
 async function fetchMonitoringCode() {
   // inline deferred monitoring code snippet
   if (process.env.DYNATRACE_API_TOKEN) {
-    const url = `https://bjd63129.dev.dynatracelabs.com/api/v1/rum/syncCS/APPLICATION-54BCAC95EB286EE9?Api-Token=${process.env.DYNATRACE_API_TOKEN}`;
+    const url = `https://bjd63129.dev.dynatracelabs.com/api/v1/rum/jsInlineScript/APPLICATION-54BCAC95EB286EE9?Api-Token=${process.env.DYNATRACE_API_TOKEN}`;
     const respose = await fetch(url);
     return respose.text();
   } else {
