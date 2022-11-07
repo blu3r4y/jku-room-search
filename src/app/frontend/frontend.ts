@@ -58,7 +58,7 @@ export interface FrontendElements {
 export class Frontend {
   private readonly elements: FrontendElements;
   private currentTeaserState: TeaserState;
-  private datepicker?: AirDatepicker = undefined;
+  private datepicker?: AirDatepicker<HTMLElement> = undefined;
 
   /**
    * Pass-through to datepicker.onSelect event
