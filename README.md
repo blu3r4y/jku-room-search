@@ -1,7 +1,7 @@
 # JKU Room Search
 
 [![License](https://img.shields.io/badge/License-AGPL%203.0-yellow?style=flat-square)](LICENSE.txt)
-[![Build Status](https://img.shields.io/github/workflow/status/blu3r4y/jku-room-search/deploy-github-pages?style=flat-square)](https://github.com/blu3r4y/jku-room-search/actions?query=workflow%3Adeploy-github-pages)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/blu3r4y/jku-room-search/deploy-github-pages.yml?branch=main&style=flat-square)](https://github.com/blu3r4y/jku-room-search/actions?query=workflow%3Adeploy-github-pages)
 [![Website Status](https://img.shields.io/website?style=flat-square&up_message=online&url=https%3A%2F%2Fjkuroomsearch.app)](http://jkuroomsearch.app)
 
 Search for free rooms on the campus of the Johannes Kepler University Linz.
