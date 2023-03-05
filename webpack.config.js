@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const glob = require("glob");
+const { globSync } = require("glob");
 const fetch = require("node-fetch");
 const webpack = require("webpack");
 
@@ -8,7 +8,7 @@ const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 // purge unused css
-const PurgeCssPlugin = require("purgecss-webpack-plugin");
+const { PurgeCSSPlugin } = require("purgecss-webpack-plugin");
 
 // minimizer for css
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
@@ -82,8 +82,8 @@ const appConfig = async (env, options) => {
       new MiniCssExtractPlugin({
         filename: "./css/[name].[contenthash].css",
       }),
-      new PurgeCssPlugin({
-        paths: glob.sync(
+      new PurgeCSSPlugin({
+        paths: globSync(
           `${path.join(__dirname, "src").replace(/\\/g, "/")}/**/*`,
           { nodir: true }
         ),
