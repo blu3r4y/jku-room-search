@@ -9,10 +9,10 @@ export class BuildingScraper extends ScraperComponent<BuildingScrape[]> {
     const url = this.scraper.jkuUrl + BUILDINGS_PAGE;
     const ch: cheerio.CheerioAPI = await this.scraper.request(url);
 
-    // select the <article> elements inside <div class="stripe_element"> ...
-    const values = ch("div.stripe_element > article").map((_, el) => {
+    // select the <div> elements inside <li class="stripe_element"> ...
+    const values = ch("li.stripe_element > div").map((_, el) => {
       return {
-        // select the first <h3> child inside <article>
+        // select the first <h3> child inside <div>
         // ... of which we get and remove all its other nested html elements
         // only to return back and get the remaining header text inside the <h3>
         header: ch(el).children("h3").first().children().remove().end().text(),
