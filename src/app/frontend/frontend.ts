@@ -228,7 +228,7 @@ export class Frontend {
       if (room.capacity != null) {
         const span = doc.createElement("span");
         span.innerHTML = room.capacity.toString();
-        span.className = "capacity small text-muted";
+        span.className = "capacity small text-body-secondary";
 
         // append the seat icon svg
         const user = findIconDefinition({ prefix: "far", iconName: "user" });
