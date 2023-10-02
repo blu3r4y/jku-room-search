@@ -50,6 +50,7 @@ export interface FrontendElements {
   spinner: Cash;
   buttonText: Cash;
   versionText: Cash;
+  versionTextInline: Cash;
   cover: Cash;
   button: HTMLInputElement;
   anchor: HTMLElement;
@@ -118,6 +119,7 @@ export class Frontend {
    */
   public renderVersion(version: Day): void {
     this.elements.versionText.html(`Index updated ${version.from(dayjs())}`);
+    this.elements.versionTextInline.html(`${version.from(dayjs())}`);
   }
 
   /**

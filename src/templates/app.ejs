@@ -142,12 +142,20 @@
 
           <div id="results" style="display: none; opacity: 0">
             <div class="d-grid gap-3">
-              <small class="text-center text-muted mb-3">
-                Please note that these results are based on room bookings from
-                <a href="http://kusss.jku.at">kusss.jku.at</a>.<br
-                  class="desktop-break"
-                />&nbsp;Extraordinary room bookings may still occur.
-              </small>
+              <div
+                class="text-center mb-3 py-2 px-3 bg-warning-subtle border border-warning-subtle text-secondary"
+              >
+                <small>
+                  This is an unofficial service, provided without guarantees.
+                  You cannot use these results to request room reservations at
+                  JKU. Results are based on course data from KUSSS from
+                  <span id="versionTextInline"></span>.
+                  <span class="fw-medium"
+                    >Rooms may be occupied by events other than classes, even if
+                    they are listed as free here.</span
+                  >
+                </small>
+              </div>
 
               <span id="anchor"></span>
 
@@ -158,6 +166,24 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="container">
+      <footer class="py-3 mb-4 border-top" style="margin-top: 100px">
+        <p class="text-center text-body-secondary small">
+          This is an unofficial app to search for free rooms on the campus of
+          the Johannes Kepler University Linz.<br /><span class="fw-medium"
+            >Media Owner:</span
+          >
+          Mario Kahlhofer, Linz, Austria.
+          <span class="fw-medium">Contact:</span>
+          <a
+            href="mailto:mario.kahlhofer@gmail.com"
+            class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+            >mario.kahlhofer@gmail.com</a
+          >
+        </p>
+      </footer>
     </div>
 
     <a

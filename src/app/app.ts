@@ -34,6 +34,7 @@ export class App {
       spinner: $("#spinner"),
       buttonText: $("#buttonText"),
       versionText: $("#versionText"),
+      versionTextInline: $("#versionTextInline"),
       cover: $("#cover"),
       button: $("#button")[0] as HTMLInputElement,
       anchor: $("#anchor")[0] as HTMLElement,
@@ -166,7 +167,7 @@ export class App {
     // show result status
     if (result.length > 0) {
       app.frontend.render(
-        "😊 We found some free rooms",
+        "😊 These rooms are not used for classes at this time",
         TSt.Success,
         result,
         animate
