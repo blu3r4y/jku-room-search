@@ -38,7 +38,7 @@ export class SearchApi {
       ) {
         LogUtils.error(
           "err::unbookableInterval",
-          "tried to query an unbookable interval"
+          "tried to query an unbookable interval",
         );
         return null;
       }
@@ -84,7 +84,7 @@ export class SearchApi {
   private buildFreeRoomEntry(
     rid: string,
     match: number,
-    timespans: TimeSpanDto[]
+    timespans: TimeSpanDto[],
   ): FreeRoom {
     const room = this.index.rooms[rid];
     // map the raw minute-based timespans to `Time` objects

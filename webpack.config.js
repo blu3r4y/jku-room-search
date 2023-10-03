@@ -85,7 +85,7 @@ const appConfig = async (env, options) => {
       new PurgeCSSPlugin({
         paths: globSync(
           `${path.join(__dirname, "src").replace(/\\/g, "/")}/**/*`,
-          { nodir: true }
+          { nodir: true },
         ),
         safelist: {
           greedy: [/^air-datepicker/],
@@ -112,7 +112,7 @@ const appConfig = async (env, options) => {
 
 // a file with some hand-coded extra resources necessary for scraping
 const extraResources = JSON.parse(
-  fs.readFileSync("./src/scraper/resources/extra.json")
+  fs.readFileSync("./src/scraper/resources/extra.json"),
 );
 
 const scraperConfig = async (env, options) => {
@@ -141,7 +141,7 @@ const scraperConfig = async (env, options) => {
         KUSSS_URL: JSON.stringify("https://www.kusss.jku.at"),
         JKU_URL: JSON.stringify("https://www.jku.at"),
         USER_AGENT: JSON.stringify(
-          "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)"
+          "jku-room-search-bot/0.1 (+https://github.com/blu3r4y/jku-room-search)",
         ),
         OUTPUT_PATH: JSON.stringify("index.json"),
         MAX_RETRIES: JSON.stringify(5),

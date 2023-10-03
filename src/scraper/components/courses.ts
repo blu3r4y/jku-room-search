@@ -7,7 +7,7 @@ import { RoomScrape, CourseScrape, SEARCH_RESULTS } from "../types";
 export class CourseScraper extends ScraperComponent<CourseScrape[]> {
   public async scrape(
     room: RoomScrape,
-    progress: number | undefined = undefined
+    progress: number | undefined = undefined,
   ): Promise<CourseScrape[]> {
     if (room.kusssId == null) throw "room.kusssId can not be null here";
 
@@ -29,7 +29,7 @@ export class CourseScraper extends ScraperComponent<CourseScrape[]> {
         // then, take only the <td> (first column)
         // then, take the first <a>
         // and retrieve its "href" attribute
-        ch(el).children("td").first().find("a").first().attr("href")
+        ch(el).children("td").first().find("a").first().attr("href"),
       );
 
     const courses: CourseScrape[] = values
@@ -47,7 +47,7 @@ export class CourseScraper extends ScraperComponent<CourseScrape[]> {
         } else {
           throw Error(
             "required parameters 'courseclassid', 'coursegroupid', 'showdetails' " +
-              `are missing in '${href}'`
+              `are missing in '${href}'`,
           );
         }
       });
@@ -57,7 +57,7 @@ export class CourseScraper extends ScraperComponent<CourseScrape[]> {
       "course",
       `scraped ${courses.length} course numbers for room '${room.name}'`,
       courses.length,
-      progress
+      progress,
     );
 
     return courses;

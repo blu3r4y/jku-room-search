@@ -47,7 +47,7 @@ export class BuildingScraper extends ScraperComponent<BuildingScrape[]> {
     Log.milestone(
       "building",
       `scraped ${buildings.length} building names`,
-      buildings.length
+      buildings.length,
     );
     Log.obj(buildings.map((building: BuildingScrape) => building.name));
 

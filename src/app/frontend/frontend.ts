@@ -106,7 +106,7 @@ export class Frontend {
     text: string | null = null,
     color: TeaserState = TeaserState.NoResult,
     result: ApiResponse | null = null,
-    animate = false
+    animate = false,
   ): void {
     this.renderTeaser(text, color);
     this.renderTable(result, animate);
@@ -345,7 +345,7 @@ export class Frontend {
       this.elements.fromTime.append(
         $("<option></option>")
           .val(TimeUtils.toMinutes(item).toString())
-          .html(TimeUtils.toString(item))
+          .html(TimeUtils.toString(item)),
       );
     });
 
@@ -354,7 +354,7 @@ export class Frontend {
       this.elements.toTime.append(
         $("<option></option>")
           .val(TimeUtils.toMinutes(item).toString())
-          .html(TimeUtils.toString(item))
+          .html(TimeUtils.toString(item)),
       );
     });
 
@@ -365,7 +365,7 @@ export class Frontend {
 
     // pre-select the closest start time in the past (or one up to 15 minutes in the future)
     const setpoint = revStartTimes.find((e) =>
-      TimeUtils.isAfter(now, e.subtract(15, "minutes"))
+      TimeUtils.isAfter(now, e.subtract(15, "minutes")),
     );
 
     if (setpoint) {

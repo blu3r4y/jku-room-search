@@ -78,11 +78,11 @@ export class App {
     const handlXhrError = () => {
       LogUtils.error(
         "err::xhrRequest",
-        `the XHR request 'GET ${indexUrl}' failed.`
+        `the XHR request 'GET ${indexUrl}' failed.`,
       );
       this.frontend.render(
         "😟 Sorry, something broke <tt>[err::xhrRequest]</tt>",
-        TSt.Error
+        TSt.Error,
       );
     };
 
@@ -130,11 +130,11 @@ export class App {
     if (query == null) {
       LogUtils.error(
         "err::parseQuery",
-        "the frontend input could not be parsed into a valid user query"
+        "the frontend input could not be parsed into a valid user query",
       );
       app.frontend.render(
         "😟 Sorry, something broke <tt>[err::parseQuery]</tt>",
-        TSt.Error
+        TSt.Error,
       );
       return;
     }
@@ -143,7 +143,7 @@ export class App {
       LogUtils.error("err::initApi", "room data wasn't loaded properly");
       app.frontend.render(
         "😟 Sorry, something broke <tt>[err::initApi]</tt>",
-        TSt.Error
+        TSt.Error,
       );
       return;
     }
@@ -155,11 +155,11 @@ export class App {
     if (result == null) {
       LogUtils.error(
         "err::searchApi",
-        "the search algorithm could not process the query"
+        "the search algorithm could not process the query",
       );
       app.frontend.render(
         "😟 Sorry, something broke <tt>[err::searchApi]</tt>",
-        TSt.Error
+        TSt.Error,
       );
       return;
     }
@@ -170,12 +170,12 @@ export class App {
         "😊 These rooms are not used for classes at this time",
         TSt.Success,
         result,
-        animate
+        animate,
       );
     } else {
       app.frontend.render(
         "😟 Sorry, we don't have data for this day",
-        TSt.NoResult
+        TSt.NoResult,
       );
     }
 

@@ -84,7 +84,7 @@ export class Scraper {
     requestDelay = 500,
     ignoreRooms: string[] = [],
     extraBuildingMeta: BuildingToRooms = {},
-    extraCapacityMeta: RoomToCapacityMap = {}
+    extraCapacityMeta: RoomToCapacityMap = {},
   ) {
     this.quickMode = quickMode;
     this.jkuUrl = jkuUrl;
@@ -134,7 +134,7 @@ export class Scraper {
 
     // intermediate data structure for available dto
     const available: AvailableDict = new FactoryDictionary(
-      () => new FactoryDictionary(() => new Array<TimeSpanDto>())
+      () => new FactoryDictionary(() => new Array<TimeSpanDto>()),
     );
 
     const buildingScraper = new BuildingScraper(this);
@@ -300,7 +300,7 @@ export class Scraper {
           course,
           p,
           ignoredRooms,
-          unknownRooms
+          unknownRooms,
         );
 
         // return early in quick-mode
@@ -347,7 +347,7 @@ export class Scraper {
   private reverseIndex(
     available: AvailableDict,
     range: RangeDto,
-    rooms: RoomsDto
+    rooms: RoomsDto,
   ) {
     // booking interval which will be considered free
     const fullInterval: [number, number] = Jku.getBookingIntervalInMinutes();
@@ -375,14 +375,14 @@ export class Scraper {
         let reversed = SplitTree.split(fullInterval, intervals);
         // drop stand-alone break times because those short intervals can't be selected anyway
         reversed = reversed.filter(
-          (iv) => !breakTimes.some((br) => br[0] === iv[0] && br[1] === iv[1])
+          (iv) => !breakTimes.some((br) => br[0] === iv[0] && br[1] === iv[1]),
         );
 
         // sanity check that there are no zero-length intervals
         for (const interval of reversed) {
           if (interval[0] === interval[1])
             throw Error(
-              `found a zero-length interval for ${day} and room ${room}: ${reversed}`
+              `found a zero-length interval for ${day} and room ${room}: ${reversed}`,
             );
         }
 
@@ -415,7 +415,7 @@ export class Scraper {
   public async request(url: string): Promise<cheerio.CheerioAPI> {
     try {
       const response = await this.requestLimiter.schedule(() =>
-        got.get(url, this.requestOptions)
+        got.get(url, this.requestOptions),
       );
 
       this.statistics.nRequests++;
@@ -427,7 +427,7 @@ export class Scraper {
         return cheerio.load(response.body);
       } else {
         throw Error(
-          `request returned unexpected status code ${response.statusCode}`
+          `request returned unexpected status code ${response.statusCode}`,
         );
       }
     } catch (error) {
@@ -442,7 +442,7 @@ export class Scraper {
     Log.milestone(
       "room",
       `scraped ${numRooms} rooms from the JKU homepage or extraneous resource files`,
-      numRooms
+      numRooms,
     );
     Log.obj(Object.values(rooms).map((r) => r.name));
   }
@@ -455,7 +455,7 @@ export class Scraper {
       Log.scrape(
         "room",
         `appended ${this.statistics.nExtraBuildings} extra buildings and ${this.statistics.nExtraRooms} room mappings`,
-        1
+        1,
       );
       Log.obj(this.extraBuildingMeta);
     }
@@ -463,14 +463,14 @@ export class Scraper {
 
   private logMergedRoomMetrics(rooms: RoomsDto): void {
     const missing = Object.values(rooms).filter(
-      (r) => r.building === -1 || r.capacity === -1
+      (r) => r.building === -1 || r.capacity === -1,
     );
 
     this.statistics.nIncompleteRooms = missing.length;
 
     if (missing.length > 0) {
       Log.err(
-        `there are ${missing.length} rooms without building or capacity information`
+        `there are ${missing.length} rooms without building or capacity information`,
       );
 
       const affectedRooms = missing.map((r) => r.name);
@@ -486,7 +486,7 @@ export class Scraper {
     Log.milestone(
       "COURSE",
       `scraped ${numUniqueCourses} course numbers (removed ${numDuplicates} duplicates)`,
-      numUniqueCourses
+      numUniqueCourses,
     );
   }
 
@@ -495,7 +495,7 @@ export class Scraper {
     course: CourseScrape,
     progress: number,
     ignoredRooms: Set<string>,
-    unknownRooms: Set<string>
+    unknownRooms: Set<string>,
   ): void {
     const nIgnored = ignoredRooms.size();
     const nUnknown = unknownRooms.size();
@@ -519,14 +519,14 @@ export class Scraper {
       "booking",
       `scraped ${bookings.length} room bookings for course '${course.showdetails}'${ignoreText}`,
       bookings.length,
-      progress
+      progress,
     );
 
     // warn if we additionally ignored something that wasn't on the ignore list
     if (unknownRooms.size() > 0) {
       const unknowns = `'${unknownRooms.toArray().join("', '")}'`;
       Log.warn(
-        `additionally ignored ${unknownRooms.size()} unknown rooms: ${unknowns}`
+        `additionally ignored ${unknownRooms.size()} unknown rooms: ${unknowns}`,
       );
     }
   }
@@ -535,7 +535,7 @@ export class Scraper {
     Log.milestone(
       "booking",
       `scraped ${this.statistics.nScrapedBookings} room bookings for ${this.statistics.nScrapedCourses} courses`,
-      this.statistics.nScrapedBookings
+      this.statistics.nScrapedBookings,
     );
   }
 

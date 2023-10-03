@@ -8,7 +8,7 @@ export class SplitTree {
    */
   public static split(
     interval: [number, number],
-    exclusions: [number, number][]
+    exclusions: [number, number][],
   ): [number, number][] {
     const root = new Interval(interval[0], interval[1]);
     for (const exclusion of exclusions) {

@@ -35,7 +35,7 @@ export class KusssRoomScraper extends ScraperComponent<RoomScrape[]> {
     Log.milestone(
       "room",
       `scraped ${rooms.length} bookable room names from KUSSS`,
-      rooms.length
+      rooms.length,
     );
     Log.obj(rooms.map((r) => r.name));
 
@@ -46,14 +46,14 @@ export class KusssRoomScraper extends ScraperComponent<RoomScrape[]> {
 export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
   public async scrape(
     building: BuildingScrape,
-    progress: number | undefined = undefined
+    progress: number | undefined = undefined,
   ): Promise<RoomScrape[]> {
     const url = this.scraper.jkuUrl + building.url;
     const ch: cheerio.CheerioAPI = await this.scraper.request(url);
 
     // select all <table> elements in the body
     const values = ch(
-      "div.content_container > div.text > div.body > table.contenttable"
+      "div.content_container > div.text > div.body > table.contenttable",
     )
       // for each of those tables (there might be multiple) do ...
       .map((_, el) =>
@@ -76,13 +76,13 @@ export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
                 capacity: tds.eq(2).text(),
               };
             }
-          })
+          }),
       )
       // flat map the map of table rows
       .get()
       .reduce(
         (acc, x) => acc.concat(x.get()),
-        [] as { name: string; capacity: string }[]
+        [] as { name: string; capacity: string }[],
       );
 
     const rooms: RoomScrape[] = values.map(
@@ -92,7 +92,7 @@ export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
           name: t.name.trim().replace(/\s+/g, " "),
           capacity: parseInt(t.capacity, 10),
         };
-      }
+      },
     );
 
     this.scraper.statistics.nScrapedJkuRooms += rooms.length;
@@ -100,7 +100,7 @@ export class JkuRoomScraper extends ScraperComponent<RoomScrape[]> {
       "room",
       `found ${rooms.length} room entries for building '${building.name}'`,
       rooms.length,
-      progress
+      progress,
     );
 
     return rooms;

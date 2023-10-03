@@ -43,7 +43,7 @@ export class Log {
     group: string,
     text: string,
     numItems: number,
-    progress = 1
+    progress = 1,
   ): void {
     Log.logScraperInfo(group, text, numItems, progress, false);
   }
@@ -52,7 +52,7 @@ export class Log {
     group: string,
     text: string,
     numItems: number,
-    progress = 1
+    progress = 1,
   ): void {
     Log.logScraperInfo(group, text, numItems, progress, true);
   }
@@ -69,7 +69,7 @@ export class Log {
     text: string,
     numItems: number,
     progress = 1,
-    major = false
+    major = false,
   ): void {
     const success = numItems > 0;
 
@@ -82,7 +82,7 @@ export class Log {
     if (major) text_ = c.green(text_);
 
     const progress_ = c.green(
-      (Math.round(progress * 100).toString() + "%").padStart(4, " ")
+      (Math.round(progress * 100).toString() + "%").padStart(4, " "),
     );
 
     if (major) console.log();
