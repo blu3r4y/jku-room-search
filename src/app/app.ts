@@ -29,6 +29,7 @@ export class App {
       fromTime: $("#fromTime"),
       toTime: $("#toTime"),
       results: $("#results"),
+      resultsTable: $("#resultsTable"),
       teaserText: $("#teaserText"),
       teaserBlock: $("#teaserBlock"),
       spinner: $("#spinner"),

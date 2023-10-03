@@ -45,6 +45,7 @@ export interface FrontendElements {
   fromTime: Cash;
   toTime: Cash;
   results: Cash;
+  resultsTable: Cash;
   teaserText: Cash;
   teaserBlock: Cash;
   spinner: Cash;
@@ -205,6 +206,8 @@ export class Frontend {
     if (!result || (result as ApiResponse).length === 0) {
       this.elements.results.hide();
       this.elements.results.css("opacity", "0");
+      this.elements.resultsTable.hide();
+      this.elements.resultsTable.css("opacity", "0");
       return;
     }
 
@@ -256,24 +259,24 @@ export class Frontend {
       fragment.appendChild(tr);
     }
 
+    this.elements.results.show();
+    this.elements.results.css("opacity", "1");
+
     if (animate) {
       this.animateTable();
     } else {
-      this.elements.results.show();
-      this.elements.results.css("opacity", "1");
+      this.elements.resultsTable.show();
+      this.elements.resultsTable.css("opacity", "1");
     }
 
     // update the table body
-    const body = this.elements.results
-      .children("div")
-      .children("table")
-      .children("tbody");
+    const body = this.elements.resultsTable.children("tbody");
     body.empty();
     body.append(fragment);
   }
 
   private animateTable() {
-    const tab = this.elements.results;
+    const tab = this.elements.resultsTable;
 
     if (tab.css("display") !== "none") {
       // briefly flash the existing table to indicate an update
