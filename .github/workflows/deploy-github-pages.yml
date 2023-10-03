@@ -21,7 +21,7 @@ jobs:
       - name: Enable corepack and upgrade Yarn
         run: |
           corepack enable
-          yarn set version ./.yarn/releases/yarn-3.4.1.cjs
+          yarn set version ./.yarn/releases/yarn-3.6.3.cjs
       - name: Install dependencies
         run: yarn install --immutable
       - name: Check code style
