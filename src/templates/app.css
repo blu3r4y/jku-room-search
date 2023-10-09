@@ -29,8 +29,13 @@ div#results th {
   height: 18px;
 }
 
-@media (max-width: 1200px) {
-  .desktop-break {
+.footer-logo {
+  padding-top: 1rem;
+  height: 56px;
+}
+
+@media (min-width: 576px) {
+  .mobile-break {
     display: none;
   }
 }
