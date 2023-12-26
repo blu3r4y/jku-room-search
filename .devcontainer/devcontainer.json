@@ -1,11 +1,10 @@
 // https://aka.ms/devcontainer.json
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.236.0/containers/javascript-node
 
 {
   "name": "node-js",
   "build": {
     "dockerfile": "Dockerfile",
-    "args": { "VARIANT": "18-bullseye" }
+    "args": { "VARIANT": "20" }
   },
   "customizations": {
     "vscode": {
@@ -17,6 +16,6 @@
     }
   },
   "forwardPorts": [8080],
-  "postCreateCommand": "yarn && yarn build",
+  "postCreateCommand": "git config --global --add safe.directory /workspaces/jku-room-search && yarn && yarn build",
   "remoteUser": "node"
 }

@@ -24,32 +24,32 @@
   },
   "homepage": "https://github.com/blu3r4y/jku-room-search#readme",
   "devDependencies": {
-    "@dynatrace/dtrum-api-types": "^1.275.1",
-    "@types/node": "^18.18.4",
-    "@typescript-eslint/eslint-plugin": "^6.7.4",
-    "@typescript-eslint/parser": "^6.7.4",
+    "@dynatrace/dtrum-api-types": "^1.279.1",
+    "@types/node": "^18.19.3",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
-    "eslint": "^8.51.0",
-    "eslint-config-prettier": "^9.0.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
     "glob": "^10.3.10",
-    "html-webpack-plugin": "^5.5.3",
+    "html-webpack-plugin": "^5.6.0",
     "mini-css-extract-plugin": "^2.7.6",
     "node-fetch": "^2.7.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.1",
     "purgecss-webpack-plugin": "^5.0.0",
     "source-map-loader": "^4.0.1",
     "terser-webpack-plugin": "^5.3.9",
-    "ts-loader": "^9.5.0",
-    "typescript": "^5.2.2",
-    "webpack": "^5.88.2",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.4.2",
-    "@fortawesome/free-regular-svg-icons": "^6.4.2",
+    "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-regular-svg-icons": "^6.5.1",
     "air-datepicker": "^3.4.0",
     "bootstrap": "^5.3.2",
     "bottleneck": "^2.19.5",
@@ -64,5 +64,5 @@
   "peerDependencies": {
     "@popperjs/core": "^2.11.5"
   },
-  "packageManager": "yarn@3.6.3"
+  "packageManager": "yarn@4.0.2"
 }
