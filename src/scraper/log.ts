@@ -26,7 +26,7 @@ export class Log {
   }
 
   public static obj(object: any): void {
-    console.log(object);
+    console.dir(object, { maxArrayLength: null, depth: null, colors: true });
   }
 
   public static req(status: number, url: string): void {
