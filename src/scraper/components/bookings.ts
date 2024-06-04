@@ -13,7 +13,9 @@ export class BookingScraper extends ScraperComponent<BookingScrape[]> {
       .replace("{{coursegroupid}}", encodeURIComponent(course.coursegroupid))
       .replace("{{showdetails}}", encodeURIComponent(course.showdetails));
     const url = this.scraper.kusssUrl + courseDetails;
-    const ch: cheerio.CheerioAPI = await this.scraper.request(url);
+    const ch: cheerio.CheerioAPI | null =
+      await this.scraper.requestButTolerateErrors(url);
+    if (!ch) return [];
 
     // select the <tbody> which holds the date and times ...
     const values = ch("table.subinfo > tbody > tr table > tbody")

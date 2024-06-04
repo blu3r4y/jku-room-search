@@ -67,6 +67,9 @@ export class Scraper {
   private readonly requestLimiter: Bottleneck;
   private readonly requestOptions: OptionsOfTextResponseBody;
 
+  private readonly maxErrors: number;
+  private errorCounter: number;
+
   /**
    * Initializes the scraper
    *
@@ -81,6 +84,7 @@ export class Scraper {
     userAgent = "jku-room-search-bot",
     requestTimeout = 5000,
     maxRetries = 5,
+    maxErrors = 0,
     requestDelay = 500,
     ignoreRooms: string[] = [],
     extraBuildingMeta: BuildingToRooms = {},
@@ -93,16 +97,20 @@ export class Scraper {
     this.extraBuildingMeta = extraBuildingMeta;
     this.extraCapacityMeta = extraCapacityMeta;
 
-    // initialize request configuration and statistics object
+    this.maxErrors = maxErrors;
+    this.errorCounter = 0;
+
     this.requestOptions = {
       headers: { "User-Agent": userAgent },
       timeout: { request: requestTimeout },
       retry: { limit: maxRetries },
     };
+
     this.requestLimiter = new Bottleneck({
       maxConcurrent: 1,
       minTime: requestDelay,
     });
+
     this.statistics = {
       nScrapedBookings: 0,
       nIgnoredBookings: 0,
@@ -434,6 +442,33 @@ export class Scraper {
       Log.err(`GET ${url}`);
       Log.obj(error);
       return Promise.reject(null);
+    }
+  }
+
+  /**
+   * Perform a HTTP GET request, load the HTML with cheerio and return the cheerio-parsed DOM.
+   *
+   * If the request fails, and we are still below the maximum number of errors,
+   * we will not throw an error, but return null instead.
+   *
+   * @param url The URL to load and parse with cheerio
+   *
+   */
+  public async requestButTolerateErrors(
+    url: string,
+  ): Promise<cheerio.CheerioAPI | null> {
+    try {
+      return await this.request(url);
+    } catch (error) {
+      if (this.errorCounter + 1 <= this.maxErrors) {
+        this.errorCounter++;
+        Log.warn(
+          `ignoring previous error, this is error ${this.errorCounter} of ${this.maxErrors} allowed`,
+        );
+        return null;
+      } else {
+        return Promise.reject(null);
+      }
     }
   }
 

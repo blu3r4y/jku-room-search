@@ -145,6 +145,7 @@ const scraperConfig = async (env, options) => {
         ),
         OUTPUT_PATH: JSON.stringify("index.json"),
         MAX_RETRIES: JSON.stringify(5),
+        MAX_ERRORS: JSON.stringify(3),
         REQUEST_TIMEOUT_MS: JSON.stringify(5 * 1000),
         REQUEST_DELAY_MS:
           options.mode !== "production"

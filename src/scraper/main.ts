@@ -15,6 +15,8 @@ declare let USER_AGENT: string;
 declare let OUTPUT_PATH: string;
 /** How often shall individual requests be retried before raising an error */
 declare let MAX_RETRIES: number;
+/** How often can requests (for bookings) fail - even after retries - before we abort the script */
+declare let MAX_ERRORS: number;
 /** How long shall be waited for a response of each request */
 declare let REQUEST_TIMEOUT_MS: number;
 /** How much time should we wait before retrying a request again */
@@ -41,6 +43,7 @@ const scraper = new Scraper(
   USER_AGENT,
   REQUEST_TIMEOUT_MS,
   MAX_RETRIES,
+  MAX_ERRORS,
   REQUEST_DELAY_MS,
   IGNORE_ROOMS,
   EXTRA_BUILDING_METADATA,
