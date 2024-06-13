@@ -9,7 +9,7 @@ export class CourseScraper extends ScraperComponent<CourseScrape[]> {
     room: RoomScrape,
     progress: number | undefined = undefined,
   ): Promise<CourseScrape[]> {
-    if (room.kusssId == null) throw "room.kusssId can not be null here";
+    if (room.kusssId == null) throw Error("room.kusssId cannot be null here");
 
     const url =
       this.scraper.kusssUrl +
@@ -17,7 +17,7 @@ export class CourseScraper extends ScraperComponent<CourseScrape[]> {
     const ch: cheerio.CheerioAPI = await this.scraper.request(url);
 
     // select the <tbody> elements in the table
-    const values = ch("div.contentcell > table > tbody")
+    const values = ch("div.contentcell > div.sectionheader > table > tbody")
       // select the last <tbody> of them
       // then, select the <tr> children (rows)
       // then, remove the first row which is the header

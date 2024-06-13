@@ -91,7 +91,7 @@ export class App {
     xhr.onload = () => {
       try {
         if (xhr.status !== 200 && xhr.onerror)
-          throw new Error(xhr.status.toString());
+          throw Error(xhr.status.toString());
 
         // try parsing the response
         const index: IndexDto = JSON.parse(xhr.response);

@@ -86,14 +86,15 @@ export declare interface RoomToCapacityMap {
   [room: string]: number;
 }
 
-export const SEARCH_PAGE = "/kusss/coursecatalogue-start.action?advanced=true";
+export const SEARCH_PAGE =
+  "/kusss/coursecatalogue-start.action?showFilters=true";
 export const SEARCH_RESULTS =
-  "/kusss/coursecatalogue-search-lvas.action?sortParam0courses=lvaName&asccourses=true" +
-  "&detailsearch=true&advanced=%24advanced&lvaName=&abhart=all&organisationalHint=&lastname=&firstname=" +
+  "/kusss/coursecatalogue-searchlvareg.action?sortParam0courses=lvaName&asccourses=true" +
+  "&showFilters=true&lvasearch=&direct=true&lvaName=&abhart=all&organisationalHint=&lastname=&firstname=" +
   "&lvaNr=&klaId=&type=all&curriculumContentKey=all&orgid=Alle&language=all&day=all&timefrom=all&timeto=all" +
-  "&room={{room}}+&direct=true#result";
+  "&room={{room}}";
 export const COURSE_DETAILS =
-  "/kusss/selectcoursegroup.action?coursegroupid={{coursegroupid}}&showdetails={{showdetails}}" +
+  "/kusss/lvaregistrationlist.action?coursegroupid={{coursegroupid}}&showdetails={{showdetails}}" +
   "&abhart=all&courseclassid={{courseclassid}}";
 
 export const BUILDINGS_PAGE = "/en/campus/the-jku-campus/buildings/";
