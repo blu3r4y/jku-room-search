@@ -35,10 +35,12 @@ async function fetchMonitoringCode() {
   if (process.env.DYNATRACE_API_TOKEN) {
     const url = `https://bjd63129.dev.dynatracelabs.com/api/v1/rum/jsInlineScript/APPLICATION-54BCAC95EB286EE9?Api-Token=${process.env.DYNATRACE_API_TOKEN}`;
     const respose = await fetch(url);
-    return respose.text();
-  } else {
-    return "<!-- could not fetch monitoring code -->";
+    if (respose.ok) {
+      return respose.text();
+    }
   }
+
+  return "<!-- could not fetch monitoring code -->";
 }
 
 const appConfig = async (env, options) => {
