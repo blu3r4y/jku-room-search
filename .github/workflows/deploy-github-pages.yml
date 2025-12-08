@@ -3,8 +3,8 @@ name: deploy-github-pages
 on:
   push:
   schedule:
-    # run at 3am in the morning (UTC) on weekdays
-    - cron: 0 3 * * 1-5
+    # run at 05:15 AM in the morning (UTC) on weekdays
+    - cron: 15 5 * * 1-5
 
 jobs:
   deploy-github-pages:
