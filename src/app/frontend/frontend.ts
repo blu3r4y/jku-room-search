@@ -173,6 +173,18 @@ export class Frontend {
     return this.elements.anchor;
   }
 
+  /**
+   * Disable all interactive controls (datepicker, time selects, button)
+   */
+  public disableControls(): void {
+    this.elements.fromTime.attr("disabled", "disabled");
+    this.elements.toTime.attr("disabled", "disabled");
+    this.elements.button.disabled = true;
+    $(this.elements.datepicker)
+      .css("pointer-events", "none")
+      .css("opacity", "0.5");
+  }
+
   private getDate(): Day | null {
     if (!this.datepicker || this.datepicker.selectedDates.length === 0)
       return null;

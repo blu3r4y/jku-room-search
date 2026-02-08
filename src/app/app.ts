@@ -20,6 +20,7 @@ export class App {
   private readonly frontend: Frontend;
   private readonly indexUrl: string;
   private readonly debugMode: boolean;
+  private readonly disabled = true;
 
   constructor(indexUrl: string, debugMode = false) {
     this.indexUrl = indexUrl;
@@ -49,6 +50,21 @@ export class App {
     if (this.debugMode) console.log("🤖 debug mode enabled");
 
     this.frontend.init(Jku.getCourseStartTimes(), Jku.getCourseEndTimes());
+
+    if (this.disabled) {
+      const unavailableMessage =
+        "😟 The room search is temporarily unavailable because the JKU started blocking this service on 28 January 2026. " +
+        "We have not yet received an answer from the JKU service desk on why this is the case.";
+      this.frontend.render(unavailableMessage, TSt.Error);
+
+      // disable all controls and buttons and show page by hiding the cover
+      this.frontend.disableControls();
+      $("#form").on("submit", (event) => event.preventDefault());
+      $(window).on("load", () => this.frontend.hideCover());
+
+      return;
+    }
+
     this.initSeachApi(this.indexUrl);
 
     // register form submission handler (animate, scroll)
@@ -61,7 +77,7 @@ export class App {
     $("#fromTime").on("change", () => App.handleSearchEvent(this, true));
     $("#toTime").on("change", () => App.handleSearchEvent(this, true));
 
-    // register date picker submission handler (animate, no scroll
+    // register date picker submission handler (animate, no scroll)
     this.frontend.datepickerOnSelect = () => App.handleSearchEvent(this, true);
 
     // only show page content when loading finished
