@@ -20,7 +20,7 @@ export class App {
   private readonly frontend: Frontend;
   private readonly indexUrl: string;
   private readonly debugMode: boolean;
-  private readonly disabled = true;
+  private readonly disabled = false;
 
   constructor(indexUrl: string, debugMode = false) {
     this.indexUrl = indexUrl;
