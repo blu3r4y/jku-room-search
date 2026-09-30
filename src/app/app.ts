@@ -1,5 +1,3 @@
-/// <reference types="@dynatrace/dtrum-api-types" />
-
 import $ from "cash-dom";
 import dayjs from "dayjs";
 import scrollIntoView from "scroll-into-view-if-needed";
@@ -138,8 +136,6 @@ export class App {
   private static handleSearchEvent(app: App, animate = false, scroll = false) {
     if (animate) app.frontend.renderButton(BSt.Spinning);
 
-    const searchAction = window.dtrum?.enterAction("search");
-
     // get user query
     const query = app.frontend.getQuery();
     if (app.debugMode) console.log("query", query);
@@ -203,8 +199,6 @@ export class App {
         scrollMode: "if-needed",
       });
     }
-
-    if (searchAction) window.dtrum?.leaveAction(searchAction);
 
     // briefly show the spinner before re-enabling the button
     if (animate) {

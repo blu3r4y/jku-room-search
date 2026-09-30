@@ -72,13 +72,12 @@ export class TimeUtils {
 
 export class LogUtils {
   /**
-   * Reports an error to the console and possibly to some monitoring tool
+   * Reports an error to the console
    *
    * @param key A key that uniquely identifies the error location
    * @param value A value that describes the error
    */
   public static error(key: string, value: string): void {
     console.error(`${key} - ${value}`);
-    window.dtrum?.reportCustomError(key, value);
   }
 }
